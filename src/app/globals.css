@@ -1024,21 +1024,45 @@ textarea {
   box-shadow: var(--shadow-lg);
 }
 
-.card--work,
+/* One distinct tint per category (all pass AA with navy text). */
+.card--work {
+  --card-tint: #bae6fd; /* sky */
+}
+
 .card--tech {
-  --card-tint: var(--c-secondary-soft);
+  --card-tint: #c7d2fe; /* indigo */
 }
 
-.card--kitchen,
 .card--money {
-  --card-tint: var(--c-accent-soft);
+  --card-tint: #d9f99d; /* lime */
 }
 
-.card--social,
-.card--home,
-.card--travel,
+.card--food {
+  --card-tint: #fef08a; /* yellow */
+}
+
+.card--home {
+  --card-tint: #fed7aa; /* orange */
+}
+
+.card--health {
+  --card-tint: #fecdd3; /* rose */
+}
+
+.card--travel {
+  --card-tint: #99f6e4; /* teal */
+}
+
+.card--social {
+  --card-tint: #f5d0fe; /* fuchsia */
+}
+
+.card--learning {
+  --card-tint: #e7d3b5; /* parchment */
+}
+
 .card--other {
-  --card-tint: var(--c-primary-soft);
+  --card-tint: #e5e7eb; /* grey */
 }
 
 .card__tags {
@@ -1200,6 +1224,20 @@ button.been-there:hover {
 }
 
 .been-there.is-pressed .been-there__emoji {
+  animation: pop 400ms var(--ease);
+}
+
+.been-there__check {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-left: -2px;
+  background: var(--c-text);
+  color: var(--c-surface);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  line-height: 1;
   animation: pop 400ms var(--ease);
 }
 

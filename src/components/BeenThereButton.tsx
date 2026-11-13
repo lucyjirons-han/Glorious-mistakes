@@ -33,6 +33,11 @@ export function BeenThereButton({ mistake }: { mistake: Mistake }) {
         🙋
       </span>
       <span>Been there</span>
+      {pressed && (
+        <span className="been-there__check" aria-hidden="true">
+          ✓
+        </span>
+      )}
       <span className="been-there__count">
         {count}
         <span className="sr-only"> {count === 1 ? 'person' : 'people'}</span>

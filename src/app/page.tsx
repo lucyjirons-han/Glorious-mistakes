@@ -58,12 +58,12 @@ export default function HomePage() {
             <div className="sticker sticker--2">💥</div>
             <div className="sticker sticker--3">🤦</div>
             <div className="hero-card hero-card--back">
-              <p className="hero-card__tag">🍳 Kitchen · 😬 Big yikes</p>
+              <p className="hero-card__tag">🍳 Food &amp; cooking · 😬 Big yikes</p>
               <p className="hero-card__title">Microwaved a boiled egg</p>
               <p className="hero-card__lesson">💡 Eggs are tiny grenades.</p>
             </div>
             <div className="hero-card hero-card--front">
-              <p className="hero-card__tag">💼 Work · 🫠 Legendary</p>
+              <p className="hero-card__tag">💼 Work &amp; career · 🫠 Legendary</p>
               <p className="hero-card__title">Said &ldquo;love you, bye&rdquo; to my boss</p>
               <p className="hero-card__lesson">💡 Slow down at the end of calls.</p>
               <p className="hero-card__react">🙋 Been there · 356</p>

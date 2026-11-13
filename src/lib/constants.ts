@@ -7,15 +7,26 @@ export interface Category {
 }
 
 export const CATEGORIES: Category[] = [
-  { id: 'work', label: 'Work', emoji: '💼' },
-  { id: 'social', label: 'Social', emoji: '🗣️' },
-  { id: 'kitchen', label: 'Kitchen', emoji: '🍳' },
-  { id: 'home', label: 'Home', emoji: '🏠' },
-  { id: 'money', label: 'Money', emoji: '💸' },
-  { id: 'tech', label: 'Tech', emoji: '💻' },
-  { id: 'travel', label: 'Travel', emoji: '✈️' },
+  { id: 'work', label: 'Work & career', emoji: '💼' },
+  { id: 'tech', label: 'Tech & digital', emoji: '💻' },
+  { id: 'money', label: 'Money & shopping', emoji: '🛍️' },
+  { id: 'food', label: 'Food & cooking', emoji: '🍳' },
+  { id: 'home', label: 'Home & DIY', emoji: '🔨' },
+  { id: 'health', label: 'Health & fitness', emoji: '🏃' },
+  { id: 'travel', label: 'Travel & transport', emoji: '✈️' },
+  { id: 'social', label: 'Relationships & social', emoji: '💬' },
+  { id: 'learning', label: 'Learning & study', emoji: '📚' },
   { id: 'other', label: 'Other', emoji: '🌀' },
 ];
+
+/** Category ids from earlier versions, mapped to their current equivalent. */
+const LEGACY_CATEGORIES: Record<string, CategoryId> = { kitchen: 'food' };
+
+/** Returns a valid category id for data saved by any version of the app. */
+export function normaliseCategory(id: string): CategoryId {
+  if (CATEGORIES.some((c) => c.id === id)) return id as CategoryId;
+  return LEGACY_CATEGORIES[id] ?? 'other';
+}
 
 export interface Cringe {
   level: CringeLevel;

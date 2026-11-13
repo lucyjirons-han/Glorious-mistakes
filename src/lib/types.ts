@@ -2,12 +2,14 @@ export type Visibility = 'private' | 'public';
 
 export type CategoryId =
   | 'work'
-  | 'home'
-  | 'social'
-  | 'kitchen'
-  | 'money'
   | 'tech'
+  | 'money'
+  | 'food'
+  | 'home'
+  | 'health'
   | 'travel'
+  | 'social'
+  | 'learning'
   | 'other';
 
 export type CringeLevel = 1 | 2 | 3 | 4 | 5;

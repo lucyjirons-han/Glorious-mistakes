@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { normaliseCategory } from './constants';
 import { SEED_MISTAKES } from './seed';
 import type { Mistake, MistakeInput, Visibility } from './types';
 
@@ -80,7 +81,11 @@ export function MistakesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const storedMine = readJSON<Mistake[]>(MINE_KEY, []);
     const storedReactions = readJSON<string[]>(REACTIONS_KEY, []);
-    setMine(Array.isArray(storedMine) ? storedMine : []);
+    setMine(
+      Array.isArray(storedMine)
+        ? storedMine.map((m) => ({ ...m, category: normaliseCategory(m.category) }))
+        : [],
+    );
     setReactions(Array.isArray(storedReactions) ? storedReactions : []);
     setReady(true);
   }, []);
