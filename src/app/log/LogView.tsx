@@ -1,0 +1,161 @@
+'use client';
+
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { EmptyState } from '@/components/EmptyState';
+import { MistakeForm } from '@/components/MistakeForm';
+import { useToast } from '@/components/Toast';
+import { CELEBRATIONS } from '@/lib/constants';
+import { useMistakes } from '@/lib/store';
+import type { Mistake, MistakeInput } from '@/lib/types';
+
+const CONFETTI_COLOURS = ['#E879F9', '#38BDF8', '#FBBF24', '#1E1B4B'];
+
+export function LogView() {
+  const editId = useSearchParams().get('edit');
+  const router = useRouter();
+  const toast = useToast();
+  const { ready, getMine, addMistake, updateMistake } = useMistakes();
+  const [logged, setLogged] = useState<{ mistake: Mistake; message: string } | null>(null);
+  const [formKey, setFormKey] = useState(0);
+
+  if (editId) {
+    if (!ready) return <div className="container page" aria-busy="true" />;
+    const existing = getMine(editId);
+    if (!existing) {
+      return (
+        <div className="container page page--narrow">
+          <EmptyState
+            emoji="🤷"
+            title="We couldn't find that mistake"
+            action={
+              <Link href="/mine" className="btn btn--primary">
+                Back to my mistakes
+              </Link>
+            }
+          >
+            <p>It may have been deleted, or it was saved on another device.</p>
+          </EmptyState>
+        </div>
+      );
+    }
+    return (
+      <div className="container page page--narrow">
+        <header className="page-header">
+          <p className="eyebrow">
+            <span aria-hidden="true">✏️</span> Editing
+          </p>
+          <h1 className="page-header__title">Polish your mistake</h1>
+          <p className="page-header__lead">Hindsight is 20/20. Tweak away.</p>
+        </header>
+        <MistakeForm
+          initial={existing}
+          submitLabel="Save changes"
+          onCancel={() => router.push('/mine')}
+          onSubmit={(input) => {
+            updateMistake(existing.id, input);
+            toast('Changes saved ✨');
+            router.push('/mine');
+          }}
+        />
+      </div>
+    );
+  }
+
+  const handleCreate = (input: MistakeInput) => {
+    const mistake = addMistake(input);
+    const message = CELEBRATIONS[Math.floor(Math.random() * CELEBRATIONS.length)];
+    setLogged({ mistake, message });
+  };
+
+  return (
+    <div className="container page page--narrow">
+      {logged ? (
+        <Celebration
+          mistake={logged.mistake}
+          message={logged.message}
+          onAnother={() => {
+            setLogged(null);
+            setFormKey((k) => k + 1);
+          }}
+        />
+      ) : (
+        <>
+          <header className="page-header">
+            <p className="eyebrow">
+              <span aria-hidden="true">✍️</span> New entry
+            </p>
+            <h1 className="page-header__title">Log a glorious mistake</h1>
+            <p className="page-header__lead">
+              Two questions, zero judgement. What happened, and what did you take from it?
+            </p>
+          </header>
+          <MistakeForm key={formKey} submitLabel="Log my mistake 🎉" onSubmit={handleCreate} />
+        </>
+      )}
+    </div>
+  );
+}
+
+function Celebration({
+  mistake,
+  message,
+  onAnother,
+}: {
+  mistake: Mistake;
+  message: string;
+  onAnother: () => void;
+}) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+    headingRef.current?.focus({ preventScroll: true });
+  }, []);
+  const isPublic = mistake.visibility === 'public';
+
+  return (
+    <section className="celebration" aria-labelledby="celebration-title">
+      <div className="confetti" aria-hidden="true">
+        {Array.from({ length: 24 }, (_, i) => (
+          <span
+            key={i}
+            style={{
+              left: `${(i * 37) % 100}%`,
+              background: CONFETTI_COLOURS[i % CONFETTI_COLOURS.length],
+              animationDelay: `${(i % 8) * 0.12}s`,
+              transform: `rotate(${i * 29}deg)`,
+            }}
+          />
+        ))}
+      </div>
+      <p className="celebration__emoji" aria-hidden="true">
+        🎉
+      </p>
+      <h1 id="celebration-title" ref={headingRef} tabIndex={-1} className="celebration__title">
+        {message}
+      </h1>
+      <p className="celebration__text">
+        {isPublic
+          ? 'It’s live on the public feed. Watch the “been there”s roll in.'
+          : 'Saved privately, just for you. Future you says thanks.'}
+      </p>
+      <blockquote className="celebration__lesson">
+        <span aria-hidden="true">💡</span> {mistake.lesson}
+      </blockquote>
+      <div className="btn-row btn-row--center">
+        <button type="button" className="btn btn--primary" onClick={onAnother}>
+          Log another
+        </button>
+        <Link href="/mine" className="btn btn--secondary">
+          My mistakes
+        </Link>
+        {isPublic && (
+          <Link href="/feed" className="btn btn--ghost">
+            View the feed
+          </Link>
+        )}
+      </div>
+    </section>
+  );
+}
