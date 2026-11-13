@@ -1134,6 +1134,74 @@ textarea {
   }
 }
 
+.guidelines__list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guidelines__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px;
+  border: var(--border);
+  border-radius: var(--radius);
+}
+
+.guidelines__list--do .guidelines__item {
+  background: var(--c-secondary-soft);
+}
+
+.guidelines__list--dont .guidelines__item {
+  background: var(--c-danger-soft);
+}
+
+.guidelines__item p {
+  color: var(--c-muted);
+}
+
+.guidelines__checklist {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  font-weight: 700;
+}
+
+.guidelines__checklist li::before {
+  content: '🤔';
+  margin-right: 10px;
+}
+
+.guidelines__actions {
+  margin-top: clamp(40px, 6vw, 56px);
+}
+
+.not-found__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 20px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-weight: 700;
+}
+
+.not-found__links a {
+  text-decoration-color: var(--c-primary);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+
+.not-found__links a:hover {
+  color: var(--c-primary-strong);
+}
+
 /* 8. Cards --------------------------------------------------------------- */
 .card {
   --card-tint: var(--c-primary-soft);

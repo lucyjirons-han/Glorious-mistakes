@@ -243,6 +243,16 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
         </fieldset>
 
         {values.visibility === 'public' && (
+          <p className="field__hint">
+            <span aria-hidden="true">🤝</span> Laugh with, not at: please don&rsquo;t name anyone else
+            or share private details.{' '}
+            <a href="/guidelines" target="_blank" rel="noopener">
+              Community guidelines
+            </a>
+          </p>
+        )}
+
+        {values.visibility === 'public' && (
           <div className="field">
             <label htmlFor="field-author" className="field__label">
               Name on the feed <span className="field__optional">(optional)</span>

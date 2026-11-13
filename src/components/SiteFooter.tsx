@@ -21,6 +21,9 @@ export function SiteFooter() {
             <li>
               <Link href="/about">About</Link>
             </li>
+            <li>
+              <Link href="/guidelines">Community guidelines</Link>
+            </li>
           </ul>
         </nav>
         <p className="site-footer__note">
