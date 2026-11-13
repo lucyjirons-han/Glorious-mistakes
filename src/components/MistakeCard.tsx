@@ -1,7 +1,9 @@
+import { Globe, Lightbulb, Lock } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { displayAuthor, formatDate, getCategory, getCringe } from '@/lib/constants';
 import type { Mistake } from '@/lib/types';
+import { Icon, IconBadge } from './Icon';
 
 interface MistakeCardProps {
   mistake: Mistake;
@@ -22,16 +24,16 @@ export function MistakeCard({ mistake, children }: MistakeCardProps) {
     <article className={`card card--${mistake.category}`} aria-labelledby={titleId}>
       <div className="card__tags">
         <span className="tag tag--category">
-          <span aria-hidden="true">{category.emoji}</span> {category.label}
+          <IconBadge icon={category.icon} tone="white" size="sm" className="tag__icon" />
+          {category.label}
         </span>
         <span className="tag tag--cringe">
-          <span aria-hidden="true">{cringe.emoji}</span>
           <span className="sr-only">Cringe level: </span>
           {cringe.label}
         </span>
         {mistake.mine && (
           <span className={`tag tag--${mistake.visibility}`}>
-            <span aria-hidden="true">{mistake.visibility === 'private' ? '🔒' : '🌍'}</span>{' '}
+            <Icon icon={mistake.visibility === 'private' ? Lock : Globe} size={14} />
             {mistake.visibility === 'private' ? 'Private' : 'Shared'}
           </span>
         )}
@@ -51,7 +53,8 @@ export function MistakeCard({ mistake, children }: MistakeCardProps) {
         </div>
         <div className="card__section card__section--lesson">
           <dt>
-            <span aria-hidden="true">💡</span> What it taught me
+            <Icon icon={Lightbulb} size={14} className="card__dt-icon" />
+            What it taught me
           </dt>
           <dd>{mistake.lesson}</dd>
         </div>

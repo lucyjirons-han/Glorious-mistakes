@@ -1,6 +1,8 @@
 'use client';
 
+import { Check } from 'lucide-react';
 import { useState } from 'react';
+import { Icon, IconBadge } from './Icon';
 import { REACTIONS } from '@/lib/community';
 import { useMistakes } from '@/lib/store';
 import type { Mistake, ReactionId } from '@/lib/types';
@@ -31,9 +33,7 @@ export function ReactionBar({ mistake }: { mistake: Mistake }) {
           return (
             <li key={reaction.id}>
               <span className="reaction reaction--static">
-                <span className="reaction__emoji" aria-hidden="true">
-                  {reaction.emoji}
-                </span>
+                <IconBadge icon={reaction.icon} tone={reaction.tone} size="sm" className="reaction__icon" />
                 <span className="reaction__label">{reaction.label}</span>
                 {countText}
               </span>
@@ -55,23 +55,20 @@ export function ReactionBar({ mistake }: { mistake: Mistake }) {
                 setAnimating({ id: reaction.id, key: Date.now(), added: !pressed });
               }}
             >
-              <span
+              <IconBadge
                 key={anim?.key ?? 0}
-                className={`reaction__emoji${anim ? (anim.added ? ' is-popping' : ' is-wobbling') : ''}`}
-                aria-hidden="true"
-              >
-                {reaction.emoji}
-              </span>
+                icon={reaction.icon}
+                tone={reaction.tone}
+                size="sm"
+                className={`reaction__icon${anim ? (anim.added ? ' is-popping' : ' is-wobbling') : ''}`}
+              />
               <span className="reaction__label">{reaction.label}</span>
               {countText}
               {pressed && (
-                <span className="reaction__check" aria-hidden="true">
-                  ✓
-                </span>
+                <Icon icon={Check} size={16} className="reaction__check" />
               )}
               {anim?.added && (
                 <span key={`burst-${anim.key}`} className="reaction__burst" aria-hidden="true">
-                  <span>{reaction.emoji}</span>
                   <span>+1</span>
                 </span>
               )}

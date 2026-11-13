@@ -1,16 +1,18 @@
 'use client';
 
+import { CircleHelp, Lightbulb, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { EmptyState } from '@/components/EmptyState';
+import { Icon, IconBadge } from '@/components/Icon';
 import { MistakeForm } from '@/components/MistakeForm';
 import { useToast } from '@/components/Toast';
 import { CELEBRATIONS } from '@/lib/constants';
 import { useMistakes } from '@/lib/store';
 import type { Mistake, MistakeInput } from '@/lib/types';
 
-const CONFETTI_COLOURS = ['#E879F9', '#38BDF8', '#FBBF24', '#1E1B4B'];
+const CONFETTI_COLOURS = ['#C3B8E6', '#D0E8C6', '#B0D3D0', '#F6D5D8', '#F5C842'];
 
 export function LogView() {
   const params = useSearchParams();
@@ -31,7 +33,7 @@ export function LogView() {
       return (
         <div className="container page page--narrow">
           <EmptyState
-            emoji="🤷"
+            icon={CircleHelp}
             title="We couldn't find that mistake"
             action={
               <Link href="/mine" className="btn btn--primary">
@@ -48,7 +50,7 @@ export function LogView() {
       <div className="container page page--narrow">
         <header className="page-header">
           <p className="eyebrow">
-            <span aria-hidden="true">✏️</span> Editing
+            Editing
           </p>
           <h1 className="page-header__title">Polish your mistake</h1>
           <p className="page-header__lead">Hindsight is 20/20. Tweak away.</p>
@@ -59,7 +61,7 @@ export function LogView() {
           onCancel={() => router.push(returnTo)}
           onSubmit={(input) => {
             updateMistake(existing.id, input);
-            toast('Changes saved ✨');
+            toast('Changes saved');
             router.push(returnTo);
           }}
         />
@@ -88,14 +90,14 @@ export function LogView() {
         <>
           <header className="page-header">
             <p className="eyebrow">
-              <span aria-hidden="true">✍️</span> New entry
+              New entry
             </p>
             <h1 className="page-header__title">Log a glorious mistake</h1>
             <p className="page-header__lead">
               Two questions, zero judgement. What happened, and what did you take from it?
             </p>
           </header>
-          <MistakeForm key={formKey} submitLabel="Log my mistake 🎉" onSubmit={handleCreate} />
+          <MistakeForm key={formKey} submitLabel="Log my mistake" onSubmit={handleCreate} />
         </>
       )}
     </div>
@@ -133,9 +135,7 @@ function Celebration({
           />
         ))}
       </div>
-      <p className="celebration__emoji" aria-hidden="true">
-        🎉
-      </p>
+      <IconBadge icon={PartyPopper} tone="sun" size="xl" className="celebration__icon" />
       <h1 id="celebration-title" ref={headingRef} tabIndex={-1} className="celebration__title">
         {message}
       </h1>
@@ -145,7 +145,7 @@ function Celebration({
           : 'Saved privately, just for you. Future you says thanks.'}
       </p>
       <blockquote className="celebration__lesson">
-        <span aria-hidden="true">💡</span> {mistake.lesson}
+        <Icon icon={Lightbulb} size={18} className="inline-icon" /> {mistake.lesson}
       </blockquote>
       <div className="btn-row btn-row--center">
         <button type="button" className="btn btn--primary" onClick={onAnother}>

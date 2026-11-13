@@ -1,22 +1,43 @@
+import {
+  Annoyed,
+  BookOpen,
+  Briefcase,
+  CookingPot,
+  Flame,
+  Frown,
+  Hammer,
+  HeartPulse,
+  Laptop,
+  Laugh,
+  MessageCircle,
+  Plane,
+  Shapes,
+  ShoppingBag,
+  Smile,
+  type LucideIcon,
+} from 'lucide-react';
+import type { Tone } from '@/components/Icon';
 import type { CategoryId, CringeLevel, Mistake } from './types';
 
 export interface Category {
   id: CategoryId;
   label: string;
-  emoji: string;
+  icon: LucideIcon;
+  /** The pastel used for this category's tags, chips and lesson boxes. */
+  tone: Tone;
 }
 
 export const CATEGORIES: Category[] = [
-  { id: 'work', label: 'Work & career', emoji: '💼' },
-  { id: 'tech', label: 'Tech & digital', emoji: '💻' },
-  { id: 'money', label: 'Money & shopping', emoji: '🛍️' },
-  { id: 'food', label: 'Food & cooking', emoji: '🍳' },
-  { id: 'home', label: 'Home & DIY', emoji: '🔨' },
-  { id: 'health', label: 'Health & fitness', emoji: '🏃' },
-  { id: 'travel', label: 'Travel & transport', emoji: '✈️' },
-  { id: 'social', label: 'Relationships & social', emoji: '💬' },
-  { id: 'learning', label: 'Learning & study', emoji: '📚' },
-  { id: 'other', label: 'Other', emoji: '🌀' },
+  { id: 'work', label: 'Work & career', icon: Briefcase, tone: 'sky' },
+  { id: 'tech', label: 'Tech & digital', icon: Laptop, tone: 'lilac' },
+  { id: 'money', label: 'Money & shopping', icon: ShoppingBag, tone: 'sage' },
+  { id: 'food', label: 'Food & cooking', icon: CookingPot, tone: 'blush' },
+  { id: 'home', label: 'Home & DIY', icon: Hammer, tone: 'sky' },
+  { id: 'health', label: 'Health & fitness', icon: HeartPulse, tone: 'blush' },
+  { id: 'travel', label: 'Travel & transport', icon: Plane, tone: 'lilac' },
+  { id: 'social', label: 'Relationships & social', icon: MessageCircle, tone: 'sage' },
+  { id: 'learning', label: 'Learning & study', icon: BookOpen, tone: 'sage' },
+  { id: 'other', label: 'Other', icon: Shapes, tone: 'white' },
 ];
 
 /** Category ids from earlier versions, mapped to their current equivalent. */
@@ -31,15 +52,15 @@ export function normaliseCategory(id: string): CategoryId {
 export interface Cringe {
   level: CringeLevel;
   label: string;
-  emoji: string;
+  icon: LucideIcon;
 }
 
 export const CRINGE_LEVELS: Cringe[] = [
-  { level: 1, label: 'Mild oops', emoji: '🙃' },
-  { level: 2, label: 'Whoopsie', emoji: '😅' },
-  { level: 3, label: 'Facepalm', emoji: '🤦' },
-  { level: 4, label: 'Big yikes', emoji: '😬' },
-  { level: 5, label: 'Legendary', emoji: '🫠' },
+  { level: 1, label: 'Mild oops', icon: Smile },
+  { level: 2, label: 'Whoopsie', icon: Laugh },
+  { level: 3, label: 'Facepalm', icon: Frown },
+  { level: 4, label: 'Big yikes', icon: Annoyed },
+  { level: 5, label: 'Legendary', icon: Flame },
 ];
 
 export const LIMITS = {

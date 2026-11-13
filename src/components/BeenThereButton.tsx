@@ -1,5 +1,7 @@
 'use client';
 
+import { Check, Hand } from 'lucide-react';
+import { Icon, IconBadge } from './Icon';
 import { useMistakes } from '@/lib/store';
 import type { Mistake } from '@/lib/types';
 
@@ -12,7 +14,7 @@ export function BeenThereButton({ mistake }: { mistake: Mistake }) {
   if (mistake.mine) {
     return (
       <p className="been-there been-there--static">
-        <span aria-hidden="true">👋</span>
+        <IconBadge icon={Hand} tone="sky" size="sm" className="been-there__icon" />
         <span className="been-there__count">{count}</span>
         <span>
           <span className="sr-only">{people} </span>been there
@@ -29,19 +31,13 @@ export function BeenThereButton({ mistake }: { mistake: Mistake }) {
       aria-pressed={pressed}
       onClick={() => toggleBeenThere(mistake.id)}
     >
-      <span className="been-there__emoji" aria-hidden="true">
-        👋
-      </span>
+      <IconBadge icon={Hand} tone="sky" size="sm" className="been-there__icon" />
       <span>Been there</span>
-      {pressed && (
-        <span className="been-there__check" aria-hidden="true">
-          ✓
-        </span>
-      )}
       <span className="been-there__count">
         {count}
         <span className="sr-only"> {count === 1 ? 'person' : 'people'}</span>
       </span>
+      {pressed && <Icon icon={Check} size={16} className="been-there__check" />}
     </button>
   );
 }

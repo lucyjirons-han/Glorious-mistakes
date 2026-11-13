@@ -1,6 +1,8 @@
 'use client';
 
+import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Icon } from './Icon';
 import { setTheme, type Theme } from '@/lib/theme';
 
 /** Header button that switches between light and dark mode and remembers the choice. */
@@ -29,12 +31,8 @@ export function ThemeToggle() {
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {/* Both icons render; CSS shows the right one, so it's correct before React loads. */}
-      <span className="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
-        ☀️
-      </span>
-      <span className="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
-        🌙
-      </span>
+      <Icon icon={Sun} size={20} className="theme-toggle__icon theme-toggle__icon--sun" />
+      <Icon icon={Moon} size={20} className="theme-toggle__icon theme-toggle__icon--moon" />
       <span className="sr-only">Dark mode</span>
     </button>
   );

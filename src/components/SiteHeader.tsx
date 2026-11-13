@@ -1,8 +1,10 @@
 'use client';
 
+import { Asterisk } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Icon } from './Icon';
 import { ThemeToggle } from './ThemeToggle';
 
 const NAV_LINKS = [
@@ -32,7 +34,7 @@ export function SiteHeader() {
       <div className="container site-header__inner">
         <Link href="/" className="logo" aria-label="Glorious Mistakes home">
           <span className="logo__mark" aria-hidden="true">
-            💥
+            <Icon icon={Asterisk} size={24} />
           </span>
           <span className="logo__text">
             Glorious <span>Mistakes</span>
@@ -65,7 +67,7 @@ export function SiteHeader() {
             ))}
           </ul>
           <Link href="/log" className="btn btn--primary btn--sm">
-            <span aria-hidden="true">✍️</span> Log a mistake
+            Log a mistake
           </Link>
         </nav>
 
