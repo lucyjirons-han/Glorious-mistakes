@@ -66,7 +66,7 @@ export default function HomePage() {
               <p className="hero-card__tag">💼 Work &amp; career · 🫠 Legendary</p>
               <p className="hero-card__title">Said &ldquo;love you, bye&rdquo; to my boss</p>
               <p className="hero-card__lesson">💡 Slow down at the end of calls.</p>
-              <p className="hero-card__react">🙋 Been there · 356</p>
+              <p className="hero-card__react">👋 Been there · 356</p>
             </div>
           </div>
         </div>

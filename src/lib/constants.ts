@@ -73,6 +73,12 @@ export function formatDate(iso: string): string {
   return Number.isNaN(date.getTime()) ? '' : dateFormatter.format(date);
 }
 
+/** A one-line summary for page descriptions and link previews. */
+export function summarise(text: string, max = 155): string {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  return clean.length > max ? `${clean.slice(0, max - 3).trimEnd()}…` : clean;
+}
+
 export const CELEBRATIONS = [
   'Glorious! Mistake logged.',
   'Nailed it. (The lesson, not the mistake.)',

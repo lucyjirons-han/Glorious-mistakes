@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from 'next';
 import { Fredoka, Nunito } from 'next/font/google';
+import Script from 'next/script';
 import type { ReactNode } from 'react';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { ToastProvider } from '@/components/Toast';
 import { MistakesProvider } from '@/lib/store';
+import { THEME_SCRIPT } from '@/lib/theme';
 import './globals.css';
 
 const display = Fredoka({ subsets: ['latin'], variable: '--font-display', display: 'swap' });
@@ -34,6 +36,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <body suppressHydrationWarning>
+        {/* Sets light or dark mode before the page appears (see lib/theme.ts). */}
+        <Script id="theme" strategy="beforeInteractive">
+          {THEME_SCRIPT}
+        </Script>
         <a href="#main" className="skip-link">
           Skip to content
         </a>

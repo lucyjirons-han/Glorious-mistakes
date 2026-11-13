@@ -13,7 +13,11 @@ import type { Mistake, MistakeInput } from '@/lib/types';
 const CONFETTI_COLOURS = ['#E879F9', '#38BDF8', '#FBBF24', '#1E1B4B'];
 
 export function LogView() {
-  const editId = useSearchParams().get('edit');
+  const params = useSearchParams();
+  const editId = params.get('edit');
+  // Editing can start from the entry's own page; send people back there afterwards.
+  const returnTo =
+    editId && params.get('from') === 'entry' ? `/mistakes/${encodeURIComponent(editId)}` : '/mine';
   const router = useRouter();
   const toast = useToast();
   const { ready, getMine, addMistake, updateMistake } = useMistakes();
@@ -52,11 +56,11 @@ export function LogView() {
         <MistakeForm
           initial={existing}
           submitLabel="Save changes"
-          onCancel={() => router.push('/mine')}
+          onCancel={() => router.push(returnTo)}
           onSubmit={(input) => {
             updateMistake(existing.id, input);
             toast('Changes saved ✨');
-            router.push('/mine');
+            router.push(returnTo);
           }}
         />
       </div>

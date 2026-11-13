@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { displayAuthor, formatDate, getCategory, getCringe } from '@/lib/constants';
 import type { Mistake } from '@/lib/types';
@@ -6,6 +7,10 @@ interface MistakeCardProps {
   mistake: Mistake;
   /** Actions shown in the card footer (reaction button, edit controls, …). */
   children?: ReactNode;
+}
+
+export function mistakeHref(id: string): string {
+  return `/mistakes/${encodeURIComponent(id)}`;
 }
 
 export function MistakeCard({ mistake, children }: MistakeCardProps) {
@@ -33,7 +38,10 @@ export function MistakeCard({ mistake, children }: MistakeCardProps) {
       </div>
 
       <h3 id={titleId} className="card__title">
-        {mistake.title}
+        {/* The link stretches over the whole card, so clicking anywhere opens the entry. */}
+        <Link href={mistakeHref(mistake.id)} className="card__link">
+          {mistake.title}
+        </Link>
       </h3>
 
       <dl className="card__body">

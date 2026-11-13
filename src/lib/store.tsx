@@ -9,35 +9,27 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import {
+  baseReactionCount,
+  loadMyReactions,
+  readJSON,
+  saveMyReactions,
+  toggleReactionIn,
+  writeJSON,
+  type MyReactions,
+} from './community';
 import { normaliseCategory } from './constants';
 import { SEED_MISTAKES } from './seed';
-import type { Mistake, MistakeInput, Visibility } from './types';
+import type { Mistake, MistakeInput, ReactionId, Visibility } from './types';
 
 /**
- * Client-side store for the visitor's own mistakes and their "been there" reactions.
- * Data lives in localStorage, so everything stays on this device. Swap the read/write
- * helpers for API calls to back it with a real database.
+ * Client-side store for the visitor's own mistakes and their reactions.
+ * Data lives in localStorage, so everything stays on this device. Reaction and report
+ * storage lives in ./community.ts; swap those helpers for API calls to back it with a
+ * real database.
  */
 
 const MINE_KEY = 'glorious-mistakes:mine:v1';
-const REACTIONS_KEY = 'glorious-mistakes:reactions:v1';
-
-function readJSON<T>(key: string, fallback: T): T {
-  try {
-    const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function writeJSON(key: string, value: unknown) {
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Storage can be full or blocked (private mode); the app still works for this visit.
-  }
-}
 
 function makeId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
@@ -62,10 +54,16 @@ interface MistakesContextValue {
   mine: Mistake[];
   publicFeed: Mistake[];
   getMine: (id: string) => Mistake | undefined;
+  /** Any entry the visitor can open: their own (public or private) or a public one. */
+  getMistake: (id: string) => Mistake | undefined;
   addMistake: (input: MistakeInput) => Mistake;
   updateMistake: (id: string, input: MistakeInput) => void;
   setVisibility: (id: string, visibility: Visibility) => void;
   deleteMistake: (id: string) => void;
+  hasReaction: (id: string, reaction: ReactionId) => boolean;
+  toggleReaction: (id: string, reaction: ReactionId) => void;
+  reactionCount: (mistake: Mistake, reaction: ReactionId) => number;
+  /** Shorthands for the "been there" reaction shown on cards. */
   hasReacted: (id: string) => boolean;
   toggleBeenThere: (id: string) => void;
   beenThereCount: (mistake: Mistake) => number;
@@ -76,17 +74,16 @@ const MistakesContext = createContext<MistakesContextValue | null>(null);
 export function MistakesProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [mine, setMine] = useState<Mistake[]>([]);
-  const [reactions, setReactions] = useState<string[]>([]);
+  const [reactions, setReactions] = useState<MyReactions>({});
 
   useEffect(() => {
     const storedMine = readJSON<Mistake[]>(MINE_KEY, []);
-    const storedReactions = readJSON<string[]>(REACTIONS_KEY, []);
     setMine(
       Array.isArray(storedMine)
         ? storedMine.map((m) => ({ ...m, category: normaliseCategory(m.category) }))
         : [],
     );
-    setReactions(Array.isArray(storedReactions) ? storedReactions : []);
+    setReactions(loadMyReactions());
     setReady(true);
   }, []);
 
@@ -95,7 +92,7 @@ export function MistakesProvider({ children }: { children: ReactNode }) {
   }, [ready, mine]);
 
   useEffect(() => {
-    if (ready) writeJSON(REACTIONS_KEY, reactions);
+    if (ready) saveMyReactions(reactions);
   }, [ready, reactions]);
 
   const addMistake = useCallback((input: MistakeInput) => {
@@ -122,12 +119,14 @@ export function MistakesProvider({ children }: { children: ReactNode }) {
     setMine((prev) => prev.filter((m) => m.id !== id));
   }, []);
 
-  const toggleBeenThere = useCallback((id: string) => {
-    setReactions((prev) => (prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id]));
+  const toggleReaction = useCallback((id: string, reaction: ReactionId) => {
+    setReactions((prev) => toggleReactionIn(prev, id, reaction));
   }, []);
 
   const value = useMemo<MistakesContextValue>(() => {
-    const reactionSet = new Set(reactions);
+    const has = (id: string, reaction: ReactionId) => reactions[id]?.includes(reaction) ?? false;
+    const count = (m: Mistake, reaction: ReactionId) =>
+      baseReactionCount(m, reaction) + (has(m.id, reaction) ? 1 : 0);
     const sortedMine = [...mine].sort(byNewest);
     return {
       ready,
@@ -136,15 +135,19 @@ export function MistakesProvider({ children }: { children: ReactNode }) {
         byNewest,
       ),
       getMine: (id) => mine.find((m) => m.id === id),
+      getMistake: (id) => mine.find((m) => m.id === id) ?? SEED_MISTAKES.find((m) => m.id === id),
       addMistake,
       updateMistake,
       setVisibility,
       deleteMistake,
-      hasReacted: (id) => reactionSet.has(id),
-      toggleBeenThere,
-      beenThereCount: (m) => m.baseBeenThere + (reactionSet.has(m.id) ? 1 : 0),
+      hasReaction: has,
+      toggleReaction,
+      reactionCount: count,
+      hasReacted: (id) => has(id, 'been-there'),
+      toggleBeenThere: (id) => toggleReaction(id, 'been-there'),
+      beenThereCount: (m) => count(m, 'been-there'),
     };
-  }, [ready, mine, reactions, addMistake, updateMistake, setVisibility, deleteMistake, toggleBeenThere]);
+  }, [ready, mine, reactions, addMistake, updateMistake, setVisibility, deleteMistake, toggleReaction]);
 
   return <MistakesContext.Provider value={value}>{children}</MistakesContext.Provider>;
 }

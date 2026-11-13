@@ -14,6 +14,8 @@ export type CategoryId =
 
 export type CringeLevel = 1 | 2 | 3 | 4 | 5;
 
+export type ReactionId = 'been-there' | 'glorious' | 'lesson-noted' | 'solidarity' | 'legendary';
+
 export interface Mistake {
   id: string;
   title: string;
@@ -28,6 +30,8 @@ export interface Mistake {
   createdAt: string;
   /** "Been there" reactions from other people (excludes the current visitor). */
   baseBeenThere: number;
+  /** Other reactions from other people. "Been there" stays in `baseBeenThere`. */
+  baseReactions?: Partial<Record<Exclude<ReactionId, 'been-there'>, number>>;
   /** True when the current visitor wrote this entry. */
   mine: boolean;
 }

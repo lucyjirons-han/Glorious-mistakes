@@ -73,7 +73,7 @@ export function MineView() {
     { label: 'Mistakes logged', value: mine.length, emoji: '📝' },
     { label: 'Lessons learned', value: mine.length, emoji: '💡' },
     { label: 'Shared to the feed', value: shared.length, emoji: '🌍' },
-    { label: '“Been there”s received', value: shared.reduce((n, m) => n + beenThereCount(m), 0), emoji: '🙋' },
+    { label: '“Been there”s received', value: shared.reduce((n, m) => n + beenThereCount(m), 0), emoji: '👋' },
   ];
   const visible = filter === 'all' ? mine : mine.filter((m) => m.visibility === filter);
 

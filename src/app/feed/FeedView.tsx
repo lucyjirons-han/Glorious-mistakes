@@ -37,7 +37,7 @@ export function FeedView() {
         </p>
         <h1 className="page-header__title">Everyone stuffs up</h1>
         <p className="page-header__lead">
-          Real mistakes from real humans. Tap <strong>🙋 Been there</strong> when one hits a little
+          Real mistakes from real humans. Tap <strong>👋 Been there</strong> when one hits a little
           too close to home.
         </p>
       </header>

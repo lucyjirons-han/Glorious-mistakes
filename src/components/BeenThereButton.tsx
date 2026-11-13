@@ -12,7 +12,7 @@ export function BeenThereButton({ mistake }: { mistake: Mistake }) {
   if (mistake.mine) {
     return (
       <p className="been-there been-there--static">
-        <span aria-hidden="true">🙋</span>
+        <span aria-hidden="true">👋</span>
         <span className="been-there__count">{count}</span>
         <span>
           <span className="sr-only">{people} </span>been there
@@ -30,7 +30,7 @@ export function BeenThereButton({ mistake }: { mistake: Mistake }) {
       onClick={() => toggleBeenThere(mistake.id)}
     >
       <span className="been-there__emoji" aria-hidden="true">
-        🙋
+        👋
       </span>
       <span>Been there</span>
       {pressed && (
