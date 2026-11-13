@@ -1,10 +1,12 @@
 'use client';
 
+import { Hand, Search, SearchX } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { BeenThereButton } from '@/components/BeenThereButton';
 import { CategoryFilter } from '@/components/CategoryFilter';
 import { EmptyState } from '@/components/EmptyState';
+import { Icon } from '@/components/Icon';
 import { MistakeCard } from '@/components/MistakeCard';
 import { useMistakes } from '@/lib/store';
 import type { CategoryId } from '@/lib/types';
@@ -33,11 +35,11 @@ export function FeedView() {
     <div className="container page">
       <header className="page-header">
         <p className="eyebrow">
-          <span aria-hidden="true">🌍</span> Public feed
+          Public feed
         </p>
         <h1 className="page-header__title">Everyone stuffs up</h1>
         <p className="page-header__lead">
-          Real mistakes from real humans. Tap <strong>👋 Been there</strong> when one hits a little
+          Real mistakes from real humans. Tap <strong className="nowrap"><Icon icon={Hand} size={18} className="inline-icon" /> Been there</strong> when one hits a little
           too close to home.
         </p>
       </header>
@@ -48,9 +50,7 @@ export function FeedView() {
             <label htmlFor="feed-search" className="sr-only">
               Search mistakes
             </label>
-            <span className="toolbar__search-icon" aria-hidden="true">
-              🔍
-            </span>
+            <Icon icon={Search} size={18} className="toolbar__search-icon" />
             <input
               id="feed-search"
               type="search"
@@ -93,7 +93,7 @@ export function FeedView() {
         </div>
       ) : (
         <EmptyState
-          emoji="🕵️"
+          icon={SearchX}
           title="No mistakes match that… yet"
           action={
             <Link href="/log" className="btn btn--primary">

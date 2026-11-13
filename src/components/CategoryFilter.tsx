@@ -9,18 +9,18 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({ value, onChange }: CategoryFilterProps) {
-  const options = [{ id: 'all' as const, label: 'Everything', emoji: '✨' }, ...CATEGORIES];
+  const options = [{ id: 'all' as const, label: 'Everything' }, ...CATEGORIES];
   return (
     <div className="chip-group" role="group" aria-label="Filter by category">
       {options.map((option) => (
         <button
           key={option.id}
           type="button"
-          className="chip"
+          className={`chip tint--${option.id}`}
           aria-pressed={value === option.id}
           onClick={() => onChange(option.id)}
         >
-          <span aria-hidden="true">{option.emoji}</span> {option.label}
+          {option.label}
         </button>
       ))}
     </div>

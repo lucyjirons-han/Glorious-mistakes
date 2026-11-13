@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { MapPinOff } from 'lucide-react';
 import Link from 'next/link';
 import { EmptyState } from '@/components/EmptyState';
 
@@ -10,7 +11,7 @@ export default function NotFound() {
   return (
     <div className="container page page--narrow">
       <EmptyState
-        emoji="🙈"
+        icon={MapPinOff}
         title="Well, this is a glorious mistake"
         action={
           <div className="btn-row btn-row--center">
@@ -18,7 +19,7 @@ export default function NotFound() {
               Take me home
             </Link>
             <Link href="/log" className="btn">
-              Log this as a mistake <span aria-hidden="true">✍️</span>
+              Log this as a mistake
             </Link>
           </div>
         }

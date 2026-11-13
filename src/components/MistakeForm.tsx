@@ -1,6 +1,8 @@
 'use client';
 
+import { CircleAlert, Globe, Handshake, Lock } from 'lucide-react';
 import { useRef, useState, type FormEvent } from 'react';
+import { Icon, IconBadge } from './Icon';
 import { CATEGORIES, CRINGE_LEVELS, LIMITS } from '@/lib/constants';
 import type { MistakeInput } from '@/lib/types';
 
@@ -77,7 +79,8 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
   const error = (name: TextField) =>
     errors[name] ? (
       <p id={`field-${name}-error`} className="field__error">
-        <span aria-hidden="true">⚠️</span> {errors[name]}
+        <Icon icon={CircleAlert} size={16} className="field__error-icon" />
+        {errors[name]}
       </p>
     ) : null;
 
@@ -136,7 +139,7 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
           <legend className="field__label">Category</legend>
           <div className="choice-grid choice-grid--chips">
             {CATEGORIES.map((c) => (
-              <label key={c.id} className="choice choice--chip">
+              <label key={c.id} className={`choice choice--chip tint--${c.id}`}>
                 <input
                   type="radio"
                   name="category"
@@ -144,9 +147,7 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
                   checked={values.category === c.id}
                   onChange={() => set('category', c.id)}
                 />
-                <span>
-                  <span aria-hidden="true">{c.emoji}</span> {c.label}
-                </span>
+                <span>{c.label}</span>
               </label>
             ))}
           </div>
@@ -165,9 +166,7 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
                   onChange={() => set('cringe', c.level)}
                 />
                 <span>
-                  <span className="choice__emoji" aria-hidden="true">
-                    {c.emoji}
-                  </span>
+                  <IconBadge icon={c.icon} tone="neutral" className="choice__icon" />
                   {c.label}
                 </span>
               </label>
@@ -220,7 +219,7 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
                 onChange={() => set('visibility', 'private')}
               />
               <span>
-                <span className="choice__emoji" aria-hidden="true">🔒</span>
+                <IconBadge icon={Lock} tone="lilac" className="choice__icon" />
                 <strong>Keep it private</strong>
                 <span className="choice__desc">Just for me. A personal reflection.</span>
               </span>
@@ -234,7 +233,7 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
                 onChange={() => set('visibility', 'public')}
               />
               <span>
-                <span className="choice__emoji" aria-hidden="true">🌍</span>
+                <IconBadge icon={Globe} tone="sky" className="choice__icon" />
                 <strong>Share to the feed</strong>
                 <span className="choice__desc">Others can say &ldquo;been there&rdquo;.</span>
               </span>
@@ -244,7 +243,7 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
 
         {values.visibility === 'public' && (
           <p className="field__hint">
-            <span aria-hidden="true">🤝</span> Laugh with, not at: please don&rsquo;t name anyone else
+            <Icon icon={Handshake} size={16} className="inline-icon" /> Laugh with, not at: please don&rsquo;t name anyone else
             or share private details.{' '}
             <a href="/guidelines" target="_blank" rel="noopener">
               Community guidelines

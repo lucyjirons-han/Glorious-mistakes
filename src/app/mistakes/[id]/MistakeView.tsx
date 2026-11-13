@@ -1,10 +1,24 @@
 'use client';
 
+import {
+  ArrowLeft,
+  Dices,
+  Flag,
+  Globe,
+  Lightbulb,
+  Link2,
+  Lock,
+  MapPinOff,
+  Pencil,
+  Trash2,
+  VenetianMask,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { BeenThereButton } from '@/components/BeenThereButton';
 import { EmptyState } from '@/components/EmptyState';
+import { Icon, IconBadge } from '@/components/Icon';
 import { MistakeCard, mistakeHref } from '@/components/MistakeCard';
 import { ReactionBar } from '@/components/ReactionBar';
 import { useToast } from '@/components/Toast';
@@ -77,7 +91,7 @@ export function MistakeView({ id }: { id: string }) {
   return (
     <div className="container page page--narrow entry-page">
       <Link href={mistake.mine ? '/mine' : '/feed'} className="back-link">
-        <span aria-hidden="true">←</span> {mistake.mine ? 'My mistakes' : 'Public feed'}
+        <Icon icon={ArrowLeft} size={18} /> {mistake.mine ? 'My mistakes' : 'Public feed'}
       </Link>
 
       {mistake.mine && (
@@ -117,13 +131,13 @@ export function MistakeView({ id }: { id: string }) {
           <CopyLinkButton />
         ) : (
           <p className="entry-section__hint">
-            <span aria-hidden="true">🔒</span> Private entries can&rsquo;t be shared. Make it public to
+            <Icon icon={Lock} size={16} className="inline-icon" /> Private entries can&rsquo;t be shared. Make it public to
             get a link.
           </p>
         )}
         {others.length > 0 && (
           <button type="button" className="btn btn--accent" onClick={showAnother}>
-            <span aria-hidden="true">🎲</span> Show me another
+            <Icon icon={Dices} size={18} /> Show me another
           </button>
         )}
       </section>
@@ -151,7 +165,7 @@ export function MistakeView({ id }: { id: string }) {
         </h2>
         <p>Two questions, zero judgement. Future you will thank you.</p>
         <Link href="/log" className="btn btn--accent btn--lg">
-          Log yours <span aria-hidden="true">✍️</span>
+          Log yours
         </Link>
       </section>
 
@@ -175,11 +189,8 @@ function EntryDetails({ mistake }: { mistake: Mistake }) {
   return (
     <article className={`entry card--${mistake.category}`} aria-labelledby="entry-title">
       <div className="card__tags">
-        <span className="tag tag--category">
-          <span aria-hidden="true">{category.emoji}</span> {category.label}
-        </span>
+        <span className="tag tag--category">{category.label}</span>
         <span className="tag tag--cringe">
-          <span aria-hidden="true">{cringe.emoji}</span>
           <span className="sr-only">Cringe level: </span>
           {cringe.label}
         </span>
@@ -199,7 +210,8 @@ function EntryDetails({ mistake }: { mistake: Mistake }) {
         </div>
         <div className="entry__section entry__section--lesson">
           <dt>
-            <span aria-hidden="true">💡</span> The lesson
+            <Icon icon={Lightbulb} size={14} className="card__dt-icon" />
+            The lesson
           </dt>
           <dd>{mistake.lesson}</dd>
         </div>
@@ -210,7 +222,7 @@ function EntryDetails({ mistake }: { mistake: Mistake }) {
   );
 }
 
-const AVATAR_TINTS = ['#bae6fd', '#c7d2fe', '#d9f99d', '#fef08a', '#fed7aa', '#fecdd3', '#99f6e4', '#f5d0fe'];
+const AVATAR_TINTS = ['#C3B8E6', '#D0E8C6', '#B0D3D0', '#F6D5D8'];
 
 function AuthorLine({ mistake }: { mistake: Mistake }) {
   const name = displayAuthor(mistake);
@@ -224,7 +236,7 @@ function AuthorLine({ mistake }: { mistake: Mistake }) {
         style={anonymous ? undefined : { background: tint }}
         aria-hidden="true"
       >
-        {anonymous ? '🥸' : [...name][0].toUpperCase()}
+        {anonymous ? <Icon icon={VenetianMask} size={22} /> : [...name][0].toUpperCase()}
       </span>
       <span>
         <span className="author-line__label">
@@ -256,7 +268,7 @@ function AuthorControls({ mistake, onDeleted }: { mistake: Mistake; onDeleted: (
     return (
       <section className="author-panel author-panel--confirm" aria-labelledby="confirm-title">
         <h2 id="confirm-title" className="author-panel__title">
-          <span aria-hidden="true">🗑️</span> Delete this mistake for good?
+          <IconBadge icon={Trash2} tone="white" size="sm" className="heading-icon" /> Delete this mistake for good?
         </h2>
         <p>It&rsquo;ll be gone from your collection and the feed. This can&rsquo;t be undone.</p>
         <div className="btn-row">
@@ -266,7 +278,7 @@ function AuthorControls({ mistake, onDeleted }: { mistake: Mistake; onDeleted: (
             onClick={() => {
               onDeleted();
               deleteMistake(mistake.id);
-              toast('Mistake deleted. Poof! 💨');
+              toast('Mistake deleted. Poof!');
             }}
           >
             Yes, delete it
@@ -290,7 +302,7 @@ function AuthorControls({ mistake, onDeleted }: { mistake: Mistake; onDeleted: (
   return (
     <section className="author-panel" aria-labelledby="author-panel-title">
       <h2 id="author-panel-title" className="author-panel__title">
-        <span aria-hidden="true">{isPublic ? '🌍' : '🔒'}</span>{' '}
+        <IconBadge icon={isPublic ? Globe : Lock} tone={isPublic ? 'sky' : 'lilac'} size="sm" className="heading-icon" />{' '}
         {isPublic ? 'Your mistake is on the public feed' : 'Private: only you can see this'}
       </h2>
       <div className="author-panel__actions">
@@ -301,7 +313,7 @@ function AuthorControls({ mistake, onDeleted }: { mistake: Mistake; onDeleted: (
           className="switch"
           onClick={() => {
             setVisibility(mistake.id, isPublic ? 'private' : 'public');
-            toast(isPublic ? 'Now private 🔒' : 'Shared to the feed 🌍');
+            toast(isPublic ? 'Now private' : 'Shared to the feed');
           }}
         >
           <span className="switch__track" aria-hidden="true">
@@ -313,7 +325,7 @@ function AuthorControls({ mistake, onDeleted }: { mistake: Mistake; onDeleted: (
           href={`/log?edit=${encodeURIComponent(mistake.id)}&from=entry`}
           className="btn btn--ghost btn--sm"
         >
-          <span aria-hidden="true">✏️</span> Edit
+          <Icon icon={Pencil} size={16} /> Edit
         </Link>
         <button
           ref={deleteButton}
@@ -321,7 +333,7 @@ function AuthorControls({ mistake, onDeleted }: { mistake: Mistake; onDeleted: (
           className="btn btn--ghost btn--sm btn--danger-text"
           onClick={() => setConfirming(true)}
         >
-          <span aria-hidden="true">🗑️</span> Delete
+          <Icon icon={Trash2} size={16} /> Delete
         </button>
       </div>
     </section>
@@ -358,7 +370,7 @@ function CopyLinkButton() {
   return (
     <div className="copy-link">
       <button type="button" className="btn btn--secondary" onClick={copy}>
-        <span aria-hidden="true">🔗</span> Copy link
+        <Icon icon={Link2} size={18} /> Copy link
       </button>
       <span className="copy-link__status" role="status">
         {copied ? 'Link copied! Go spread the joy.' : ''}
@@ -393,7 +405,7 @@ function ReportLink({ mistakeId }: { mistakeId: string }) {
             setReported(true);
           }}
         >
-          <span aria-hidden="true">🚩</span> Report this entry
+          <Icon icon={Flag} size={14} /> Report this entry
         </button>
       )}
     </div>
@@ -404,7 +416,7 @@ function MistakeNotFound() {
   return (
     <div className="container page page--narrow">
       <EmptyState
-        emoji="🕳️"
+        icon={MapPinOff}
         title="This mistake has wandered off"
         action={
           <Link href="/feed" className="btn btn--primary">

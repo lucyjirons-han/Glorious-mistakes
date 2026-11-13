@@ -1,3 +1,5 @@
+import { Hand, HeartHandshake, Laugh, Lightbulb, Trophy, type LucideIcon } from 'lucide-react';
+import type { Tone } from '@/components/Icon';
 import type { Mistake, ReactionId } from './types';
 
 /**
@@ -16,16 +18,18 @@ import type { Mistake, ReactionId } from './types';
 
 export interface Reaction {
   id: ReactionId;
-  emoji: string;
+  icon: LucideIcon;
+  /** The pastel circle behind the icon. */
+  tone: Tone;
   label: string;
 }
 
 export const REACTIONS: Reaction[] = [
-  { id: 'been-there', emoji: '👋', label: 'Been there' },
-  { id: 'glorious', emoji: '😂', label: 'Glorious' },
-  { id: 'lesson-noted', emoji: '💡', label: 'Lesson noted' },
-  { id: 'solidarity', emoji: '🫂', label: 'Solidarity' },
-  { id: 'legendary', emoji: '🏆', label: 'Legendary' },
+  { id: 'been-there', icon: Hand, tone: 'sky', label: 'Been there' },
+  { id: 'glorious', icon: Laugh, tone: 'lilac', label: 'Glorious' },
+  { id: 'lesson-noted', icon: Lightbulb, tone: 'sage', label: 'Lesson noted' },
+  { id: 'solidarity', icon: HeartHandshake, tone: 'blush', label: 'Solidarity' },
+  { id: 'legendary', icon: Trophy, tone: 'lilac', label: 'Legendary' },
 ];
 
 const REACTION_IDS = new Set<string>(REACTIONS.map((r) => r.id));

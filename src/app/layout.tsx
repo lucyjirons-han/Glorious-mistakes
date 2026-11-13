@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Fredoka, Nunito } from 'next/font/google';
+import { Bricolage_Grotesque, DM_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -8,8 +8,18 @@ import { ToastProvider } from '@/components/Toast';
 import { MistakesProvider } from '@/lib/store';
 import './globals.css';
 
-const display = Fredoka({ subsets: ['latin'], variable: '--font-display', display: 'swap' });
-const body = Nunito({ subsets: ['latin'], variable: '--font-body', display: 'swap' });
+const display = Bricolage_Grotesque({
+  subsets: ['latin'],
+  weight: ['800'],
+  variable: '--font-display',
+  display: 'swap',
+});
+const body = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-body',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -21,7 +31,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#E879F9',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FAF7F0' },
+    { media: '(prefers-color-scheme: dark)', color: '#14173A' },
+  ],
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

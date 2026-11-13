@@ -10,7 +10,7 @@ export function FeedPreview() {
   const top = [...publicFeed].sort((a, b) => b.baseBeenThere - a.baseBeenThere).slice(0, 3);
 
   return (
-    <div className="card-grid">
+    <div className="card-grid card-grid--favourites">
       {top.map((m) => (
         <MistakeCard key={m.id} mistake={m}>
           <BeenThereButton mistake={m} />
