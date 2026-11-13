@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/feed', label: 'Public feed' },
   { href: '/mine', label: 'My mistakes' },
+  { href: '/about', label: 'About' },
 ];
 
 export function SiteHeader() {

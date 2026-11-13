@@ -18,6 +18,9 @@ export function SiteFooter() {
             <li>
               <Link href="/mine">My mistakes</Link>
             </li>
+            <li>
+              <Link href="/about">About</Link>
+            </li>
           </ul>
         </nav>
         <p className="site-footer__note">

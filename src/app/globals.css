@@ -503,7 +503,7 @@ textarea {
   box-shadow: inset 0 0 0 2px var(--c-text);
 }
 
-@media (max-width: 860px) {
+@media (max-width: 960px) {
   .nav-toggle {
     display: grid;
   }
@@ -1001,6 +1001,137 @@ textarea {
   color: var(--c-muted);
   font-size: 0.9375rem;
   font-weight: 700;
+}
+
+.about__quote {
+  position: relative;
+  margin: 0 0 32px;
+  padding: clamp(24px, 4vw, 36px) clamp(24px, 5vw, 44px);
+  background: var(--c-primary);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transform: rotate(-1deg);
+}
+
+.about__quote::before {
+  content: '“';
+  position: absolute;
+  top: -28px;
+  left: 20px;
+  font-family: var(--font-display-stack);
+  font-size: 5rem;
+  line-height: 1;
+  color: var(--c-text);
+}
+
+.about__quote blockquote {
+  margin: 0;
+}
+
+.about__quote p {
+  font-family: var(--font-display-stack);
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.about__intro {
+  display: grid;
+  gap: 16px;
+  font-size: 1.15rem;
+}
+
+.about__section {
+  margin-top: clamp(40px, 6vw, 56px);
+}
+
+.about__section > .section__title {
+  margin-bottom: 20px;
+}
+
+.about__how {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about__how-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px;
+  background: var(--c-secondary-soft);
+  border: var(--border);
+  border-radius: var(--radius);
+}
+
+.about__how-item:nth-child(2) {
+  background: var(--c-accent-soft);
+}
+
+.about__how-item:nth-child(3) {
+  background: var(--c-surface);
+}
+
+.about__how-item:nth-child(4) {
+  background: var(--c-primary-soft);
+}
+
+.about__how-emoji {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: var(--c-surface);
+  border: var(--border);
+  border-radius: 14px;
+  font-size: 1.5rem;
+}
+
+.about__how-item p {
+  color: var(--c-muted);
+}
+
+.about__aims {
+  grid-template-columns: 1fr;
+}
+
+.about__privacy {
+  padding: 24px;
+  background: var(--c-surface);
+  border: 2px dashed var(--c-text);
+  border-radius: var(--radius);
+}
+
+.about__privacy > .section__title {
+  margin-bottom: 10px;
+}
+
+.about__privacy a {
+  font-weight: 800;
+  text-decoration-color: var(--c-primary);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+
+.about__privacy a:hover {
+  color: var(--c-primary-strong);
+}
+
+.about__cta {
+  padding-top: 0;
+}
+
+@media (max-width: 600px) {
+  .about__how {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* 8. Cards --------------------------------------------------------------- */
