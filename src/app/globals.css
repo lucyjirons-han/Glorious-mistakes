@@ -2796,6 +2796,40 @@ fieldset.field > .field__label {
   }
 }
 
+/* Spot illustrations: the paper plane drifts and the lightbulb's glow breathes. Both stay still
+   for anyone who has asked for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .ill-drift {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ill-drift 6s ease-in-out infinite;
+  }
+
+  .ill-glow {
+    animation: ill-glow 4s ease-in-out infinite;
+  }
+}
+
+@keyframes ill-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(3px, -5px) rotate(-3deg);
+  }
+}
+
+@keyframes ill-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
