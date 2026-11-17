@@ -1,28 +1,34 @@
 import type { Metadata } from 'next';
-import { ArrowRight, Hand, HeartHandshake, Laugh, Lightbulb, NotebookPen, ScanFace, Send, Trophy } from 'lucide-react';
+import type { ComponentType } from 'react';
+import { ArrowRight, Hand, HeartHandshake, Laugh, ScanFace, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { FeedPreview } from '@/components/FeedPreview';
 import { Icon, IconBadge, type Tone } from '@/components/Icon';
+import {
+  DentedTrophy,
+  MicrowaveEgg,
+  NotebookScribble,
+  PaperPlane,
+  WonkyLightbulb,
+  type IllustrationProps,
+} from '@/components/illustrations';
 
 // The title and share tags come from the layout's defaults; this adds the canonical link.
 export const metadata: Metadata = { alternates: { canonical: '/' } };
 
-const STEPS: { icon: typeof Hand; tone: Tone; title: string; text: string }[] = [
+const STEPS: { art: ComponentType<IllustrationProps>; title: string; text: string }[] = [
   {
-    icon: NotebookPen,
-    tone: 'lilac',
+    art: NotebookScribble,
     title: 'Own the oops',
     text: 'Write down what happened. Headline, story, cringe level. Two minutes, tops.',
   },
   {
-    icon: Lightbulb,
-    tone: 'sage',
+    art: WonkyLightbulb,
     title: 'Find the lesson',
     text: 'What did it teach you? Wise, practical or totally ridiculous, it all counts.',
   },
   {
-    icon: Send,
-    tone: 'sky',
+    art: PaperPlane,
     title: 'Keep it or share it',
     text: 'Save it privately, or post it to the feed and collect a few “been there”s.',
   },
@@ -96,7 +102,7 @@ export default function HomePage() {
           <ol className="steps">
             {STEPS.map((step, i) => (
               <li key={step.title} className={`step step--${i + 1}`}>
-                <IconBadge icon={step.icon} tone={step.tone} size="xl" className="step__icon" />
+                <step.art className="step__art" />
                 <h3 className="step__title">
                   <span className="sr-only">Step {i + 1}: </span>
                   {step.title}
@@ -132,31 +138,37 @@ export default function HomePage() {
           <h2 id="why-title" className="section__title">
             Why celebrate mistakes?
           </h2>
-          <ul className="values">
-            {VALUES.map((v) => (
-              <li key={v.title} className="value">
-                <IconBadge icon={v.icon} tone={v.tone} size="lg" className="value__icon" />
-                <div>
-                  <h3 className="value__title">{v.title}</h3>
-                  <p>{v.text}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="values-layout">
+            <DentedTrophy className="values-layout__art" />
+            <ul className="values">
+              {VALUES.map((v) => (
+                <li key={v.title} className="value">
+                  <IconBadge icon={v.icon} tone={v.tone} size="lg" className="value__icon" />
+                  <div>
+                    <h3 className="value__title">{v.title}</h3>
+                    <p>{v.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
       {/* CTA */}
       <section className="section" aria-labelledby="cta-title">
         <div className="container">
-          <div className="cta-band">
-            <h2 id="cta-title" className="cta-band__title">
-              Go on. What did you stuff up this week?
-            </h2>
-            <p>Nobody has to see it but you. Unless you want them to.</p>
-            <Link href="/log" className="btn btn--accent btn--lg">
-              Log it now
-            </Link>
+          <div className="cta-band cta-band--art">
+            <MicrowaveEgg className="cta-band__art" />
+            <div className="cta-band__body">
+              <h2 id="cta-title" className="cta-band__title">
+                Go on. What did you stuff up this week?
+              </h2>
+              <p>Nobody has to see it but you. Unless you want them to.</p>
+              <Link href="/log" className="btn btn--accent btn--lg">
+                Log it now
+              </Link>
+            </div>
           </div>
         </div>
       </section>
