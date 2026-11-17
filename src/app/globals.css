@@ -1358,6 +1358,108 @@ textarea {
   margin-top: clamp(40px, 6vw, 56px);
 }
 
+/* FAQ */
+.faq__toc {
+  padding: 24px 28px;
+  background: var(--c-surface);
+  border: var(--hairline);
+  border-radius: var(--radius-lg);
+}
+
+.faq__toc-title {
+  margin-bottom: 12px;
+  font-family: var(--font-body-stack);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.faq__toc ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.faq__toc a {
+  display: inline-block;
+  padding-block: 6px;
+  text-decoration-color: var(--c-line-strong);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+
+.faq__toc a:hover {
+  text-decoration-color: currentColor;
+}
+
+.faq__list {
+  display: grid;
+  gap: 14px;
+}
+
+.faq__item {
+  padding: 24px 28px;
+  background: var(--c-surface);
+  border: var(--hairline);
+  border-radius: var(--radius-lg);
+}
+
+/* Leaves room for the sticky header when jumping to a question. */
+.faq__question {
+  scroll-margin-top: 110px;
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
+
+.faq__answer {
+  display: grid;
+  gap: 12px;
+  color: var(--c-muted);
+}
+
+.faq__answer ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.25em;
+}
+
+.faq__answer a,
+.faq__more a,
+.prose a {
+  color: var(--c-text);
+  font-weight: 700;
+  text-decoration-color: var(--sun);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+}
+
+.faq__answer a:hover,
+.faq__more a:hover,
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
+.faq__more {
+  margin-top: clamp(32px, 5vw, 48px);
+  color: var(--c-muted);
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .faq__toc ul {
+    grid-template-columns: 1fr;
+  }
+
+  .faq__toc,
+  .faq__item {
+    padding: 20px;
+  }
+}
+
 .not-found__links {
   display: flex;
   flex-wrap: wrap;
