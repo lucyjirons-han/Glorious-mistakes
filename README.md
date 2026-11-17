@@ -74,6 +74,36 @@ pricing are added), update the answers in [`src/app/faq/questions.ts`](src/app/f
 To make sharing truly public across people,
 replace the read/write helpers in the store with calls to an API and database.
 
+## Spot illustrations
+
+Hand-drawn illustrations live in [`src/components/illustrations`](src/components/illustrations),
+one inline SVG component each. They're decorative, so they're hidden from screen readers.
+
+| Component          | Used on                                      |
+| ------------------ | -------------------------------------------- |
+| `NotebookScribble` | Home, How it works: "Own the oops"           |
+| `WonkyLightbulb`   | Home, How it works: "Find the lesson"        |
+| `PaperPlane`       | Home, How it works: "Keep it or share it"    |
+| `DentedTrophy`     | Home, beside "Why celebrate mistakes?"       |
+| `MicrowaveEgg`     | Home, bottom call to action                  |
+| `PhoneLoveYouBye`  | Not used yet (e.g. the 404 page)             |
+| `WavingHand`       | Not used yet (e.g. empty states)             |
+
+Use one with a class that sets its width; the height follows from the drawing:
+
+```tsx
+import { WavingHand } from '@/components/illustrations';
+
+<WavingHand className="empty-state__art" />; // .empty-state__art { width: 160px; }
+```
+
+To draw a new one, wrap the paths in `<Illustration viewBox="…">` and use the `.ill-*` classes
+from `globals.css` instead of hex colours: `ill-ln` for lines, `ill-paper` for the object's fill,
+`ill-wash` plus a colour (`ill-lilac`, `ill-sage`, `ill-sky`, `ill-blush`) for the blob behind, and
+`ill-accent` plus a colour (or `ill-sun`) for the offset accent. The classes switch colour for dark
+mode and for the dark call-to-action band on their own. Keep to the style: fine wobbly lines that
+overshoot, a slight tilt, a few motion marks, at most one sparkle, and objects only, no faces.
+
 ## Project structure
 
 ```
