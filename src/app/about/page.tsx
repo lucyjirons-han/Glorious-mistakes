@@ -12,12 +12,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { IconBadge, type Tone } from '@/components/Icon';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'About',
   description:
     'Glorious Mistakes is a celebratory log of stuff-ups and the lessons they taught us. Find out what it is and why it exists.',
-};
+  path: '/about',
+});
 
 const AIMS: { icon: LucideIcon; tone: Tone; title: string; text: string }[] = [
   {

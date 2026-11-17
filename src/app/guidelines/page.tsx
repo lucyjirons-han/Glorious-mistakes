@@ -14,12 +14,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Icon, IconBadge } from '@/components/Icon';
+import { pageMetadata } from '@/lib/site';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Community guidelines',
   description:
     'Laugh with, not at. A few friendly ground rules for sharing mistakes on Glorious Mistakes.',
-};
+  path: '/guidelines',
+});
 
 const DOS: { icon: LucideIcon; title: string; text: string }[] = [
   {

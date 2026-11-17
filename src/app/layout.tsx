@@ -5,6 +5,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { ThemeScript } from '@/components/ThemeScript';
 import { ToastProvider } from '@/components/Toast';
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
 import { MistakesProvider } from '@/lib/store';
 import './globals.css';
 
@@ -21,13 +22,26 @@ const body = DM_Sans({
   display: 'swap',
 });
 
+const DEFAULT_TITLE = `${SITE_NAME} · ${SITE_TAGLINE}`;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Glorious Mistakes · Celebrate your stuff-ups',
-    template: '%s · Glorious Mistakes',
+    default: DEFAULT_TITLE,
+    template: `%s · ${SITE_NAME}`,
   },
-  description:
-    'Log a mistake you made and what it taught you. Keep it private or share it so others can say "been there".',
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  // Site-wide share defaults. Pages set their own with pageMetadata() in src/lib/site.ts.
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    locale: 'en_AU',
+    url: '/',
+    title: DEFAULT_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: { card: 'summary_large_image', title: DEFAULT_TITLE, description: SITE_DESCRIPTION },
 };
 
 export const viewport: Viewport = {

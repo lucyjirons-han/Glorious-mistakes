@@ -40,7 +40,13 @@ export default function NotFound() {
             <Link href="/mine">My mistakes</Link>
           </li>
           <li>
+            <Link href="/learn">Learn</Link>
+          </li>
+          <li>
             <Link href="/about">About</Link>
+          </li>
+          <li>
+            <Link href="/faq">FAQ</Link>
           </li>
           <li>
             <Link href="/guidelines">Community guidelines</Link>
