@@ -436,6 +436,86 @@ textarea {
   vertical-align: middle;
 }
 
+/* Spot illustrations (src/components/illustrations). Fine hand-drawn lines on a soft wash, with
+   accent colours placed loosely behind the lines. Everything is driven by these variables, so a
+   drawing restyles itself for dark mode or a dark band without any changes to the SVG. */
+.ill {
+  --ill-line: var(--c-text);
+  --ill-paper: var(--c-surface);
+  --ill-wash-alpha: 0.6;
+  --ill-accent-alpha: 1;
+  --ill-sun-alpha: 1;
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* On navy the pastels would glare, so the wash fades right back and the accents soften. */
+:root[data-theme='dark'] .ill,
+.cta-band .ill {
+  --ill-wash-alpha: 0.2;
+  --ill-accent-alpha: 0.5;
+  --ill-sun-alpha: 0.85;
+}
+
+/* The light-mode CTA band is ink, so the "paper" inside the objects matches it. */
+.cta-band .ill {
+  --ill-paper: var(--ink);
+}
+
+:root[data-theme='dark'] .cta-band .ill {
+  --ill-paper: var(--c-surface);
+}
+
+.ill-ln {
+  fill: none;
+  stroke: var(--ill-line);
+  stroke-width: 1.4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Keeps the line a true ~1.4px however large or small the drawing is shown. */
+  vector-effect: non-scaling-stroke;
+}
+
+.ill-paper {
+  fill: var(--ill-paper);
+}
+
+.ill-wash {
+  fill-opacity: var(--ill-wash-alpha);
+}
+
+.ill-accent {
+  fill-opacity: var(--ill-accent-alpha);
+}
+
+.ill-lilac {
+  fill: var(--lilac);
+}
+
+.ill-sage {
+  fill: var(--sage);
+}
+
+.ill-sky {
+  fill: var(--sky);
+}
+
+.ill-blush {
+  fill: var(--blush);
+}
+
+.ill-sun {
+  fill: var(--sun);
+  fill-opacity: var(--ill-sun-alpha);
+}
+
+.ill-text {
+  fill: var(--ill-line);
+  font: 500 12px var(--font-body-stack);
+}
+
 /* 5. Buttons & chips ----------------------------------------------------- */
 /* Base button = secondary: a 1.5px outline pill. */
 .btn {
