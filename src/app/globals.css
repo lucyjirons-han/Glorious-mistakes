@@ -334,6 +334,19 @@ textarea {
   margin-top: 32px;
 }
 
+/* Why celebrate mistakes?: the trophy sits beside the value cards (above them on small screens). */
+.values-layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 48px);
+  margin-top: 32px;
+}
+
+.values-layout__art {
+  width: 100%;
+}
+
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -2804,6 +2817,15 @@ fieldset.field > .field__label {
 
   .values {
     grid-template-columns: 1fr;
+  }
+
+  .values-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .values-layout__art {
+    width: min(200px, 60%);
+    margin-inline: auto;
   }
 }
 

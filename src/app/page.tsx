@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FeedPreview } from '@/components/FeedPreview';
 import { Icon, IconBadge, type Tone } from '@/components/Icon';
 import {
+  DentedTrophy,
   NotebookScribble,
   PaperPlane,
   WonkyLightbulb,
@@ -136,17 +137,20 @@ export default function HomePage() {
           <h2 id="why-title" className="section__title">
             Why celebrate mistakes?
           </h2>
-          <ul className="values">
-            {VALUES.map((v) => (
-              <li key={v.title} className="value">
-                <IconBadge icon={v.icon} tone={v.tone} size="lg" className="value__icon" />
-                <div>
-                  <h3 className="value__title">{v.title}</h3>
-                  <p>{v.text}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="values-layout">
+            <DentedTrophy className="values-layout__art" />
+            <ul className="values">
+              {VALUES.map((v) => (
+                <li key={v.title} className="value">
+                  <IconBadge icon={v.icon} tone={v.tone} size="lg" className="value__icon" />
+                  <div>
+                    <h3 className="value__title">{v.title}</h3>
+                    <p>{v.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
