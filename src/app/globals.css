@@ -1091,8 +1091,11 @@ textarea {
   list-style: none;
 }
 
+/* The drawings have different proportions, so they share a height (not a width). That keeps the
+   step titles lined up across the row. */
 .step__art {
-  width: clamp(140px, 60%, 180px);
+  width: auto;
+  height: 150px;
   margin-bottom: 18px;
 }
 
