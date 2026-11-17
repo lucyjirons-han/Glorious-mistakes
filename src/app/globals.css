@@ -100,7 +100,6 @@
 .reaction.is-pressed,
 .been-there.is-pressed,
 .choice input:checked + span,
-.step__icon,
 .stat,
 .about__quote,
 .about__how-item,
@@ -454,7 +453,7 @@ textarea {
 /* On navy the pastels would glare, so the wash fades right back and the accents soften. */
 :root[data-theme='dark'] .ill,
 .cta-band .ill {
-  --ill-wash-alpha: 0.2;
+  --ill-wash-alpha: 0.16;
   --ill-accent-alpha: 0.5;
   --ill-sun-alpha: 0.85;
 }
@@ -1079,8 +1078,9 @@ textarea {
   list-style: none;
 }
 
-.step__icon {
-  margin-bottom: 22px;
+.step__art {
+  width: clamp(140px, 60%, 180px);
+  margin-bottom: 18px;
 }
 
 .step__title {

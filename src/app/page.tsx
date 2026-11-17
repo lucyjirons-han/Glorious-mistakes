@@ -1,28 +1,32 @@
 import type { Metadata } from 'next';
-import { ArrowRight, Hand, HeartHandshake, Laugh, Lightbulb, NotebookPen, ScanFace, Send, Trophy } from 'lucide-react';
+import type { ComponentType } from 'react';
+import { ArrowRight, Hand, HeartHandshake, Laugh, ScanFace, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { FeedPreview } from '@/components/FeedPreview';
 import { Icon, IconBadge, type Tone } from '@/components/Icon';
+import {
+  NotebookScribble,
+  PaperPlane,
+  WonkyLightbulb,
+  type IllustrationProps,
+} from '@/components/illustrations';
 
 // The title and share tags come from the layout's defaults; this adds the canonical link.
 export const metadata: Metadata = { alternates: { canonical: '/' } };
 
-const STEPS: { icon: typeof Hand; tone: Tone; title: string; text: string }[] = [
+const STEPS: { art: ComponentType<IllustrationProps>; title: string; text: string }[] = [
   {
-    icon: NotebookPen,
-    tone: 'lilac',
+    art: NotebookScribble,
     title: 'Own the oops',
     text: 'Write down what happened. Headline, story, cringe level. Two minutes, tops.',
   },
   {
-    icon: Lightbulb,
-    tone: 'sage',
+    art: WonkyLightbulb,
     title: 'Find the lesson',
     text: 'What did it teach you? Wise, practical or totally ridiculous, it all counts.',
   },
   {
-    icon: Send,
-    tone: 'sky',
+    art: PaperPlane,
     title: 'Keep it or share it',
     text: 'Save it privately, or post it to the feed and collect a few “been there”s.',
   },
@@ -96,7 +100,7 @@ export default function HomePage() {
           <ol className="steps">
             {STEPS.map((step, i) => (
               <li key={step.title} className={`step step--${i + 1}`}>
-                <IconBadge icon={step.icon} tone={step.tone} size="xl" className="step__icon" />
+                <step.art className="step__art" />
                 <h3 className="step__title">
                   <span className="sr-only">Step {i + 1}: </span>
                   {step.title}
