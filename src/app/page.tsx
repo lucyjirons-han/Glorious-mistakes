@@ -1,7 +1,11 @@
+import type { Metadata } from 'next';
 import { ArrowRight, Hand, HeartHandshake, Laugh, Lightbulb, NotebookPen, ScanFace, Send, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { FeedPreview } from '@/components/FeedPreview';
 import { Icon, IconBadge, type Tone } from '@/components/Icon';
+
+// The title and share tags come from the layout's defaults; this adds the canonical link.
+export const metadata: Metadata = { alternates: { canonical: '/' } };
 
 const STEPS: { icon: typeof Hand; tone: Tone; title: string; text: string }[] = [
   {

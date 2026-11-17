@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { summarise } from '@/lib/constants';
 import { SEED_MISTAKES } from '@/lib/seed';
+import { pageMetadata } from '@/lib/site';
 import { MistakeView } from './MistakeView';
 
 interface MistakePageProps {
@@ -20,11 +21,12 @@ export async function generateMetadata({ params }: MistakePageProps): Promise<Me
     };
   }
 
-  return {
+  return pageMetadata({
     title: mistake.title,
     description: summarise(mistake.whatHappened),
-    openGraph: { title: mistake.title, description: summarise(mistake.whatHappened) },
-  };
+    path: `/mistakes/${encodeURIComponent(mistake.id)}`,
+    openGraph: { type: 'article' },
+  });
 }
 
 export function generateStaticParams() {
