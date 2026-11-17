@@ -1162,6 +1162,25 @@ textarea {
   font-size: 1.125rem;
 }
 
+/* With an illustration, the band becomes picture + text side by side (stacked on small screens). */
+.cta-band--art {
+  grid-template-columns: auto minmax(0, 34rem);
+  justify-content: center;
+  align-items: center;
+  column-gap: clamp(28px, 5vw, 64px);
+  text-align: left;
+}
+
+.cta-band__body {
+  display: grid;
+  justify-items: start;
+  gap: 18px;
+}
+
+.cta-band__art {
+  width: clamp(150px, 18vw, 210px);
+}
+
 /* 8. Pages & toolbar ----------------------------------------------------- */
 .page-header {
   margin-bottom: clamp(28px, 4vw, 40px);
@@ -2826,6 +2845,21 @@ fieldset.field > .field__label {
   .values-layout__art {
     width: min(200px, 60%);
     margin-inline: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .cta-band--art {
+    grid-template-columns: minmax(0, 1fr);
+    text-align: center;
+  }
+
+  .cta-band__body {
+    justify-items: center;
+  }
+
+  .cta-band__art {
+    width: 140px;
   }
 }
 

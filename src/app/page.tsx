@@ -6,6 +6,7 @@ import { FeedPreview } from '@/components/FeedPreview';
 import { Icon, IconBadge, type Tone } from '@/components/Icon';
 import {
   DentedTrophy,
+  MicrowaveEgg,
   NotebookScribble,
   PaperPlane,
   WonkyLightbulb,
@@ -157,14 +158,17 @@ export default function HomePage() {
       {/* CTA */}
       <section className="section" aria-labelledby="cta-title">
         <div className="container">
-          <div className="cta-band">
-            <h2 id="cta-title" className="cta-band__title">
-              Go on. What did you stuff up this week?
-            </h2>
-            <p>Nobody has to see it but you. Unless you want them to.</p>
-            <Link href="/log" className="btn btn--accent btn--lg">
-              Log it now
-            </Link>
+          <div className="cta-band cta-band--art">
+            <MicrowaveEgg className="cta-band__art" />
+            <div className="cta-band__body">
+              <h2 id="cta-title" className="cta-band__title">
+                Go on. What did you stuff up this week?
+              </h2>
+              <p>Nobody has to see it but you. Unless you want them to.</p>
+              <Link href="/log" className="btn btn--accent btn--lg">
+                Log it now
+              </Link>
+            </div>
           </div>
         </div>
       </section>
