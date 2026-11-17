@@ -40,6 +40,15 @@ export const CATEGORIES: Category[] = [
   { id: 'other', label: 'Other', icon: Shapes, tone: 'white' },
 ];
 
+export function isCategoryId(id: string): id is CategoryId {
+  return CATEGORIES.some((c) => c.id === id);
+}
+
+/** Link to the public feed filtered to one category, e.g. /feed?category=food. */
+export function feedCategoryHref(id: CategoryId): string {
+  return `/feed?category=${id}`;
+}
+
 /** Category ids from earlier versions, mapped to their current equivalent. */
 const LEGACY_CATEGORIES: Record<string, CategoryId> = { kitchen: 'food' };
 

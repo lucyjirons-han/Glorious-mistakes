@@ -2,12 +2,14 @@
 
 import { Hand, Search, SearchX } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useMemo, useState } from 'react';
 import { BeenThereButton } from '@/components/BeenThereButton';
 import { CategoryFilter } from '@/components/CategoryFilter';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { MistakeCard } from '@/components/MistakeCard';
+import { isCategoryId } from '@/lib/constants';
 import { useMistakes } from '@/lib/store';
 import type { CategoryId } from '@/lib/types';
 
@@ -15,7 +17,22 @@ type Sort = 'newest' | 'relatable' | 'cringe';
 
 export function FeedView() {
   const { publicFeed, beenThereCount } = useMistakes();
-  const [category, setCategory] = useState<CategoryId | 'all'>('all');
+  // The category lives in the URL (/feed?category=food) so it can be linked to and shared.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const param = searchParams.get('category') ?? '';
+  const category: CategoryId | 'all' = isCategoryId(param) ? param : 'all';
+  const setCategory = useCallback(
+    (next: CategoryId | 'all') => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (next === 'all') params.delete('category');
+      else params.set('category', next);
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<Sort>('newest');
 
