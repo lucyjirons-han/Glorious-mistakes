@@ -66,6 +66,12 @@ export function SiteHeader() {
                 </Link>
               </li>
             ))}
+            <li>
+              {/* The sign-up form sits at the bottom of every page, so this is an in-page link. */}
+              <a href="#newsletter" className="site-nav__link" onClick={() => setOpen(false)}>
+                Newsletter
+              </a>
+            </li>
           </ul>
           <Link href="/log" className="btn btn--primary btn--sm">
             Log a mistake

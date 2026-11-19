@@ -61,7 +61,7 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'Yes, completely free right now. There’s no account, no sign-up and no email address needed. Open the site and ',
+              'Yes, completely free right now. There’s no account, no sign-up and no email address needed (the newsletter is optional). Open the site and ',
               { href: '/log', text: 'log a mistake' },
               '.',
             ],
@@ -104,7 +104,7 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'Yes. There are no accounts, so we never ask for your name, email or a password. If you share a mistake, the name shown on it is optional. Leave it blank and it’s posted as “Anonymous”.',
+              'Yes. There are no accounts, so logging or sharing a mistake never asks for your name, email or a password. The only place we ask for a first name and email is the optional newsletter sign-up, and that isn’t linked to your entries. If you share a mistake, the name shown on it is optional. Leave it blank and it’s posted as “Anonymous”.',
             ],
           },
           {

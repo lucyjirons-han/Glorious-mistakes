@@ -966,6 +966,85 @@ textarea {
   }
 }
 
+/* Newsletter sign-up: a white band above the footer on every page. */
+.newsletter {
+  padding-block: clamp(40px, 6vw, 64px);
+  background: var(--c-surface);
+  border-top: var(--hairline);
+  scroll-margin-top: 100px;
+}
+
+.newsletter__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  align-items: start;
+  gap: 24px clamp(32px, 5vw, 64px);
+}
+
+.newsletter__intro .icon-badge {
+  margin-bottom: 16px;
+}
+
+.newsletter__title {
+  font-family: var(--font-display-stack);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.newsletter__lead {
+  margin-top: 10px;
+  color: var(--c-muted);
+  max-width: 44ch;
+}
+
+.newsletter__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  align-items: start;
+}
+
+.newsletter__submit {
+  justify-self: start;
+}
+
+.newsletter__note {
+  align-self: center;
+  color: var(--c-muted);
+  font-size: 0.875rem;
+}
+
+.newsletter__failed {
+  grid-column: 1 / -1;
+}
+
+.newsletter__done {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  background: var(--c-neutral);
+  border-radius: var(--radius);
+  font-size: 1.0625rem;
+}
+
+@media (max-width: 860px) {
+  .newsletter__inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .newsletter__form {
+    grid-template-columns: 1fr;
+  }
+
+  .newsletter__submit {
+    justify-self: stretch;
+  }
+}
+
 /* 7. Home ---------------------------------------------------------------- */
 .hero {
   position: relative;
