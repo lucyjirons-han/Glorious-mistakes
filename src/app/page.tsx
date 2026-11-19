@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
-import type { ComponentType } from 'react';
+import type { ComponentType, CSSProperties } from 'react';
 import { ArrowRight, Hand, HeartHandshake, Laugh, ScanFace, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { FeedPreview } from '@/components/FeedPreview';
 import { Icon, IconBadge, type Tone } from '@/components/Icon';
+import { RevealOnScroll } from '@/components/RevealOnScroll';
 import {
   DentedTrophy,
   MicrowaveEgg,
@@ -41,9 +42,13 @@ const VALUES: { icon: typeof Hand; tone: Tone; title: string; text: string }[] =
   { icon: Laugh, tone: 'blush', title: 'Keep it light', text: 'No judgement, no lectures. Just people laughing at themselves together.' },
 ];
 
+/** Where a nested stagger starts counting, so it carries on after the items above it. */
+const offset = (n: number) => ({ '--reveal-offset': n }) as CSSProperties;
+
 export default function HomePage() {
   return (
     <>
+      <RevealOnScroll />
       {/* Hero */}
       <section className="hero" aria-labelledby="hero-title">
         <div className="container hero__inner">
@@ -94,12 +99,12 @@ export default function HomePage() {
 
       {/* How it works */}
       <section className="section section--tinted" aria-labelledby="how-title">
-        <div className="container">
+        <div className="container" data-reveal data-reveal-stagger>
           <h2 id="how-title" className="section__title">
             How it works
           </h2>
           <p className="section__lead">A tiny reflection habit with a big grin.</p>
-          <ol className="steps">
+          <ol className="steps" data-reveal-stagger style={offset(2)}>
             {STEPS.map((step, i) => (
               <li key={step.title} className={`step step--${i + 1}`}>
                 <step.art className="step__art" />
@@ -116,7 +121,7 @@ export default function HomePage() {
 
       {/* Feed preview */}
       <section className="section" aria-labelledby="preview-title">
-        <div className="container">
+        <div className="container" data-reveal data-reveal-stagger>
           <div className="section__header">
             <div>
               <h2 id="preview-title" className="section__title">
@@ -134,13 +139,13 @@ export default function HomePage() {
 
       {/* Values */}
       <section className="section section--tinted" aria-labelledby="why-title">
-        <div className="container">
+        <div className="container" data-reveal data-reveal-stagger>
           <h2 id="why-title" className="section__title">
             Why celebrate mistakes?
           </h2>
-          <div className="values-layout">
+          <div className="values-layout" data-reveal-stagger style={offset(1)}>
             <DentedTrophy className="values-layout__art" />
-            <ul className="values">
+            <ul className="values" data-reveal-stagger style={offset(2)}>
               {VALUES.map((v) => (
                 <li key={v.title} className="value">
                   <IconBadge icon={v.icon} tone={v.tone} size="lg" className="value__icon" />
@@ -157,7 +162,7 @@ export default function HomePage() {
 
       {/* CTA */}
       <section className="section" aria-labelledby="cta-title">
-        <div className="container">
+        <div className="container" data-reveal data-reveal-stagger>
           <div className="cta-band cta-band--art">
             <MicrowaveEgg className="cta-band__art" />
             <div className="cta-band__body">

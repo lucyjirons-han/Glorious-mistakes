@@ -2790,6 +2790,96 @@ fieldset.field > .field__label {
   }
 }
 
+/* Entrances. These animate `translate`, not `transform`, so they stack with the hover lifts above
+   instead of fighting them.
+
+   Hero: plays on load with CSS alone, so it never waits for JavaScript. The copy rises line by
+   line, then the two sample cards drop into place.
+
+   Scroll: <RevealOnScroll> marks each [data-reveal] section "pending" while it's below the fold
+   and "shown" once it scrolls into view. Inside it, the children of every [data-reveal-stagger]
+   element rise one after another (a nested stagger element passes the job to its own children,
+   starting at its --reveal-offset). Without JavaScript nothing is ever marked pending, so
+   everything is simply visible. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__copy > * {
+    animation: reveal-rise 600ms var(--ease) both;
+  }
+
+  .hero__copy > :nth-child(2) {
+    animation-delay: 80ms;
+  }
+
+  .hero__copy > :nth-child(3) {
+    animation-delay: 160ms;
+  }
+
+  .hero__copy > :nth-child(4) {
+    animation-delay: 240ms;
+  }
+
+  .hero-card {
+    animation: reveal-drop 700ms var(--ease) 300ms both;
+  }
+
+  .hero-card--front {
+    animation-delay: 420ms;
+  }
+
+  [data-reveal-stagger] > :not([data-reveal-stagger]) {
+    --reveal-i: 0;
+  }
+
+  [data-reveal-stagger] > :nth-child(2) {
+    --reveal-i: 1;
+  }
+
+  [data-reveal-stagger] > :nth-child(3) {
+    --reveal-i: 2;
+  }
+
+  [data-reveal-stagger] > :nth-child(4) {
+    --reveal-i: 3;
+  }
+
+  [data-reveal-stagger] > :nth-child(n + 5) {
+    --reveal-i: 4;
+  }
+
+  [data-reveal-state='pending'][data-reveal-stagger] > :not([data-reveal-stagger]),
+  [data-reveal-state='pending'] [data-reveal-stagger] > :not([data-reveal-stagger]) {
+    opacity: 0;
+  }
+
+  [data-reveal-state='shown'][data-reveal-stagger] > :not([data-reveal-stagger]),
+  [data-reveal-state='shown'] [data-reveal-stagger] > :not([data-reveal-stagger]) {
+    animation: reveal-rise 600ms var(--ease) both;
+    animation-delay: calc((var(--reveal-offset, 0) + var(--reveal-i, 0)) * 90ms);
+  }
+}
+
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes reveal-drop {
+  from {
+    opacity: 0;
+    translate: 0 -18px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 @keyframes pop {
   0% {
     transform: scale(0.85);
