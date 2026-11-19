@@ -1,7 +1,7 @@
-# 💥 Glorious Mistakes
+# Glorious Mistakes
 
 Log a mistake you made and what it taught you. Keep it private, or share it to the public feed
-where other people can react with **🙋 Been there**.
+where other people can react with **Been there**.
 
 - **Celebrate, don't hide.** Mistakes mean you tried something.
 - **Build a reflection habit.** Two questions: what happened, and what did I take from it?
@@ -116,16 +116,33 @@ src/
 
 ## Design
 
-Playful, chunky "sticker" style: 2px navy outlines, offset shadows and bouncy transitions.
+"Soft and confident": a warm cream page, deep navy ink, soft pastel blocks, rounded corners,
+thin 1.5px outlines on pill buttons, and line icons from [Lucide](https://lucide.dev) in place of
+emoji. Headings use Bricolage Grotesque (800), body text DM Sans. All styles live in
+[`src/app/globals.css`](src/app/globals.css); its table of contents is at the top of the file.
 
-| Token      | Colour    |
-| ---------- | --------- |
-| Primary    | `#E879F9` |
-| Secondary  | `#38BDF8` |
-| Accent     | `#FBBF24` |
-| Background | `#FDF4FF` |
-| Text       | `#1E1B4B` |
+| Brand colour | Value     | Used for                                  |
+| ------------ | --------- | ----------------------------------------- |
+| Ink          | `#1B1F4B` | Text, primary buttons, outlines            |
+| Ink muted    | `#454A72` | Secondary text                             |
+| Cream        | `#FAF7F0` | Page background (light mode)               |
+| Lilac        | `#C3B8E6` | Pastel blocks, badges, category tints      |
+| Sage         | `#D0E8C6` | Pastel blocks, lesson panels               |
+| Sky          | `#B0D3D0` | Pastel blocks, "Been there"                |
+| Blush        | `#F6D5D8` | Pastel blocks                              |
+| Sun          | `#F5C842` | Accent, pressed reactions, dark-mode primary |
+| Red          | `#B42318` | Errors and delete                          |
 
-Text always sits in navy on the bright colours, so every pairing passes WCAG AA contrast.
-Includes a skip link, visible focus rings, labelled form fields with inline errors, `aria-pressed`
-toggles, a polite live region for toasts, and reduced-motion support.
+Components don't use these directly. They use theme tokens (`--c-bg`, `--c-surface`, `--c-text`,
+`--c-muted`, `--c-primary`, `--c-focus`…), which switch for dark mode: a deep navy page
+(`#14173A`) with cream text and a sun-yellow primary. Pastel blocks keep their colours in both
+themes and always carry navy text, so every pairing passes WCAG AA contrast.
+
+Light or dark follows the visitor's device until they pick one with the header toggle. The choice
+is saved, and a small script in `<head>` ([`src/lib/theme.ts`](src/lib/theme.ts)) applies it
+before the page paints.
+
+Accessibility built in: a skip link, visible focus rings, labelled form fields with hints and
+inline errors, `aria-pressed` toggles, a polite live region for toasts, decorative icons and
+illustrations hidden from screen readers, and reduced-motion support (the scroll and reaction
+animations switch off).
