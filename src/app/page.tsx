@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import type { ComponentType, CSSProperties } from 'react';
+import type { ComponentType } from 'react';
 import { ArrowRight, Hand, HeartHandshake, Laugh, ScanFace, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { FeedPreview } from '@/components/FeedPreview';
 import { Icon, IconBadge, type Tone } from '@/components/Icon';
-import { RevealOnScroll } from '@/components/RevealOnScroll';
 import {
   DentedTrophy,
   MicrowaveEgg,
@@ -13,6 +12,7 @@ import {
   WonkyLightbulb,
   type IllustrationProps,
 } from '@/components/illustrations';
+import { revealOffset } from '@/lib/reveal';
 
 // The title and share tags come from the layout's defaults; this adds the canonical link.
 export const metadata: Metadata = { alternates: { canonical: '/' } };
@@ -42,13 +42,9 @@ const VALUES: { icon: typeof Hand; tone: Tone; title: string; text: string }[] =
   { icon: Laugh, tone: 'blush', title: 'Keep it light', text: 'No judgement, no lectures. Just people laughing at themselves together.' },
 ];
 
-/** Where a nested stagger starts counting, so it carries on after the items above it. */
-const offset = (n: number) => ({ '--reveal-offset': n }) as CSSProperties;
-
 export default function HomePage() {
   return (
     <>
-      <RevealOnScroll />
       {/* Hero */}
       <section className="hero" aria-labelledby="hero-title">
         <div className="container hero__inner">
@@ -104,7 +100,7 @@ export default function HomePage() {
             How it works
           </h2>
           <p className="section__lead">A tiny reflection habit with a big grin.</p>
-          <ol className="steps" data-reveal-stagger style={offset(2)}>
+          <ol className="steps" data-reveal-stagger style={revealOffset(2)}>
             {STEPS.map((step, i) => (
               <li key={step.title} className={`step step--${i + 1}`}>
                 <step.art className="step__art" />
@@ -143,9 +139,9 @@ export default function HomePage() {
           <h2 id="why-title" className="section__title">
             Why celebrate mistakes?
           </h2>
-          <div className="values-layout" data-reveal-stagger style={offset(1)}>
+          <div className="values-layout" data-reveal-stagger style={revealOffset(1)}>
             <DentedTrophy className="values-layout__art" />
-            <ul className="values" data-reveal-stagger style={offset(2)}>
+            <ul className="values" data-reveal-stagger style={revealOffset(2)}>
               {VALUES.map((v) => (
                 <li key={v.title} className="value">
                   <IconBadge icon={v.icon} tone={v.tone} size="lg" className="value__icon" />

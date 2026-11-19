@@ -24,6 +24,7 @@ import { ReactionBar } from '@/components/ReactionBar';
 import { useToast } from '@/components/Toast';
 import { hasReported, reportMistake } from '@/lib/community';
 import { displayAuthor, formatDate, getCategory, getCringe, summarise } from '@/lib/constants';
+import { revealOffset } from '@/lib/reveal';
 import { useMistakes } from '@/lib/store';
 import type { Mistake } from '@/lib/types';
 
@@ -108,7 +109,7 @@ export function MistakeView({ id }: { id: string }) {
       <EntryDetails mistake={mistake} />
 
       {/* 3. Reactions */}
-      <section className="entry-section" aria-labelledby="reactions-title">
+      <section className="entry-section" aria-labelledby="reactions-title" data-reveal data-reveal-stagger>
         <h2 id="reactions-title" className="entry-section__title">
           Reactions
         </h2>
@@ -123,7 +124,7 @@ export function MistakeView({ id }: { id: string }) {
       </section>
 
       {/* 4–5. Share and Show me another */}
-      <section className="entry-section entry-share" aria-labelledby="share-title">
+      <section className="entry-section entry-share" aria-labelledby="share-title" data-reveal data-reveal-stagger>
         <h2 id="share-title" className="sr-only">
           Share and explore
         </h2>
@@ -144,11 +145,11 @@ export function MistakeView({ id }: { id: string }) {
 
       {/* 6. More like this */}
       {similar.length > 0 && (
-        <section className="entry-section" aria-labelledby="similar-title">
+        <section className="entry-section" aria-labelledby="similar-title" data-reveal data-reveal-stagger>
           <h2 id="similar-title" className="entry-section__title">
             More like this
           </h2>
-          <div className="card-grid entry-similar">
+          <div className="card-grid entry-similar" data-reveal-stagger style={revealOffset(1)}>
             {similar.map((m) => (
               <MistakeCard key={m.id} mistake={m}>
                 <BeenThereButton mistake={m} />
@@ -159,7 +160,7 @@ export function MistakeView({ id }: { id: string }) {
       )}
 
       {/* 7. Call to action */}
-      <section className="cta-band entry-cta" aria-labelledby="entry-cta-title">
+      <section className="cta-band entry-cta" aria-labelledby="entry-cta-title" data-reveal data-reveal-stagger>
         <h2 id="entry-cta-title" className="cta-band__title">
           Done something similar?
         </h2>

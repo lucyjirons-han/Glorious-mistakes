@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Icon, IconBadge } from '@/components/Icon';
+import { revealOffset } from '@/lib/reveal';
 import { pageMetadata } from '@/lib/site';
 
 export const metadata: Metadata = pageMetadata({
@@ -79,11 +80,11 @@ export default function GuidelinesPage() {
         </p>
       </header>
 
-      <section className="about__section" aria-labelledby="guidelines-do">
+      <section className="about__section" aria-labelledby="guidelines-do" data-reveal data-reveal-stagger>
         <h2 id="guidelines-do" className="section__title section__title--sm">
           <IconBadge icon={ThumbsUp} tone="sage" size="sm" className="heading-icon" /> Please do
         </h2>
-        <ul className="guidelines__list guidelines__list--do">
+        <ul className="guidelines__list guidelines__list--do" data-reveal-stagger style={revealOffset(1)}>
           {DOS.map((item) => (
             <li key={item.title} className="guidelines__item">
               <IconBadge icon={item.icon} tone="white" className="about__how-icon" />
@@ -96,11 +97,11 @@ export default function GuidelinesPage() {
         </ul>
       </section>
 
-      <section className="about__section" aria-labelledby="guidelines-dont">
+      <section className="about__section" aria-labelledby="guidelines-dont" data-reveal data-reveal-stagger>
         <h2 id="guidelines-dont" className="section__title section__title--sm">
           <IconBadge icon={Ban} tone="blush" size="sm" className="heading-icon" /> Please don&rsquo;t
         </h2>
-        <ul className="guidelines__list guidelines__list--dont">
+        <ul className="guidelines__list guidelines__list--dont" data-reveal-stagger style={revealOffset(1)}>
           {DONTS.map((item) => (
             <li key={item.title} className="guidelines__item">
               <IconBadge icon={item.icon} tone="white" className="about__how-icon" />
@@ -113,7 +114,7 @@ export default function GuidelinesPage() {
         </ul>
       </section>
 
-      <section className="about__section about__privacy" aria-labelledby="guidelines-check">
+      <section className="about__section about__privacy" aria-labelledby="guidelines-check" data-reveal data-reveal-stagger>
         <h2 id="guidelines-check" className="section__title section__title--sm">
           <IconBadge icon={CircleCheck} tone="sky" size="sm" className="heading-icon" /> Before you share, ask yourself
         </h2>
@@ -131,7 +132,7 @@ export default function GuidelinesPage() {
         </p>
       </section>
 
-      <div className="btn-row btn-row--center guidelines__actions">
+      <div className="btn-row btn-row--center guidelines__actions" data-reveal data-reveal-stagger>
         <Link href="/log" className="btn btn--primary btn--lg">
           Log a mistake
         </Link>

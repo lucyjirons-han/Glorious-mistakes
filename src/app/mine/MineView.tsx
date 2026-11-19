@@ -88,7 +88,7 @@ export function MineView() {
         <h2 id="stats-title" className="sr-only">
           Your stats
         </h2>
-        <ul className="stats">
+        <ul className="stats" data-reveal data-reveal-stagger>
           {stats.map((s) => (
             <li key={s.label} className="stat">
               <IconBadge icon={s.icon} tone="white" className="stat__icon" />
@@ -121,7 +121,7 @@ export function MineView() {
         </div>
 
         {visible.length > 0 ? (
-          <div className="card-grid">
+          <div className="card-grid" data-reveal-each>
             {visible.map((m) => (
               <MistakeCard key={m.id} mistake={m}>
                 <OwnerActions mistake={m} />

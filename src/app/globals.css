@@ -2793,28 +2793,36 @@ fieldset.field > .field__label {
 /* Entrances. These animate `translate`, not `transform`, so they stack with the hover lifts above
    instead of fighting them.
 
-   Hero: plays on load with CSS alone, so it never waits for JavaScript. The copy rises line by
-   line, then the two sample cards drop into place.
+   On load: plays with CSS alone, so it never waits for JavaScript. The home hero copy and every
+   other page's header rise line by line (the home page's sample cards then drop into place),
+   and a mistake's own page brings its entry up just after.
 
    Scroll: <RevealOnScroll> marks each [data-reveal] section "pending" while it's below the fold
    and "shown" once it scrolls into view. Inside it, the children of every [data-reveal-stagger]
    element rise one after another (a nested stagger element passes the job to its own children,
-   starting at its --reveal-offset). Without JavaScript nothing is ever marked pending, so
-   everything is simply visible. */
+   starting at its --reveal-offset). In a [data-reveal-each] list, each child is marked on its
+   own instead. Without JavaScript nothing is ever marked pending, so everything is simply
+   visible. */
 @media (prefers-reduced-motion: no-preference) {
-  .hero__copy > * {
+  .hero__copy > *,
+  .page-header > *,
+  .entry {
     animation: reveal-rise 600ms var(--ease) both;
   }
 
-  .hero__copy > :nth-child(2) {
+  .hero__copy > :nth-child(2),
+  .page-header > :nth-child(2),
+  .entry {
     animation-delay: 80ms;
   }
 
-  .hero__copy > :nth-child(3) {
+  .hero__copy > :nth-child(3),
+  .page-header > :nth-child(3) {
     animation-delay: 160ms;
   }
 
-  .hero__copy > :nth-child(4) {
+  .hero__copy > :nth-child(4),
+  .page-header > :nth-child(4) {
     animation-delay: 240ms;
   }
 
@@ -2826,7 +2834,7 @@ fieldset.field > .field__label {
     animation-delay: 420ms;
   }
 
-  [data-reveal-stagger] > :not([data-reveal-stagger]) {
+  [data-reveal-stagger] > * {
     --reveal-i: 0;
   }
 
@@ -2846,13 +2854,15 @@ fieldset.field > .field__label {
     --reveal-i: 4;
   }
 
-  [data-reveal-state='pending'][data-reveal-stagger] > :not([data-reveal-stagger]),
-  [data-reveal-state='pending'] [data-reveal-stagger] > :not([data-reveal-stagger]) {
+  [data-reveal-state='pending'][data-reveal-stagger] > :not([data-reveal-stagger], [data-reveal-each]),
+  [data-reveal-state='pending'] [data-reveal-stagger] > :not([data-reveal-stagger], [data-reveal-each]),
+  [data-reveal-each] > [data-reveal-state='pending'] {
     opacity: 0;
   }
 
-  [data-reveal-state='shown'][data-reveal-stagger] > :not([data-reveal-stagger]),
-  [data-reveal-state='shown'] [data-reveal-stagger] > :not([data-reveal-stagger]) {
+  [data-reveal-state='shown'][data-reveal-stagger] > :not([data-reveal-stagger], [data-reveal-each]),
+  [data-reveal-state='shown'] [data-reveal-stagger] > :not([data-reveal-stagger], [data-reveal-each]),
+  [data-reveal-each] > [data-reveal-state='shown'] {
     animation: reveal-rise 600ms var(--ease) both;
     animation-delay: calc((var(--reveal-offset, 0) + var(--reveal-i, 0)) * 90ms);
   }

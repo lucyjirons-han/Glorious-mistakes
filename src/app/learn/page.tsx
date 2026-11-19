@@ -26,7 +26,7 @@ export default async function LearnPage() {
           </p>
         </header>
 
-        <div className="card-grid article-grid">
+        <div className="card-grid article-grid" data-reveal-each>
           {articles.map((article) => (
             <ArticleCard key={article.slug} article={article} />
           ))}
@@ -34,7 +34,7 @@ export default async function LearnPage() {
       </div>
 
       <section className="section about__cta" aria-labelledby="learn-cta">
-        <div className="container">
+        <div className="container" data-reveal data-reveal-stagger>
           <div className="cta-band">
             <h2 id="learn-cta" className="cta-band__title">
               Got a lesson of your own?

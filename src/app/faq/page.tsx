@@ -73,7 +73,7 @@ export default function FaqPage() {
           </p>
         </header>
 
-        <nav className="faq__toc" aria-labelledby="faq-toc-title">
+        <nav className="faq__toc" aria-labelledby="faq-toc-title" data-reveal data-reveal-stagger>
           <h2 id="faq-toc-title" className="faq__toc-title">
             Jump to a question
           </h2>
@@ -89,14 +89,14 @@ export default function FaqPage() {
         {FAQ_GROUPS.map((group) => {
           const style = GROUP_STYLE[group.id];
           return (
-            <section key={group.id} className="about__section" aria-labelledby={`faq-${group.id}`}>
+            <section key={group.id} className="about__section" aria-labelledby={`faq-${group.id}`} data-reveal data-reveal-stagger>
               <h2 id={`faq-${group.id}`} className="section__title section__title--sm">
                 {style && (
                   <IconBadge icon={style.icon} tone={style.tone} size="sm" className="heading-icon" />
                 )}{' '}
                 {group.title}
               </h2>
-              <div className="faq__list">
+              <div className="faq__list" data-reveal-each>
                 {group.questions.map((q) => (
                   <article key={q.id} className="faq__item" aria-labelledby={q.id}>
                     <h3 id={q.id} className="faq__question">
@@ -119,7 +119,7 @@ export default function FaqPage() {
       </div>
 
       <section className="section about__cta" aria-labelledby="faq-cta">
-        <div className="container">
+        <div className="container" data-reveal data-reveal-stagger>
           <div className="cta-band">
             <h2 id="faq-cta" className="cta-band__title">
               Questions sorted. Got a stuff-up?

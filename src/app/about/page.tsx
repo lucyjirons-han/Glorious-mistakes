@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { IconBadge, type Tone } from '@/components/Icon';
+import { revealOffset } from '@/lib/reveal';
 import { pageMetadata } from '@/lib/site';
 
 export const metadata: Metadata = pageMetadata({
@@ -82,13 +83,13 @@ export default function AboutPage() {
           <h1 className="page-header__title">What is Glorious Mistakes?</h1>
         </header>
 
-        <figure className="about__quote">
+        <figure className="about__quote" data-reveal data-reveal-stagger>
           <blockquote>
             <p>A celebratory log of stuff-ups and the lessons they taught us.</p>
           </blockquote>
         </figure>
 
-        <div className="about__intro">
+        <div className="about__intro" data-reveal data-reveal-stagger>
           <p>
             Glorious Mistakes is a web app where anyone can log a mistake they&rsquo;ve made and what it
             taught them. Entries can be kept private or shared to a public feed, where other people can
@@ -100,11 +101,11 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <section className="about__section" aria-labelledby="about-how">
+        <section className="about__section" aria-labelledby="about-how" data-reveal data-reveal-stagger>
           <h2 id="about-how" className="section__title section__title--sm">
             How it works
           </h2>
-          <ol className="about__how">
+          <ol className="about__how" data-reveal-stagger style={revealOffset(1)}>
             {HOW.map((step) => (
               <li key={step.title} className="about__how-item">
                 <IconBadge icon={step.icon} tone="white" className="about__how-icon" />
@@ -117,11 +118,11 @@ export default function AboutPage() {
           </ol>
         </section>
 
-        <section className="about__section" aria-labelledby="about-aims">
+        <section className="about__section" aria-labelledby="about-aims" data-reveal data-reveal-stagger>
           <h2 id="about-aims" className="section__title section__title--sm">
             Our aims
           </h2>
-          <ul className="values about__aims">
+          <ul className="values about__aims" data-reveal-stagger style={revealOffset(1)}>
             {AIMS.map((aim) => (
               <li key={aim.title} className="value">
                 <IconBadge icon={aim.icon} tone={aim.tone} size="lg" className="value__icon" />
@@ -134,7 +135,7 @@ export default function AboutPage() {
           </ul>
         </section>
 
-        <section className="about__section about__privacy" aria-labelledby="about-privacy">
+        <section className="about__section about__privacy" aria-labelledby="about-privacy" data-reveal data-reveal-stagger>
           <h2 id="about-privacy" className="section__title section__title--sm">
             <IconBadge icon={Lock} tone="lilac" size="sm" className="heading-icon" /> Your privacy
           </h2>
@@ -147,7 +148,7 @@ export default function AboutPage() {
       </div>
 
       <section className="section about__cta" aria-labelledby="about-cta">
-        <div className="container">
+        <div className="container" data-reveal data-reveal-stagger>
           <div className="cta-band">
             <h2 id="about-cta" className="cta-band__title">
               Ready to celebrate a stuff-up?

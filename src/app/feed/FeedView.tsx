@@ -101,7 +101,7 @@ export function FeedView() {
       </p>
 
       {results.length > 0 ? (
-        <div className="card-grid">
+        <div className="card-grid" data-reveal-each>
           {results.map((m) => (
             <MistakeCard key={m.id} mistake={m}>
               <BeenThereButton mistake={m} />

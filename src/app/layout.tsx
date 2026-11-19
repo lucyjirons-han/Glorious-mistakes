@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, DM_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { NewsletterSignup } from '@/components/NewsletterSignup';
+import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { ThemeScript } from '@/components/ThemeScript';
@@ -77,6 +78,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </main>
             <NewsletterSignup />
             <SiteFooter />
+            <RevealOnScroll />
           </ToastProvider>
         </MistakesProvider>
       </body>

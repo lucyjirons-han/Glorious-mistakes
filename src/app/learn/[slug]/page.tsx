@@ -6,6 +6,7 @@ import { ArticleCard } from '@/components/ArticleCard';
 import { Icon } from '@/components/Icon';
 import { formatDate } from '@/lib/constants';
 import { getArticle, getArticleBody, getArticles } from '@/lib/learn';
+import { revealOffset } from '@/lib/reveal';
 import { jsonLd, pageMetadata, SITE_NAME, SITE_URL } from '@/lib/site';
 
 interface ArticlePageProps {
@@ -99,11 +100,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       {related.length > 0 && (
         <section className="article__related" aria-labelledby="related-title">
-          <div className="container page--narrow">
+          <div className="container page--narrow" data-reveal data-reveal-stagger>
             <h2 id="related-title" className="section__title section__title--sm">
               Keep reading
             </h2>
-            <div className="card-grid article-grid">
+            <div className="card-grid article-grid" data-reveal-stagger style={revealOffset(1)}>
               {related.map((a) => (
                 <ArticleCard key={a.slug} article={a} headingLevel="h3" />
               ))}
@@ -112,7 +113,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </section>
       )}
       <section className="section about__cta" aria-labelledby="article-cta">
-        <div className="container">
+        <div className="container" data-reveal data-reveal-stagger>
           <div className="cta-band">
             <h2 id="article-cta" className="cta-band__title">
               Your turn. What did you stuff up lately?
