@@ -2,7 +2,7 @@
    Glorious Mistakes · global styles  ("soft and confident")
    1. Tokens  2. Base  3. Layout  4. Icons  5. Buttons & chips  6. Header & footer
    7. Home  8. Pages & toolbar  9. Cards  10. Mistake page  11. Form
-   12. Feedback  13. Motion  14. Responsive
+   12. Feedback  13. Motion  14. Responsive  15. Forced colours (High Contrast)
    ========================================================================== */
 
 /* 1. Tokens -------------------------------------------------------------- */
@@ -3137,5 +3137,104 @@ fieldset.field > .field__label {
 
   .logo__text {
     font-size: 1.1rem;
+  }
+}
+
+/* 15. Forced colours (High Contrast) -------------------------------------- */
+/* Windows High Contrast and other forced-colour modes swap every colour for a few system colours,
+   paint backgrounds plain, and drop shadows. So anything drawn only with a fill gets a border,
+   and selected or pressed states use the system Highlight colours. System colours are the only
+   ones these modes keep. !important lets them beat the theme rules, which are more specific. */
+@media (forced-colors: active) {
+  /* Controls and labels that are shaped only by their fill. */
+  .chip,
+  .been-there,
+  .reaction,
+  .tag,
+  .toast,
+  .skip-link,
+  .site-nav__link[aria-current='page'],
+  .card__section--lesson,
+  .entry__section--lesson,
+  .stat {
+    border: 1.5px solid CanvasText;
+  }
+
+  button.chip,
+  button.been-there,
+  button.reaction {
+    border-color: ButtonText;
+  }
+
+  /* Selected and pressed: filters, reactions, form choices and the current page. The browser
+     normally paints a plain backing behind text in this mode, which would hide HighlightText,
+     so these opt out of adjustment and set every colour themselves (system colours only). */
+  .chip[aria-pressed='true'],
+  .been-there.is-pressed,
+  .reaction.is-pressed,
+  .choice input:checked + span,
+  .site-nav__link[aria-current='page'] {
+    forced-color-adjust: none;
+    background: Highlight !important;
+    border-color: Highlight !important;
+    color: HighlightText !important;
+  }
+
+  .chip[aria-pressed='true'] *,
+  .been-there.is-pressed *,
+  .reaction.is-pressed *,
+  .choice input:checked + span *,
+  .site-nav__link[aria-current='page'] * {
+    color: inherit !important;
+    border-color: currentColor !important;
+  }
+
+  /* Unselected form choices keep a quieter edge than selected ones. */
+  .choice > span {
+    border-color: GrayText;
+  }
+
+  /* Icon circles would turn into plain discs that can hide the icon on a highlighted item. */
+  .icon-badge {
+    background: transparent !important;
+  }
+
+  /* The Public switch is drawn entirely with fills. */
+  .switch__track {
+    border: 1.5px solid ButtonText;
+  }
+
+  .switch__thumb,
+  :root[data-theme='dark'] .switch__thumb {
+    top: 2px;
+    left: 2px;
+    background: ButtonText !important;
+  }
+
+  .switch[aria-checked='true'] .switch__track {
+    background: Highlight !important;
+    border-color: Highlight;
+  }
+
+  .switch[aria-checked='true'] .switch__thumb,
+  :root[data-theme='dark'] .switch[aria-checked='true'] .switch__thumb {
+    background: HighlightText !important;
+  }
+
+  /* The menu button's three bars are fills too. */
+  .nav-toggle__bars,
+  .nav-toggle__bars::before,
+  .nav-toggle__bars::after {
+    background: ButtonText;
+  }
+
+  .nav-toggle[aria-expanded='true'] .nav-toggle__bars {
+    background: transparent;
+  }
+
+  /* The loading shimmer is meaningless without colour; aria-busy already says it's loading. */
+  .card--skeleton {
+    background: Canvas;
+    animation: none;
   }
 }
