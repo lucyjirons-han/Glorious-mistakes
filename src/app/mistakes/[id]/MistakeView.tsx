@@ -69,7 +69,9 @@ export function MistakeView({ id }: { id: string }) {
     mistake ? summarise(mistake.whatHappened) : undefined,
   );
 
-  if (!ready || deleting.current) {
+  // The example entries are known on the server, so they render straight away and arrive in the
+  // page's HTML. Only the visitor's own entries have to wait for their device storage to load.
+  if (deleting.current || (!ready && !mistake)) {
     return (
       <div className="container page page--narrow" aria-busy="true">
         <div className="card card--skeleton" />

@@ -2,37 +2,31 @@
 
 import { Hand, Search, SearchX } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { BeenThereButton } from '@/components/BeenThereButton';
 import { CategoryFilter } from '@/components/CategoryFilter';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { MistakeCard } from '@/components/MistakeCard';
-import { isCategoryId } from '@/lib/constants';
 import { useMistakes } from '@/lib/store';
 import type { CategoryId } from '@/lib/types';
 
 type Sort = 'newest' | 'relatable' | 'cringe';
 
-export function FeedView() {
+export function FeedView({ initialCategory }: { initialCategory: CategoryId | 'all' }) {
   const { publicFeed, beenThereCount } = useMistakes();
   // The category lives in the URL (/feed?category=food) so it can be linked to and shared.
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const param = searchParams.get('category') ?? '';
-  const category: CategoryId | 'all' = isCategoryId(param) ? param : 'all';
-  const setCategory = useCallback(
-    (next: CategoryId | 'all') => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (next === 'all') params.delete('category');
-      else params.set('category', next);
-      const qs = params.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    },
-    [router, pathname, searchParams],
-  );
+  // The server page reads it on arrival; after that, changing it just rewrites the address, so
+  // filtering stays instant with no trip to the server.
+  const [category, setCategoryState] = useState(initialCategory);
+  const setCategory = useCallback((next: CategoryId | 'all') => {
+    setCategoryState(next);
+    const url = new URL(window.location.href);
+    if (next === 'all') url.searchParams.delete('category');
+    else url.searchParams.set('category', next);
+    // Next.js supports the native History API and keeps its router in step with it.
+    window.history.replaceState(null, '', url);
+  }, []);
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<Sort>('newest');
 
