@@ -24,8 +24,10 @@ in the code.
   Supabase can't be reached, the store falls back to `localStorage`.
 - `ready` is false until the database (or device storage) has been read. Anything that depends on the visitor's own
   entries must wait for it. Seed content doesn't need to.
-- The newsletter route (`src/app/api/newsletter/route.ts`) validates and then drops sign-ups: no
-  provider is connected. Never log email addresses.
+- The newsletter route (`src/app/api/newsletter/route.ts`) saves sign-ups to Supabase's
+  `newsletter_signups` table through the `subscribe_newsletter` function, a stopgap until a
+  mailing-list provider is connected. Visitors can add to the list but never read it; keep it
+  that way. Never log email addresses.
 - When real accounts, a mailing-list provider or pricing arrive, update the FAQ answers in
   `src/app/faq/questions.ts`. Several say the site is free and needs no account.
 

@@ -115,6 +115,22 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         ],
       },
       {
+        id: 'newsletter-data',
+        question: 'What happens to my email if I sign up for the newsletter?',
+        answer: [
+          {
+            p: [
+              'We keep your first name and email address in our database, separate from any mistakes you log, and use them only to send the newsletter. They’re never shown on the site and never sold or shared.',
+            ],
+          },
+          {
+            p: [
+              'We haven’t sent the first issue yet. When we do, it will come through a mailing-list service, and every email will have a one-click unsubscribe link.',
+            ],
+          },
+        ],
+      },
+      {
         id: 'who-can-see',
         question: 'Who can see my private mistakes?',
         answer: [

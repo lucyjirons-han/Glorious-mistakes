@@ -81,6 +81,11 @@ padded with example entries from [`src/lib/seed.ts`](src/lib/seed.ts), which peo
   `reactions` (text `mistake_id`, so example entries work too), `reports`; and the
   `reaction_counts(ids)` function, which returns totals without revealing who reacted.
 
+Newsletter sign-ups go to the `newsletter_signups` table through the `subscribe_newsletter()`
+function, so the publishable key can add to the list but nobody can read it through the API.
+See them in the Supabase dashboard (Table Editor). It's a stopgap: when a mailing-list provider
+is connected, import the list there and empty the table.
+
 When accounts or pricing are added, update the answers in
 [`src/app/faq/questions.ts`](src/app/faq/questions.ts).
 
