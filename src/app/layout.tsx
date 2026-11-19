@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, DM_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { NewsletterSignup } from '@/components/NewsletterSignup';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { ThemeScript } from '@/components/ThemeScript';
@@ -74,6 +75,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <main id="main" tabIndex={-1}>
               {children}
             </main>
+            <NewsletterSignup />
             <SiteFooter />
           </ToastProvider>
         </MistakesProvider>
