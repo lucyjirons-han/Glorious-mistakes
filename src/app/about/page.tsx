@@ -140,7 +140,7 @@ export default function AboutPage() {
             <IconBadge icon={Lock} tone="lilac" size="sm" className="heading-icon" /> Your privacy
           </h2>
           <p>
-            Private entries are saved on your device and never leave it. You can switch any entry
+            Private entries are locked to your browser, so only you can see them. You can switch any entry
             between private and shared, edit it or delete it at any time from{' '}
             <Link href="/mine">My mistakes</Link>.
           </p>

@@ -1,19 +1,14 @@
 import { Hand, HeartHandshake, Laugh, Lightbulb, Trophy, type LucideIcon } from 'lucide-react';
 import type { Tone } from '@/components/Icon';
+import { ensureUserId, getSupabase } from './supabase';
 import type { Mistake, ReactionId } from './types';
 
 /**
  * Community data: reactions and reports.
  *
- * Everything that reads or writes reactions and reports lives in this file, so moving to a
- * real database (e.g. Supabase) means changing only these functions. Today they use
- * localStorage, which means:
- *   - each visitor's own reactions are remembered on their device, and
- *   - counts are "other people's reactions" (baked into the entry) plus the visitor's own.
- *
- * With Supabase, the natural shape is a `reactions` table (mistake_id, user_id, reaction,
- * unique on all three) and a `reports` table (mistake_id, reporter_id, created_at). Counts
- * would then come from the database instead of `baseReactionCount`.
+ * Reactions are saved by the store (./store.tsx): to Supabase's `reactions` table when it's
+ * connected, otherwise in localStorage. Counts are the example entries' baked-in numbers
+ * (`baseReactionCount`) plus other people's reactions from the database plus the visitor's own.
  */
 
 export interface Reaction {
@@ -118,16 +113,29 @@ export function hasReported(mistakeId: string): boolean {
 }
 
 /**
- * Flags an entry for review.
+ * Flags an entry for review. With Supabase connected the report lands in the `reports` table
+ * (see it in the Supabase dashboard); it's also remembered on this device so the "thanks"
+ * message stays put when the visitor comes back.
  *
- * TODO(database): send this to the backend instead, e.g.
- *   await supabase.from('reports').insert({ mistake_id: mistakeId });
- * and notify whoever moderates the feed. For now it is only remembered on this device so
- * the "thanks" message stays put when the visitor comes back.
+ * TODO: notify whoever moderates the feed when a report comes in.
  */
 export async function reportMistake(mistakeId: string): Promise<void> {
   const reports = readJSON<StoredReport[]>(REPORTS_KEY, []);
   const list = Array.isArray(reports) ? reports : [];
   if (list.some((r) => r.mistakeId === mistakeId)) return;
+
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      await ensureUserId(supabase);
+      const { error } = await supabase
+        .from('reports')
+        .upsert({ mistake_id: mistakeId }, { onConflict: 'mistake_id,reporter_id', ignoreDuplicates: true });
+      if (error) throw error;
+    } catch (error) {
+      console.error("Glorious Mistakes: couldn't send the report", error);
+    }
+  }
+
   writeJSON(REPORTS_KEY, [...list, { mistakeId, createdAt: new Date().toISOString() }]);
 }

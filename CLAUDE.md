@@ -13,18 +13,21 @@ in the code.
 - Check UI changes in the browser in **both light and dark mode**, and at phone width.
 - Write copy in Australian English ("favourite", "colour", "stuff-up"), in a warm, light tone.
 
-## Data and the backend (there isn't one yet)
+## Data and the backend (Supabase)
 
-- Visitors' entries and reactions live in `localStorage`, via `MistakesProvider` in
+- Entries, reactions and reports live in Supabase (anonymous sign-in per browser), via
   `src/lib/store.tsx` and the helpers in `src/lib/community.ts`. The public feed is padded with
   `SEED_MISTAKES` from `src/lib/seed.ts`.
-- `ready` is false until device storage has been read. Anything that depends on the visitor's own
+- Each browser is signed in anonymously; row level security does the access control, so
+  never add a policy that lets people change rows that aren't theirs. Schema changes go in
+  `supabase/migrations` as well as being applied to the project. With no env vars, or if
+  Supabase can't be reached, the store falls back to `localStorage`.
+- `ready` is false until the database (or device storage) has been read. Anything that depends on the visitor's own
   entries must wait for it. Seed content doesn't need to.
 - The newsletter route (`src/app/api/newsletter/route.ts`) validates and then drops sign-ups: no
   provider is connected. Never log email addresses.
-- When accounts, a backend, a mailing-list provider or pricing arrive, update the FAQ answers in
-  `src/app/faq/questions.ts`. Several say the site is free, needs no account and keeps data on
-  the device.
+- When real accounts, a mailing-list provider or pricing arrive, update the FAQ answers in
+  `src/app/faq/questions.ts`. Several say the site is free and needs no account.
 
 ## Conventions
 

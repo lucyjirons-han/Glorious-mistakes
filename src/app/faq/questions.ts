@@ -6,8 +6,8 @@ import { REACTIONS } from '@/lib/community';
  * so they always match.
  *
  * Keep the answers true to how the app works right now. In particular, revisit the
- * "free / no account" and "where are entries stored" answers when accounts, pricing or a
- * shared database arrive.
+ * "free / no account" and "where are entries stored" answers when accounts or pricing
+ * arrive. Entries are in Supabase, tied to an anonymous sign-in per browser.
  *
  * An answer is a list of blocks. A block is a paragraph (a list of text and links) or a
  * bullet list.
@@ -120,14 +120,16 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'Only people using this browser on this device. Private entries are never sent anywhere. (So if you lend someone your laptop, they could find them in ',
+              'Only you, from this browser on this device. Private entries are saved in our database, locked to an anonymous ID that only your browser holds, so other visitors can’t see them. (If you lend someone your laptop, though, they could find them in ',
               { href: '/mine', text: 'My mistakes' },
               '.)',
             ],
           },
           {
             p: [
-              'And while we’re being honest: right now, shared mistakes stay on your device too. The shared part of the feed is still being built. Mistakes you share appear in the feed in your browser, alongside example entries we’ve written to show how it works, but they aren’t sent to anyone else yet. When the feed goes properly public, we’ll update this page.',
+              'Mistakes you share go into the ',
+              { href: '/feed', text: 'public feed' },
+              ' for everyone to see, alongside some example entries we’ve written. You can switch a shared entry back to private any time.',
             ],
           },
         ],
@@ -138,16 +140,16 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'In your web browser, on the device you’re using. There’s no server, database or account behind the site yet. That means:',
+              'In our database, linked to an anonymous ID that your browser creates the first time you visit. There’s still no account, and we don’t know who you are. That means:',
             ],
           },
           {
             list: [
               ['A different browser or device won’t show your entries.'],
               [
-                'Clearing your browsing data (or using a private window and then closing it) deletes them for good.',
+                'Clearing your browsing data (or using a private window and then closing it) loses the ID, and with it your way back to your entries.',
               ],
-              ['There’s no backup, so we can’t get them back for you.'],
+              ['Because we don’t know who you are, we can’t reconnect you to them.'],
             ],
           },
         ],
@@ -192,7 +194,7 @@ export const FAQ_GROUPS: QuestionGroup[] = [
           },
           {
             p: [
-              'Your reactions are saved in your browser for now. The counts on the example entries are part of the example.',
+              'Reactions are counted for everyone, so the numbers you see include other people’s. The example entries started with a few made-up reactions to get the ball rolling.',
             ],
           },
         ],

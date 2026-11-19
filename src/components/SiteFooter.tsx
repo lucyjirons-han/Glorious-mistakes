@@ -36,7 +36,7 @@ export function SiteFooter() {
           </ul>
         </nav>
         <p className="site-footer__note">
-          Your entries are saved on this device only. Private ones never leave it.
+          No account needed. Private entries are visible only to you, in this browser.
         </p>
       </div>
     </footer>

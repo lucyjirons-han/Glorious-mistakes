@@ -66,13 +66,23 @@ Every page builds its title, description, canonical link and Open Graph / Twitte
 
 ## How data is stored
 
-There is no backend yet. Your entries and reactions are saved in the browser's `localStorage`
-(see [`src/lib/store.tsx`](src/lib/store.tsx)), and the public feed is padded with example
-entries from [`src/lib/seed.ts`](src/lib/seed.ts). This means entries you "share" currently
-only appear in the feed on your own device; the FAQ says so. When this changes (or accounts or
-pricing are added), update the answers in [`src/app/faq/questions.ts`](src/app/faq/questions.ts).
-To make sharing truly public across people,
-replace the read/write helpers in the store with calls to an API and database.
+Entries, reactions and reports live in [Supabase](https://supabase.com). Each browser is
+signed in anonymously on its first visit (no sign-up screen), and row level security means
+people can read public entries plus their own, and change only their own. The store
+([`src/lib/store.tsx`](src/lib/store.tsx)) loads everything and saves changes in the
+background; the client is in [`src/lib/supabase.ts`](src/lib/supabase.ts). The feed is still
+padded with example entries from [`src/lib/seed.ts`](src/lib/seed.ts), which people can react to.
+
+- Copy `.env.example` to `.env.local` and fill in the project URL and publishable key.
+  Without them (or if Supabase can't be reached) the site falls back to `localStorage`.
+- **Anonymous sign-ins** must be enabled in Supabase: Authentication → Sign In / Providers.
+- Entries saved in `localStorage` by earlier versions are uploaded once, on first load.
+- The schema is in [`supabase/migrations`](supabase/migrations). Tables: `mistakes`,
+  `reactions` (text `mistake_id`, so example entries work too), `reports`; and the
+  `reaction_counts(ids)` function, which returns totals without revealing who reacted.
+
+When accounts or pricing are added, update the answers in
+[`src/app/faq/questions.ts`](src/app/faq/questions.ts).
 
 ## Spot illustrations
 
