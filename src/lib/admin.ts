@@ -1,37 +1,13 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { CATEGORIES, CRINGE_LEVELS } from './constants';
 import { REACTIONS } from './community';
 
 /**
- * The admin page's Supabase client and the tables it manages.
+ * The tables the admin page manages.
  *
- * Admins sign in with an email and password (a normal Supabase user listed in `public.admins`).
- * The session is kept under its own storage key, so signing in here never replaces the
- * browser's anonymous visitor session (and the entries tied to it). Row level security does the
- * real access control: `public.is_admin()` must be true for any of this to return rows.
+ * Admins log in with Google like everyone else (see ./auth.tsx); their user id is listed in
+ * `public.admins`. Row level security does the real access control: `public.is_admin()` must be
+ * true for any of this to return rows, so hiding the page or its link is only for tidiness.
  */
-
-/**
- * TEMPORARY: false while the admin page is open to anyone (so a tutor can see it). The page then
- * signs in anonymously instead of asking for a password, and the database's is_admin() says yes
- * to every session (migration 20261120012502_temporarily_open_admin). To switch the login back
- * on, set this to true AND restore is_admin() as described in that migration.
- */
-export const ADMIN_LOGIN_REQUIRED = false;
-
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-let client: SupabaseClient | null | undefined;
-
-export function getAdminSupabase(): SupabaseClient | null {
-  if (client !== undefined) return client;
-  client =
-    url && key
-      ? createClient(url, key, { auth: { storageKey: 'glorious-mistakes-admin', persistSession: true } })
-      : null;
-  return client;
-}
 
 export type Row = Record<string, unknown>;
 
@@ -59,7 +35,7 @@ export interface AdminColumn {
 }
 
 export interface AdminResource {
-  id: 'mistakes' | 'reactions' | 'reports' | 'newsletter_signups';
+  id: 'mistakes' | 'reactions' | 'reports' | 'newsletter_signups' | 'profiles';
   label: string;
   /** One row, for the "Add" button and the empty state. */
   singular: string;
@@ -75,6 +51,8 @@ export interface AdminResource {
   note?: string;
   /** Name for a CSV download of the table (e.g. "newsletter-subscribers"); leave out for none. */
   exportName?: string;
+  /** True hides the "Add" button (rows are created some other way, e.g. by logging in). */
+  noAdd?: boolean;
   /** TEMPORARY: true hides the section from the admin page (the data and rules stay as they are). */
   hidden?: boolean;
 }
@@ -176,6 +154,26 @@ export const RESOURCES: AdminResource[] = [
     searchable: ['first_name', 'email'],
     note: 'Only add people who have asked to be on the list.',
     exportName: 'newsletter-subscribers',
+  },
+  {
+    id: 'profiles',
+    label: 'People',
+    singular: 'person',
+    orderBy: 'created_at',
+    primaryKey: ['id'],
+    fields: [
+      { key: 'first_name', label: 'First name', type: 'text', maxLength: 60 },
+      { key: 'last_name', label: 'Last name', type: 'text', maxLength: 60 },
+    ],
+    columns: [
+      { key: 'first_name', label: 'First name', filter: 'text' },
+      { key: 'last_name', label: 'Last name', filter: 'text' },
+      { key: 'created_at', label: 'Joined', kind: 'date', filter: 'date' },
+      { key: 'id', label: 'User', kind: 'id' },
+    ],
+    searchable: ['first_name', 'last_name', 'id'],
+    note: 'Everyone who has logged in with Google. A profile is made when someone first logs in, so there’s no Add button. Deleting a profile only clears the name; their account and entries stay.',
+    noAdd: true,
   },
 ];
 

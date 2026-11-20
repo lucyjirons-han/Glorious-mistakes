@@ -1,16 +1,13 @@
 'use client';
 
-import type { Session } from '@supabase/supabase-js';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Download, Flag, LogOut, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Download, Flag, LogIn, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { useToast } from '@/components/Toast';
 import {
-  ADMIN_LOGIN_REQUIRED,
   downloadCsv,
-  getAdminSupabase,
   matchesFilters,
   rowKey,
   rowToValues,
@@ -24,6 +21,9 @@ import {
   type Filters,
   type Row,
 } from '@/lib/admin';
+import { useAuth } from '@/lib/auth';
+import { loginHref } from '@/lib/login';
+import { getSupabase } from '@/lib/supabase';
 
 type Status = 'loading' | 'signed-out' | 'not-admin' | 'admin';
 
@@ -32,6 +32,7 @@ const TAB_ICONS = {
   reactions: Smile,
   reports: Flag,
   newsletter_signups: Mail,
+  profiles: UsersRound,
 } as const;
 
 const dateTime = new Intl.DateTimeFormat('en-AU', {
@@ -48,60 +49,22 @@ function formatDateTime(value: unknown): string {
 }
 
 export function AdminView() {
-  const supabase = getAdminSupabase();
-  const [status, setStatus] = useState<Status>('loading');
-  const [session, setSession] = useState<Session | null>(null);
+  const supabase = getSupabase();
+  const auth = useAuth();
+  const toast = useToast();
 
-  const checkAdmin = useCallback(
-    async (next: Session | null) => {
-      setSession(next);
-      if (!supabase || !next) {
-        setStatus('signed-out');
-        return;
-      }
-      const { data, error } = await supabase.rpc('is_admin');
-      setStatus(!error && data === true ? 'admin' : 'not-admin');
-    },
-    [supabase],
-  );
-
-  useEffect(() => {
-    if (!supabase) return;
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session && !ADMIN_LOGIN_REQUIRED) {
-        // Login is switched off: sign in anonymously so the page can read and save.
-        const { error } = await supabase.auth.signInAnonymously();
-        if (error) await checkAdmin(null);
-        return; // onAuthStateChange picks up the new session.
-      }
-      await checkAdmin(data.session);
-    });
-    const { data } = supabase.auth.onAuthStateChange((event, next) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') void checkAdmin(next);
-    });
-    return () => data.subscription.unsubscribe();
-  }, [supabase, checkAdmin]);
+  const status: Status = !auth.ready ? 'loading' : !auth.user ? 'signed-out' : auth.isAdmin ? 'admin' : 'not-admin';
 
   const signOut = async () => {
-    await supabase?.auth.signOut();
+    await auth.signOut();
+    toast('You’re logged out.');
   };
 
   const header = (
-    <header className="page-header page-header--split">
-      <div>
-        <p className="eyebrow">Behind the scenes</p>
-        <h1 className="page-header__title">Admin</h1>
-        <p className="page-header__lead">See, fix and tidy up everything people have shared.</p>
-      </div>
-      {session && ADMIN_LOGIN_REQUIRED && (
-        <div className="admin-account">
-          <span className="admin-account__email">{session.user.email}</span>
-          <button type="button" className="btn btn--sm" onClick={signOut}>
-            <Icon icon={LogOut} size={16} />
-            Sign out
-          </button>
-        </div>
-      )}
+    <header className="page-header">
+      <p className="eyebrow">Behind the scenes</p>
+      <h1 className="page-header__title">Admin</h1>
+      <p className="page-header__lead">See, fix and tidy up everything people have shared.</p>
     </header>
   );
 
@@ -120,18 +83,33 @@ export function AdminView() {
     <div className="container page">
       {header}
       {status === 'loading' && <div className="card card--skeleton" aria-busy="true" />}
-      {status === 'signed-out' && <SignInForm />}
+      {status === 'signed-out' && (
+        <EmptyState
+          icon={LogIn}
+          title="Log in to see the admin page"
+          action={
+            <Link href={loginHref('/admin')} className="btn btn--primary">
+              Log in
+            </Link>
+          }
+        >
+          <p>This page is just for admins. Log in with the Google account that&rsquo;s on the admin list.</p>
+        </EmptyState>
+      )}
       {status === 'not-admin' && (
         <EmptyState
           icon={ShieldAlert}
           title="This account isn’t an admin"
           action={
             <button type="button" className="btn btn--primary" onClick={signOut}>
-              Sign out
+              Log out
             </button>
           }
         >
-          <p>You&rsquo;re signed in, but this account isn&rsquo;t on the admin list.</p>
+          <p>
+            You&rsquo;re logged in as {auth.user?.email ?? 'someone'}, but that account isn&rsquo;t on the admin
+            list.
+          </p>
         </EmptyState>
       )}
       {status === 'admin' && <Dashboard />}
@@ -139,87 +117,10 @@ export function AdminView() {
   );
 }
 
-/* Sign in ------------------------------------------------------------------ */
-
-function SignInForm() {
-  const supabase = getAdminSupabase();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-  const emailRef = useRef<HTMLInputElement>(null);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!supabase) return;
-    if (!email.trim() || !password) {
-      setError('Enter your email and password.');
-      emailRef.current?.focus();
-      return;
-    }
-    setBusy(true);
-    setError('');
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setBusy(false);
-    if (signInError) {
-      setError('That email and password don’t match an account.');
-      emailRef.current?.focus();
-    }
-  };
-
-  return (
-    <form className="admin-signin form-step" onSubmit={handleSubmit} noValidate>
-      <h2 className="form-step__title">Sign in</h2>
-      <div className="field">
-        <label htmlFor="admin-email" className="field__label">
-          Email
-        </label>
-        <input
-          ref={emailRef}
-          id="admin-email"
-          type="email"
-          className="input"
-          autoComplete="username"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? 'admin-signin-error' : undefined}
-        />
-      </div>
-      <div className="field">
-        <label htmlFor="admin-password" className="field__label">
-          Password
-        </label>
-        <input
-          id="admin-password"
-          type="password"
-          className="input"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? 'admin-signin-error' : undefined}
-        />
-      </div>
-      {error && (
-        <p id="admin-signin-error" className="field__error">
-          <Icon icon={CircleAlert} size={16} className="field__error-icon" />
-          {error}
-        </p>
-      )}
-      <div>
-        <button type="submit" className="btn btn--primary" disabled={busy}>
-          {busy ? 'Signing in…' : 'Sign in'}
-        </button>
-      </div>
-    </form>
-  );
-}
-
 /* Dashboard ---------------------------------------------------------------- */
 
 function Dashboard() {
-  const supabase = getAdminSupabase()!;
+  const supabase = getSupabase()!;
   const [tab, setTab] = useState<AdminResource['id']>('mistakes');
   // Every stored entry, so reactions and reports can show headlines instead of ids.
   const [mistakes, setMistakes] = useState<Row[]>([]);
@@ -281,7 +182,7 @@ interface PanelProps {
 }
 
 function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: PanelProps) {
-  const supabase = getAdminSupabase()!;
+  const supabase = getSupabase()!;
   const toast = useToast();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -465,15 +366,17 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
               {narrowed && <span className="sr-only"> (matching rows only)</span>}
             </button>
           )}
-          <button
-            type="button"
-            className="btn btn--primary btn--sm"
-            onClick={() => setEditing('new')}
-            disabled={editing === 'new'}
-          >
-            <Icon icon={Plus} size={16} />
-            Add {resource.singular}
-          </button>
+          {!resource.noAdd && (
+            <button
+              type="button"
+              className="btn btn--primary btn--sm"
+              onClick={() => setEditing('new')}
+              disabled={editing === 'new'}
+            >
+              <Icon icon={Plus} size={16} />
+              Add {resource.singular}
+            </button>
+          )}
         </div>
       </div>
 
@@ -867,6 +770,8 @@ function describeRow(resource: AdminResource, row: Row, titles: Map<string, stri
       return `report on “${titles.get(String(row.mistake_id)) ?? row.mistake_id}”`;
     case 'newsletter_signups':
       return `${row.first_name} (${row.email})`;
+    case 'profiles':
+      return [row.first_name, row.last_name].filter(Boolean).join(' ') || 'person with no name';
   }
 }
 

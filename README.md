@@ -39,9 +39,11 @@ Then open http://localhost:3000.
 | `/faq`       | Frequently asked questions                                           |
 | `/search?q=` | Site search (opened from the header, which suggests matches as you type): entries, Learn articles, FAQ answers and pages. The pages list is `SITE_PAGES` in `src/lib/search.ts` |
 | `/about`, `/guidelines` | About the site, and the community guidelines              |
-| `/admin`     | Admin: view, add, edit and delete entries, reactions, reports and subscribers |
+| `/login`     | Log in with Google (optional). `?next=` is where to go afterwards     |
+| `/settings`  | Logged-in people change their name, email address and newsletter setting |
+| `/admin`     | Admin (admins only): view, add, edit and delete entries, people, reactions, reports and subscribers |
 
-`/mine`, `/log` and `/search` are marked `noindex`. The sitemap (`/sitemap.xml`) and `robots.txt` are
+`/mine`, `/log`, `/search`, `/login`, `/settings` and `/admin` are marked `noindex`. The sitemap (`/sitemap.xml`) and `robots.txt` are
 generated from `src/app/sitemap.ts` and `src/app/robots.ts`.
 
 ## Adding a Learn article
@@ -70,7 +72,8 @@ Every page builds its title, description, canonical link and Open Graph / Twitte
 
 Entries, reactions and reports live in [Supabase](https://supabase.com). Each browser is
 signed in anonymously on its first visit (no sign-up screen), and row level security means
-people can read public entries plus their own, and change only their own. The store
+people can read public entries plus their own, and change only their own. Logging in with
+Google is optional; see [Accounts](#accounts) below. The store
 ([`src/lib/store.tsx`](src/lib/store.tsx)) loads everything and saves changes in the
 background; the client is in [`src/lib/supabase.ts`](src/lib/supabase.ts).
 
@@ -85,6 +88,7 @@ copies used when Supabase isn't configured or can't be reached.
 - Copy `.env.example` to `.env.local` and fill in the project URL and publishable key.
   Without them (or if Supabase can't be reached) the site falls back to `localStorage`.
 - **Anonymous sign-ins** must be enabled in Supabase: Authentication → Sign In / Providers.
+  So must the **Google** provider and **manual identity linking** (see [Accounts](#accounts)).
 - Entries saved in `localStorage` by earlier versions are uploaded once, on first load.
 - The schema is in [`supabase/migrations`](supabase/migrations). Tables: `mistakes`,
   `reactions` (text `mistake_id`, so example entries work too), `reports`; and the
@@ -95,24 +99,46 @@ function, so the publishable key can add to the list but nobody can read it thro
 See them in the Supabase dashboard (Table Editor). It's a stopgap: when a mailing-list provider
 is connected, import the list there and empty the table.
 
+### Accounts
+
+Visitors can log in with Google from the header (a round button on wide screens, or in the menu
+on narrow ones). Everything lives in [`src/lib/auth.tsx`](src/lib/auth.tsx) (`useAuth()`), and
+the store reloads whenever the user changes.
+
+- **Logging in keeps your entries.** The anonymous user is upgraded with
+  `supabase.auth.linkIdentity()`, so the user id stays the same. If the Google account already
+  exists (they logged in on another device first), linking fails, so we log in to that account
+  instead and move this browser's entries across with a one-off code
+  (`start_account_transfer()` before, `finish_account_transfer()` after; codes last an hour).
+- **Logging out** (this browser only) starts a fresh anonymous session, so "My mistakes" is
+  empty until they log back in.
+- **Profiles** (`profiles` table) hold a first and last name, filled from Google the first time
+  and editable in `/settings`.
+- **Newsletter:** `my_newsletter_subscription()` and `set_my_newsletter_subscription()` only
+  ever touch the address on the person's own account, so the list stays unreadable.
+- **Changing email** uses `supabase.auth.updateUser({ email })`, which emails a confirmation
+  link. Supabase's built-in email sender only delivers to your own team's addresses (and only a
+  few an hour), so set up custom SMTP (Authentication → Emails) before real visitors rely on it.
+
+Supabase settings this needs (Authentication):
+
+1. **Sign In / Providers → Google**: on, with the client ID and secret from a Google Cloud OAuth
+   client (Web application). The Google client's redirect URI is
+   `https://<project>.supabase.co/auth/v1/callback`.
+2. **Allow manual linking** (in the same settings): on, so anonymous visitors can upgrade.
+3. **URL Configuration → Redirect URLs**: `http://localhost:3000/**` and the live site's
+   address with `/**` on the end.
+
 ### Admin page
 
-> **Login switched off for now.** So a tutor can view it, `/admin` currently needs no sign-in
-> and anyone can read and change everything, newsletter sign-ups included. To switch the login
-> back on, follow the steps in
-> [`supabase/migrations/20261120012502_temporarily_open_admin.sql`](supabase/migrations/20261120012502_temporarily_open_admin.sql)
-> (restore `is_admin()` and set `ADMIN_LOGIN_REQUIRED` to `true` in `src/lib/admin.ts`).
+[`/admin`](src/app/admin/AdminView.tsx) lets admins see, add, edit and delete entries, people,
+reactions, reports and newsletter subscribers. Admins log in with Google like everyone else,
+and the account menu shows an **Admin** link to them. Row level security does the access
+control: the `public.admins` list (unreadable through the API) and `public.is_admin()`, which is
+never true for anonymous sessions. To make someone an admin, have them log in once, then run
+this in the SQL editor:
 
-[`/admin`](src/app/admin/AdminView.tsx) lets admins see, add, edit and delete entries,
-reactions, reports and newsletter subscribers. It isn't linked from the site. Admins sign in
-with an email and password; the session is stored separately from the anonymous visitor
-session, so signing in doesn't lose that browser's own entries. Row level security does the
-access control: the `public.admins` list (unreadable through the API) and `public.is_admin()`,
-which is never true for anonymous sessions. To make someone an admin:
-
-1. Supabase → Authentication → Users → Add user → Create new user (tick auto-confirm).
-2. In the SQL editor:
-   `insert into public.admins (user_id) select id from auth.users where email = 'them@example.com';`
+`insert into public.admins (user_id) select id from auth.users where email = 'them@example.com';`
 
 The table, filter and form settings for each section are in
 [`src/lib/admin.ts`](src/lib/admin.ts). Mistakes and Newsletter have a filter per column (text,
@@ -124,7 +150,7 @@ the current order); give another section an `exportName` to add one there.
 > **Reactions and Reports tabs hidden for now.** They're marked `hidden: true` in
 > `src/lib/admin.ts`; remove that to bring them back (the data and database rules are unchanged).
 
-When accounts or pricing are added, update the answers in
+When pricing or a mailing-list provider arrives, update the answers in
 [`src/app/faq/questions.ts`](src/app/faq/questions.ts).
 
 ## Spot illustrations

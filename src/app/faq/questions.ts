@@ -5,9 +5,9 @@ import { REACTIONS } from '@/lib/community';
  * The FAQ content. The page and its FAQPage structured data are both built from this list,
  * so they always match.
  *
- * Keep the answers true to how the app works right now. In particular, revisit the
- * "free / no account" and "where are entries stored" answers when accounts or pricing
- * arrive. Entries are in Supabase, tied to an anonymous sign-in per browser.
+ * Keep the answers true to how the app works right now. In particular, revisit the "free"
+ * and "where are entries stored" answers when pricing arrives. Entries are in Supabase, tied
+ * to an anonymous sign-in per browser until the visitor logs in with Google (optional).
  *
  * An answer is a list of blocks. A block is a paragraph (a list of text and links) or a
  * bullet list.
@@ -61,14 +61,40 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'Yes, completely free right now. There’s no account, no sign-up and no email address needed (the newsletter is optional). Open the site and ',
+              'Yes, completely free right now. You don’t need an account or an email address: open the site and ',
               { href: '/log', text: 'log a mistake' },
-              '.',
+              '. Logging in with Google and the newsletter are both optional, and free too.',
             ],
           },
           {
             p: [
               'That may change down the track as the site grows. If it does, we’ll update this answer.',
+            ],
+          },
+        ],
+      },
+      {
+        id: 'logging-in',
+        question: 'Do I need to log in?',
+        answer: [
+          {
+            p: [
+              'No. You can log, share and react without an account, and your entries are saved to this browser. ',
+              { href: '/login', text: 'Logging in with Google' },
+              ' is optional. It keeps your entries in an account, so you can see them on any device and won’t lose them if you clear your browser.',
+            ],
+          },
+          {
+            list: [
+              ['Anything you’ve already logged on this device comes with you when you log in.'],
+              [
+                'Once you’re logged in, ',
+                { href: '/settings', text: 'Settings' },
+                ' is where you change your name, email address and newsletter preference.',
+              ],
+              [
+                'Logging out keeps everything safe in your account. This browser goes back to a fresh, empty start until you log in again.',
+              ],
             ],
           },
         ],
@@ -104,7 +130,7 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'Yes. There are no accounts, so logging or sharing a mistake never asks for your name, email or a password. The only place we ask for a first name and email is the optional newsletter sign-up, and that isn’t linked to your entries. If you share a mistake, the name shown on it is optional. Leave it blank and it’s posted as “Anonymous”.',
+              'Yes, if you want it to be. Logging or sharing a mistake never asks for your name, email or a password. If you choose to log in with Google, we get your name and email address from Google, but they’re never shown on your entries. The name on a shared mistake is whatever you type in its display name box. Leave it blank and it’s posted as “Anonymous”.',
             ],
           },
           {
@@ -120,7 +146,9 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'We keep your first name and email address in our database, separate from any mistakes you log, and use them only to send the newsletter. They’re never shown on the site and never sold or shared.',
+              'We keep your first name and email address in our database, separate from any mistakes you log, and use them only to send the newsletter. They’re never shown on the site and never sold or shared. If you’re logged in, you can turn the newsletter on or off any time in ',
+              { href: '/settings', text: 'Settings' },
+              '.',
             ],
           },
           {
@@ -136,9 +164,9 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'Only you, from this browser on this device. Private entries are saved in our database, locked to an anonymous ID that only your browser holds, so other visitors can’t see them. (If you lend someone your laptop, though, they could find them in ',
+              'Only you. Private entries are saved in our database, locked to you: to this browser, or to your account if you’ve logged in. Other visitors can’t see them. (If you lend someone your laptop while you’re logged in, though, they could find them in ',
               { href: '/mine', text: 'My mistakes' },
-              '.)',
+              ', so log out first.)',
             ],
           },
           {
@@ -156,7 +184,7 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'In our database, linked to an anonymous ID that your browser creates the first time you visit. There’s still no account, and we don’t know who you are. That means:',
+              'In our database. Until you log in, they’re linked to an anonymous ID that your browser creates the first time you visit, and we don’t know who you are. That means:',
             ],
           },
           {
@@ -166,6 +194,12 @@ export const FAQ_GROUPS: QuestionGroup[] = [
                 'Clearing your browsing data (or using a private window and then closing it) loses the ID, and with it your way back to your entries.',
               ],
               ['Because we don’t know who you are, we can’t reconnect you to them.'],
+            ],
+          },
+          {
+            p: [
+              { href: '/login', text: 'Log in with Google' },
+              ' to avoid all that: your entries move into your account, and you can see them anywhere you log in.',
             ],
           },
         ],

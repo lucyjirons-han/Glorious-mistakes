@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -18,16 +19,18 @@ import {
   writeJSON,
   type MyReactions,
 } from './community';
+import { useAuth } from './auth';
 import { normaliseCategory } from './constants';
-import { ensureUserId, getSupabase, inputToRow, rowToMistake, type MistakeRow } from './supabase';
+import { getSupabase, inputToRow, rowToMistake, type MistakeRow } from './supabase';
 import type { Mistake, MistakeInput, ReactionId, Visibility } from './types';
 
 /**
  * Client-side store for the visitor's own mistakes, other people's public entries and
  * reactions.
  *
- * With Supabase configured (see ./supabase.ts) the visitor is signed in anonymously and
- * everything is saved to the database. Entries saved on the device by earlier versions are
+ * With Supabase configured (see ./supabase.ts) everything is saved to the database under the
+ * visitor's user id from ./auth.tsx (anonymous, or their account once they log in). The data
+ * reloads whenever that id changes, e.g. after logging in or out. Entries saved on the device by earlier versions are
  * uploaded once. Without Supabase, or if it can't be reached, data stays in localStorage.
  * The site's example entries arrive as a prop, loaded on the server (see ./examples.ts).
  * Writes update the screen straight away and are sent to the database in the background.
@@ -119,10 +122,9 @@ interface RemoteData {
   counts: ReactionCounts;
 }
 
-async function fetchRemote(examples: Mistake[]): Promise<RemoteData | null> {
+async function fetchRemote(examples: Mistake[], userId: string): Promise<RemoteData | null> {
   const supabase = getSupabase();
   if (!supabase) return null;
-  const userId = await ensureUserId(supabase);
   await uploadLocalData(userId);
 
   const [mineRes, othersRes, reactionsRes] = await Promise.all([
@@ -201,6 +203,7 @@ export function MistakesProvider({
   /** The site's example entries, loaded on the server (see ./examples.ts). */
   examples: Mistake[];
 }) {
+  const auth = useAuth();
   const [ready, setReady] = useState(false);
   /** 'remote' once the database has loaded; 'local' when using device storage. */
   const [mode, setMode] = useState<'remote' | 'local'>('local');
@@ -208,6 +211,8 @@ export function MistakesProvider({
   const [others, setOthers] = useState<Mistake[]>([]);
   const [reactions, setReactions] = useState<MyReactions>({});
   const [counts, setCounts] = useState<ReactionCounts>({});
+  /** The user id the data on screen belongs to. */
+  const userIdRef = useRef<string | null>(null);
 
   const applyRemote = useCallback((data: RemoteData) => {
     setMine(data.mine);
@@ -220,8 +225,10 @@ export function MistakesProvider({
   const resync = useCallback(
     (action: string, error: unknown) => {
       logError(action, error);
-      fetchRemote(examples)
-        .then((data) => data && applyRemote(data))
+      const userId = userIdRef.current;
+      if (!userId) return;
+      fetchRemote(examples, userId)
+        .then((data) => data && userIdRef.current === userId && applyRemote(data))
         .catch((e) => logError('reload data', e));
     },
     [applyRemote, examples],
@@ -230,10 +237,20 @@ export function MistakesProvider({
   useEffect(() => {
     let cancelled = false;
     const loadFromDevice = () => {
+      setMode('local');
       setMine(loadLocalMine());
       setReactions(loadMyReactions());
     };
-    fetchRemote(examples)
+    if (!auth.available || auth.failed) {
+      loadFromDevice();
+      setReady(true);
+      return;
+    }
+    // Wait until we know who the visitor is.
+    if (!auth.ready || !auth.userId) return;
+    const userId = auth.userId;
+    userIdRef.current = userId;
+    fetchRemote(examples, userId)
       .then((data) => {
         if (cancelled) return;
         if (data) {
@@ -254,7 +271,7 @@ export function MistakesProvider({
     return () => {
       cancelled = true;
     };
-  }, [applyRemote, examples]);
+  }, [applyRemote, examples, auth.available, auth.failed, auth.ready, auth.userId]);
 
   // Device storage is only written in local mode; with the database, that's the source of truth.
   useEffect(() => {

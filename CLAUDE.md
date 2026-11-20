@@ -15,7 +15,8 @@ in the code.
 
 ## Data and the backend (Supabase)
 
-- Entries, reactions and reports live in Supabase (anonymous sign-in per browser), via
+- Entries, reactions and reports live in Supabase (anonymous sign-in per browser, or a Google
+  account once someone logs in), via
   `src/lib/store.tsx` and the helpers in `src/lib/community.ts`. The public feed is padded with
   example entries: `mistakes` rows with no owner, loaded on the server by
   `getExampleMistakes()` in `src/lib/examples.ts` and passed to `MistakesProvider`.
@@ -33,13 +34,16 @@ in the code.
 - `/admin` (see the README) works through admin-only RLS policies keyed on `public.is_admin()`,
   never a secret key. New tables the admin should manage need an "Admins can manage …"
   policy, the grants, and an entry in `RESOURCES` in `src/lib/admin.ts`.
-- **TEMPORARY:** the admin login is switched off (`ADMIN_LOGIN_REQUIRED = false`, and
-  `is_admin()` returns true for every session), so anyone can read and change all data. The
-  user will turn it back on later; the steps are in the `temporarily_open_admin` migration.
+- **Accounts:** visitors can log in with Google (`src/lib/auth.tsx`, `useAuth()`); see the
+  README's Accounts section. Logging in upgrades the anonymous user with `linkIdentity`, so
+  their user id stays the same. Anything tied to "the visitor" should use `useAuth().userId`
+  (anonymous or not) and wait for `ready`. Logged-in-only UI checks `useAuth().user`.
+- Admins log in with Google too; `/admin` and the account menu's Admin link check
+  `useAuth().isAdmin`, but row level security is what actually protects the data.
 - **TEMPORARY:** the admin page's Reactions and Reports tabs are hidden (`hidden: true` in
   `RESOURCES`). The user will bring them back later.
-- When real accounts, a mailing-list provider or pricing arrive, update the FAQ answers in
-  `src/app/faq/questions.ts`. Several say the site is free and needs no account.
+- When a mailing-list provider or pricing arrives, update the FAQ answers in
+  `src/app/faq/questions.ts`. Several say the site is free and logging in is optional.
 
 ## Conventions
 

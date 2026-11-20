@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import type { SearchLink } from '@/lib/search';
+import { AccountMenu, AccountNavLinks } from './AccountMenu';
 import { HeaderSearch } from './HeaderSearch';
 import { Icon } from './Icon';
 import { ThemeToggle } from './ThemeToggle';
@@ -90,12 +91,14 @@ export function SiteHeader({
               </a>
             </li>
           </ul>
+          <AccountNavLinks />
           <Link href="/log" className="btn btn--primary btn--sm">
             Log a mistake
           </Link>
         </nav>
 
         <HeaderSearch open={searchOpen} onOpenChange={setSearchOpen} links={searchLinks} />
+        <AccountMenu />
         <ThemeToggle />
       </div>
     </header>

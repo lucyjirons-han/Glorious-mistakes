@@ -1005,8 +1005,161 @@ textarea {
   }
 }
 
-/* Five links plus the button need about 1060px on one line, so the menu collapses below that. */
-@media (max-width: 1080px) {
+/* Account: "Log in", or a round button with the person's initials that opens a small menu.
+   Below 1260px the same links move into the main menu (.site-nav__account). */
+.account-login {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  background: var(--c-surface);
+  border: var(--hairline);
+  border-radius: 50%;
+  text-decoration: none;
+  transition: background-color var(--t-fast) ease;
+}
+
+.account-login:hover {
+  background: var(--c-neutral);
+}
+
+.account-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.account-menu--placeholder {
+  display: block;
+  width: 46px;
+  height: 46px;
+}
+
+.account-menu__toggle {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.account-menu__avatar {
+  width: 46px;
+  height: 46px;
+  background: var(--lilac);
+  border: 1.5px solid var(--ink);
+  font-size: 1rem;
+  transition: background-color var(--t-fast) ease;
+}
+
+.account-menu__toggle:hover .account-menu__avatar,
+.account-menu__toggle[aria-expanded='true'] .account-menu__avatar {
+  background: var(--sky);
+}
+
+.account-menu__panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  width: max-content;
+  min-width: 240px;
+  max-width: min(340px, calc(100vw - 2 * var(--gutter)));
+  padding: 6px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 32px -12px rgb(0 0 0 / 0.3);
+}
+
+.account-menu__panel[hidden] {
+  display: none;
+}
+
+.account-menu__who {
+  display: grid;
+  gap: 2px;
+  margin: 0 0 6px;
+  padding: 10px 14px 12px;
+  border-bottom: var(--hairline);
+  overflow-wrap: anywhere;
+}
+
+.account-menu__who span {
+  color: var(--c-muted);
+  font-size: 0.875rem;
+}
+
+.account-menu__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.account-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--t-fast) ease;
+}
+
+.account-menu__item:hover,
+.account-menu__item[aria-current='page'] {
+  background: var(--c-neutral);
+}
+
+.site-nav__account {
+  display: none;
+}
+
+.site-nav__link--button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.site-nav__account .site-nav__link {
+  gap: 10px;
+}
+
+.site-nav__who {
+  padding: 4px 16px 6px;
+  color: var(--c-muted);
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .account-menu__panel.is-open {
+    animation: drop-in var(--t) var(--ease);
+  }
+}
+
+/* The links, the button and the three round buttons need about 1180px on one line (the
+   container's full width), so the menu collapses below that. */
+@media (max-width: 1260px) {
   .nav-toggle {
     display: grid;
     order: 2;
@@ -1042,6 +1195,17 @@ textarea {
   .site-nav__link {
     width: 100%;
     font-size: 1.125rem;
+  }
+
+  .account-login,
+  .account-menu {
+    display: none;
+  }
+
+  .site-nav__account {
+    display: flex;
+    padding-top: 12px;
+    border-top: var(--hairline);
   }
 }
 
@@ -1465,6 +1629,143 @@ textarea {
   gap: 10px;
 }
 
+/* Log in and Settings */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.login-card {
+  display: grid;
+  gap: 24px;
+  max-width: 560px;
+  padding: clamp(24px, 4vw, 36px);
+  background: var(--c-surface);
+  border: var(--hairline);
+  border-radius: var(--radius-lg);
+}
+
+.login-card__title {
+  margin: 0;
+  font-size: 1.375rem;
+}
+
+.login-card__points {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.login-card__points li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.login-card__note {
+  margin: 0;
+  color: var(--c-muted);
+  font-size: 0.9375rem;
+}
+
+/* Google's sign-in button: their logo on a plain surface with a grey edge, in both themes. */
+.btn--google {
+  justify-self: start;
+  gap: 12px;
+  min-height: 50px;
+  padding-inline: 24px;
+  background: var(--c-surface);
+  border-color: var(--c-line-strong);
+  color: var(--c-text);
+  white-space: normal;
+}
+
+.btn--google:hover {
+  background: var(--c-neutral);
+}
+
+.btn--google:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.btn--google__logo {
+  flex-shrink: 0;
+}
+
+.settings-form {
+  display: grid;
+  gap: 28px;
+  max-width: 640px;
+}
+
+.settings-form__group {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: clamp(20px, 4vw, 32px);
+  background: var(--c-surface);
+  border: var(--hairline);
+  border-radius: var(--radius-lg);
+}
+
+.settings-form__group legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 4px;
+  padding: 0;
+  font-family: var(--font-display-stack);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.settings-form__group legend + * {
+  clear: both;
+}
+
+.settings-form__names {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+}
+
+.settings-form__pending {
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--c-neutral);
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+
+.settings-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  max-width: 640px;
+  margin-top: 40px;
+  padding-top: 28px;
+  border-top: var(--hairline);
+}
+
+.settings-account p {
+  margin: 0;
+  color: var(--c-muted);
+}
+
 /* Search results page. */
 .search__group {
   margin-top: 40px;
@@ -1755,22 +2056,6 @@ textarea {
 }
 
 /* Admin */
-.admin-account {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-
-.admin-account__email {
-  color: var(--c-muted);
-  overflow-wrap: anywhere;
-}
-
-.admin-signin {
-  max-width: 460px;
-}
-
 .admin-tabs {
   margin-bottom: 28px;
 }

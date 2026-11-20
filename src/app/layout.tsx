@@ -7,6 +7,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { ThemeScript } from '@/components/ThemeScript';
 import { ToastProvider } from '@/components/Toast';
+import { AuthProvider } from '@/lib/auth';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
 import { getExampleMistakes } from '@/lib/examples';
 import { getSearchLinks } from '@/lib/search-index';
@@ -79,17 +80,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <MistakesProvider examples={await getExampleMistakes()}>
-          <ToastProvider>
-            <SiteHeader searchLinks={searchLinks} />
-            <main id="main" tabIndex={-1}>
-              {children}
-            </main>
-            <NewsletterSignup />
-            <SiteFooter />
-            <RevealOnScroll />
-          </ToastProvider>
-        </MistakesProvider>
+        <AuthProvider>
+          <MistakesProvider examples={await getExampleMistakes()}>
+            <ToastProvider>
+              <SiteHeader searchLinks={searchLinks} />
+              <main id="main" tabIndex={-1}>
+                {children}
+              </main>
+              <NewsletterSignup />
+              <SiteFooter />
+              <RevealOnScroll />
+            </ToastProvider>
+          </MistakesProvider>
+        </AuthProvider>
       </body>
     </html>
   );
