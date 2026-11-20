@@ -26,8 +26,11 @@ in the code.
   entries must wait for it. Seed content doesn't need to.
 - The newsletter route (`src/app/api/newsletter/route.ts`) saves sign-ups to Supabase's
   `newsletter_signups` table through the `subscribe_newsletter` function, a stopgap until a
-  mailing-list provider is connected. Visitors can add to the list but never read it; keep it
+  mailing-list provider is connected. Visitors can add to the list but never read it (only admins can); keep it
   that way. Never log email addresses.
+- `/admin` (see the README) works through admin-only RLS policies keyed on `public.is_admin()`,
+  never a secret key. New tables the admin should manage need an "Admins can manage …"
+  policy, the grants, and an entry in `RESOURCES` in `src/lib/admin.ts`.
 - When real accounts, a mailing-list provider or pricing arrive, update the FAQ answers in
   `src/app/faq/questions.ts`. Several say the site is free and needs no account.
 

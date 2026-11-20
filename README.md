@@ -38,6 +38,7 @@ Then open http://localhost:3000.
 | `/learn/[slug]` | One Learn article                                                 |
 | `/faq`       | Frequently asked questions                                           |
 | `/about`, `/guidelines` | About the site, and the community guidelines              |
+| `/admin`     | Admin: view, add, edit and delete entries, reactions, reports and subscribers |
 
 `/mine` and `/log` are marked `noindex`. The sitemap (`/sitemap.xml`) and `robots.txt` are
 generated from `src/app/sitemap.ts` and `src/app/robots.ts`.
@@ -85,6 +86,21 @@ Newsletter sign-ups go to the `newsletter_signups` table through the `subscribe_
 function, so the publishable key can add to the list but nobody can read it through the API.
 See them in the Supabase dashboard (Table Editor). It's a stopgap: when a mailing-list provider
 is connected, import the list there and empty the table.
+
+### Admin page
+
+[`/admin`](src/app/admin/AdminView.tsx) lets admins see, add, edit and delete entries,
+reactions, reports and newsletter subscribers. It isn't linked from the site. Admins sign in
+with an email and password; the session is stored separately from the anonymous visitor
+session, so signing in doesn't lose that browser's own entries. Row level security does the
+access control: the `public.admins` list (unreadable through the API) and `public.is_admin()`,
+which is never true for anonymous sessions. To make someone an admin:
+
+1. Supabase → Authentication → Users → Add user → Create new user (tick auto-confirm).
+2. In the SQL editor:
+   `insert into public.admins (user_id) select id from auth.users where email = 'them@example.com';`
+
+The table and form settings for each section are in [`src/lib/admin.ts`](src/lib/admin.ts).
 
 When accounts or pricing are added, update the answers in
 [`src/app/faq/questions.ts`](src/app/faq/questions.ts).
