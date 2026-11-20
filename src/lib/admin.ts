@@ -73,6 +73,8 @@ export interface AdminResource {
   searchable: string[];
   /** Shown above the table. */
   note?: string;
+  /** Name for a CSV download of the table (e.g. "newsletter-subscribers"); leave out for none. */
+  exportName?: string;
   /** TEMPORARY: true hides the section from the admin page (the data and rules stay as they are). */
   hidden?: boolean;
 }
@@ -173,6 +175,7 @@ export const RESOURCES: AdminResource[] = [
     ],
     searchable: ['first_name', 'email'],
     note: 'Only add people who have asked to be on the list.',
+    exportName: 'newsletter-subscribers',
   },
 ];
 
@@ -218,6 +221,39 @@ export function matchesFilters(columns: AdminColumn[], row: Row, filters: Filter
         return true;
     }
   });
+}
+
+/* CSV export -------------------------------------------------------------- */
+
+/**
+ * One CSV cell. Quotes anything with commas, quotes or line breaks, and puts an apostrophe in
+ * front of values starting with = + - @ so spreadsheets don't run them as formulas.
+ */
+function csvCell(value: unknown): string {
+  let text = value == null ? '' : String(value);
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+/** The rows as CSV, one column per table column (dates as ISO 8601, which spreadsheets read). */
+export function toCsv(columns: AdminColumn[], rows: Row[]): string {
+  const header = columns.map((c) => csvCell(c.label)).join(',');
+  const lines = rows.map((row) => columns.map((c) => csvCell(row[c.key])).join(','));
+  return [header, ...lines].join('\r\n');
+}
+
+/** Saves text as a file in the browser's downloads. */
+export function downloadCsv(filename: string, csv: string) {
+  // The byte order mark tells Excel the file is UTF-8, so names with accents survive.
+  const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 /** Checks a form's values against the field rules. Returns an error message per field. */

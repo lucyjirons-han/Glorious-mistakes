@@ -1,7 +1,7 @@
 'use client';
 
 import type { Session } from '@supabase/supabase-js';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Flag, LogOut, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Download, Flag, LogOut, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { EmptyState } from '@/components/EmptyState';
@@ -9,10 +9,12 @@ import { Icon } from '@/components/Icon';
 import { useToast } from '@/components/Toast';
 import {
   ADMIN_LOGIN_REQUIRED,
+  downloadCsv,
   getAdminSupabase,
   matchesFilters,
   rowKey,
   rowToValues,
+  toCsv,
   validateRow,
   valuesToRow,
   VISIBLE_RESOURCES,
@@ -386,6 +388,16 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
   const firstIndex = (currentPage - 1) * pageSize;
   const pageRows = sorted.slice(firstIndex, firstIndex + pageSize);
 
+  /** Downloads every row that matches the search and filters (all pages), in the current order. */
+  const exportCsv = () => {
+    if (!resource.exportName) return;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const now = new Date();
+    const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    downloadCsv(`${resource.exportName}-${date}.csv`, toCsv(resource.columns, sorted));
+    toast(`Exported ${sorted.length} ${resource.singular}${sorted.length === 1 ? '' : 's'} to CSV.`);
+  };
+
   const goToPage = (next: number) => {
     setPage(next);
     toast(`Page ${next} of ${pageCount}.`);
@@ -440,6 +452,19 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
             <Icon icon={RefreshCw} size={16} />
             Refresh
           </button>
+          {resource.exportName && (
+            <button
+              type="button"
+              className="btn btn--sm"
+              onClick={exportCsv}
+              disabled={!rows || sorted.length === 0}
+              title={narrowed ? 'Exports the rows that match your search and filters' : undefined}
+            >
+              <Icon icon={Download} size={16} />
+              Export CSV
+              {narrowed && <span className="sr-only"> (matching rows only)</span>}
+            </button>
+          )}
           <button
             type="button"
             className="btn btn--primary btn--sm"
