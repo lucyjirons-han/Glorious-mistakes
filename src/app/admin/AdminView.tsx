@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { Icon } from '@/components/Icon';
 import { useToast } from '@/components/Toast';
 import {
+  ADMIN_LOGIN_REQUIRED,
   getAdminSupabase,
   RESOURCES,
   rowKey,
@@ -61,7 +62,15 @@ export function AdminView() {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.auth.getSession().then(({ data }) => checkAdmin(data.session));
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!data.session && !ADMIN_LOGIN_REQUIRED) {
+        // Login is switched off: sign in anonymously so the page can read and save.
+        const { error } = await supabase.auth.signInAnonymously();
+        if (error) await checkAdmin(null);
+        return; // onAuthStateChange picks up the new session.
+      }
+      await checkAdmin(data.session);
+    });
     const { data } = supabase.auth.onAuthStateChange((event, next) => {
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') void checkAdmin(next);
     });
@@ -79,7 +88,7 @@ export function AdminView() {
         <h1 className="page-header__title">Admin</h1>
         <p className="page-header__lead">See, fix and tidy up everything people have shared.</p>
       </div>
-      {session && (
+      {session && ADMIN_LOGIN_REQUIRED && (
         <div className="admin-account">
           <span className="admin-account__email">{session.user.email}</span>
           <button type="button" className="btn btn--sm" onClick={signOut}>

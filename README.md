@@ -96,6 +96,12 @@ is connected, import the list there and empty the table.
 
 ### Admin page
 
+> **Login switched off for now.** So a tutor can view it, `/admin` currently needs no sign-in
+> and anyone can read and change everything, newsletter sign-ups included. To switch the login
+> back on, follow the steps in
+> [`supabase/migrations/20261120012502_temporarily_open_admin.sql`](supabase/migrations/20261120012502_temporarily_open_admin.sql)
+> (restore `is_admin()` and set `ADMIN_LOGIN_REQUIRED` to `true` in `src/lib/admin.ts`).
+
 [`/admin`](src/app/admin/AdminView.tsx) lets admins see, add, edit and delete entries,
 reactions, reports and newsletter subscribers. It isn't linked from the site. Admins sign in
 with an email and password; the session is stored separately from the anonymous visitor

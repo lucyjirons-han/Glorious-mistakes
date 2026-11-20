@@ -11,6 +11,14 @@ import { REACTIONS } from './community';
  * real access control: `public.is_admin()` must be true for any of this to return rows.
  */
 
+/**
+ * TEMPORARY: false while the admin page is open to anyone (so a tutor can see it). The page then
+ * signs in anonymously instead of asking for a password, and the database's is_admin() says yes
+ * to every session (migration 20261120012502_temporarily_open_admin). To switch the login back
+ * on, set this to true AND restore is_admin() as described in that migration.
+ */
+export const ADMIN_LOGIN_REQUIRED = false;
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 

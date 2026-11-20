@@ -33,6 +33,9 @@ in the code.
 - `/admin` (see the README) works through admin-only RLS policies keyed on `public.is_admin()`,
   never a secret key. New tables the admin should manage need an "Admins can manage …"
   policy, the grants, and an entry in `RESOURCES` in `src/lib/admin.ts`.
+- **TEMPORARY:** the admin login is switched off (`ADMIN_LOGIN_REQUIRED = false`, and
+  `is_admin()` returns true for every session), so anyone can read and change all data. The
+  user will turn it back on later; the steps are in the `temporarily_open_admin` migration.
 - When real accounts, a mailing-list provider or pricing arrive, update the FAQ answers in
   `src/app/faq/questions.ts`. Several say the site is free and needs no account.
 
