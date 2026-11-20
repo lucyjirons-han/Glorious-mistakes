@@ -2,7 +2,10 @@ import type { Mistake } from './types';
 
 /**
  * Example entries from "other people" so the public feed is never empty.
- * In a real deployment these would come from a database.
+ *
+ * The live copies are in Supabase's `mistakes` table (rows with no owner), loaded by
+ * ./examples.ts; edit them there. This list is the fallback when Supabase isn't configured
+ * or can't be reached, and the source of supabase/migrations/*_add_example_mistakes.sql.
  */
 export const SEED_MISTAKES: Mistake[] = [
   {

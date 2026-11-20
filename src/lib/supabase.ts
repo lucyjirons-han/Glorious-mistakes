@@ -41,7 +41,8 @@ export function ensureUserId(supabase: SupabaseClient): Promise<string> {
 /** A row of the `mistakes` table. */
 export interface MistakeRow {
   id: string;
-  user_id: string;
+  /** Null for the site's example entries. */
+  user_id: string | null;
   title: string;
   what_happened: string;
   lesson: string;
@@ -50,9 +51,12 @@ export interface MistakeRow {
   visibility: Visibility;
   author: string;
   created_at: string;
+  /** Made-up starting counts for example entries, e.g. {"been-there": 248}. */
+  base_reactions?: Record<string, number> | null;
 }
 
 export function rowToMistake(row: MistakeRow, userId: string | null): Mistake {
+  const { 'been-there': beenThere = 0, ...otherBase } = row.base_reactions ?? {};
   return {
     id: row.id,
     title: row.title,
@@ -63,8 +67,9 @@ export function rowToMistake(row: MistakeRow, userId: string | null): Mistake {
     visibility: row.visibility,
     author: row.author,
     createdAt: row.created_at,
-    baseBeenThere: 0,
-    mine: row.user_id === userId,
+    baseBeenThere: Number(beenThere) || 0,
+    baseReactions: otherBase as Mistake['baseReactions'],
+    mine: userId !== null && row.user_id === userId,
   };
 }
 

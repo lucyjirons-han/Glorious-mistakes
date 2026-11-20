@@ -71,8 +71,15 @@ Entries, reactions and reports live in [Supabase](https://supabase.com). Each br
 signed in anonymously on its first visit (no sign-up screen), and row level security means
 people can read public entries plus their own, and change only their own. The store
 ([`src/lib/store.tsx`](src/lib/store.tsx)) loads everything and saves changes in the
-background; the client is in [`src/lib/supabase.ts`](src/lib/supabase.ts). The feed is still
-padded with example entries from [`src/lib/seed.ts`](src/lib/seed.ts), which people can react to.
+background; the client is in [`src/lib/supabase.ts`](src/lib/supabase.ts).
+
+The feed is padded with example entries. They're rows in `mistakes` with no owner
+(`user_id` is null), so only admins can edit them, from `/admin` or the Supabase dashboard.
+Their made-up starting counts are in `base_reactions`, which visitors can't set. The server
+loads them ([`src/lib/examples.ts`](src/lib/examples.ts)) so example pages and the feed arrive
+with them in the HTML; edits show up within 10 minutes. They keep their old ids (like
+`seed-wave`), which is why `mistakes.id` is text. [`src/lib/seed.ts`](src/lib/seed.ts) holds
+copies used when Supabase isn't configured or can't be reached.
 
 - Copy `.env.example` to `.env.local` and fill in the project URL and publishable key.
   Without them (or if Supabase can't be reached) the site falls back to `localStorage`.

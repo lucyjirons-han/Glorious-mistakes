@@ -8,6 +8,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { ThemeScript } from '@/components/ThemeScript';
 import { ToastProvider } from '@/components/Toast';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
+import { getExampleMistakes } from '@/lib/examples';
 import { MistakesProvider } from '@/lib/store';
 import './globals.css';
 
@@ -53,7 +54,7 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   return (
     // suppressHydrationWarning only covers these two elements' own attributes, which browser
     // extensions (Grammarly, ColorZilla, password managers…) often change before React loads.
@@ -70,7 +71,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <MistakesProvider>
+        <MistakesProvider examples={await getExampleMistakes()}>
           <ToastProvider>
             <SiteHeader />
             <main id="main" tabIndex={-1}>

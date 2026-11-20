@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { summarise } from '@/lib/constants';
-import { SEED_MISTAKES } from '@/lib/seed';
+import { getExampleMistakes } from '@/lib/examples';
 import { pageMetadata } from '@/lib/site';
 import { MistakeView } from './MistakeView';
 
@@ -10,9 +10,9 @@ interface MistakePageProps {
 
 export async function generateMetadata({ params }: MistakePageProps): Promise<Metadata> {
   const { id } = await params;
-  const mistake = SEED_MISTAKES.find((m) => m.id === decodeURIComponent(id));
+  const mistake = (await getExampleMistakes()).find((m) => m.id === decodeURIComponent(id));
 
-  // Entries people log are saved on their own device, so the server can't see them.
+  // Only the examples are looked up on the server; other entries load in the browser.
   // MistakeView updates the title and description once the entry has loaded.
   if (!mistake) {
     return {
@@ -29,8 +29,9 @@ export async function generateMetadata({ params }: MistakePageProps): Promise<Me
   });
 }
 
-export function generateStaticParams() {
-  return SEED_MISTAKES.map((m) => ({ id: m.id }));
+/** Example entries are pre-rendered; entries people log render on request. */
+export async function generateStaticParams() {
+  return (await getExampleMistakes()).map((m) => ({ id: m.id }));
 }
 
 export default async function MistakePage({ params }: MistakePageProps) {

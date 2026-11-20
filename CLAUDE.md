@@ -17,7 +17,9 @@ in the code.
 
 - Entries, reactions and reports live in Supabase (anonymous sign-in per browser), via
   `src/lib/store.tsx` and the helpers in `src/lib/community.ts`. The public feed is padded with
-  `SEED_MISTAKES` from `src/lib/seed.ts`.
+  example entries: `mistakes` rows with no owner, loaded on the server by
+  `getExampleMistakes()` in `src/lib/examples.ts` and passed to `MistakesProvider`.
+  `SEED_MISTAKES` in `src/lib/seed.ts` is only the fallback when Supabase is unavailable.
 - Each browser is signed in anonymously; row level security does the access control, so
   never add a policy that lets people change rows that aren't theirs. Schema changes go in
   `supabase/migrations` as well as being applied to the project. With no env vars, or if

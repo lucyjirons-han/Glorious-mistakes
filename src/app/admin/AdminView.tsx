@@ -18,7 +18,6 @@ import {
   type AdminResource,
   type Row,
 } from '@/lib/admin';
-import { SEED_MISTAKES } from '@/lib/seed';
 
 type Status = 'loading' | 'signed-out' | 'not-admin' | 'admin';
 
@@ -212,7 +211,7 @@ function Dashboard() {
   const [mistakes, setMistakes] = useState<Row[]>([]);
 
   const loadMistakes = useCallback(async () => {
-    const { data } = await supabase.from('mistakes').select('id, title').order('created_at', { ascending: false });
+    const { data } = await supabase.from('mistakes').select('id, title, user_id').order('created_at', { ascending: false });
     setMistakes(data ?? []);
   }, [supabase]);
 
@@ -222,8 +221,9 @@ function Dashboard() {
 
   const mistakeOptions = useMemo(
     () => ({
-      stored: mistakes.map((m) => ({ value: String(m.id), label: String(m.title) })),
-      examples: SEED_MISTAKES.map((m) => ({ value: m.id, label: m.title })),
+      // Example entries are the ones with no owner.
+      stored: mistakes.filter((m) => m.user_id).map((m) => ({ value: String(m.id), label: String(m.title) })),
+      examples: mistakes.filter((m) => !m.user_id).map((m) => ({ value: String(m.id), label: String(m.title) })),
     }),
     [mistakes],
   );

@@ -19,7 +19,6 @@ import {
   type MyReactions,
 } from './community';
 import { normaliseCategory } from './constants';
-import { SEED_MISTAKES } from './seed';
 import { ensureUserId, getSupabase, inputToRow, rowToMistake, type MistakeRow } from './supabase';
 import type { Mistake, MistakeInput, ReactionId, Visibility } from './types';
 
@@ -30,6 +29,7 @@ import type { Mistake, MistakeInput, ReactionId, Visibility } from './types';
  * With Supabase configured (see ./supabase.ts) the visitor is signed in anonymously and
  * everything is saved to the database. Entries saved on the device by earlier versions are
  * uploaded once. Without Supabase, or if it can't be reached, data stays in localStorage.
+ * The site's example entries arrive as a prop, loaded on the server (see ./examples.ts).
  * Writes update the screen straight away and are sent to the database in the background.
  */
 
@@ -119,7 +119,7 @@ interface RemoteData {
   counts: ReactionCounts;
 }
 
-async function fetchRemote(): Promise<RemoteData | null> {
+async function fetchRemote(examples: Mistake[]): Promise<RemoteData | null> {
   const supabase = getSupabase();
   if (!supabase) return null;
   const userId = await ensureUserId(supabase);
@@ -131,6 +131,7 @@ async function fetchRemote(): Promise<RemoteData | null> {
       .from('mistakes')
       .select('*')
       .eq('visibility', 'public')
+      .not('user_id', 'is', null) // examples come from the server, via the provider's props
       .neq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(FEED_LIMIT),
@@ -151,7 +152,7 @@ async function fetchRemote(): Promise<RemoteData | null> {
     (reactions[mistake_id] ??= []).push(reaction);
   }
 
-  const ids = [...mine, ...others, ...SEED_MISTAKES].map((m) => m.id);
+  const ids = [...mine, ...others, ...examples].map((m) => m.id);
   const countsRes = await supabase.rpc('reaction_counts', { mistake_ids: ids });
   if (countsRes.error) throw countsRes.error;
 
@@ -192,7 +193,14 @@ interface MistakesContextValue {
 
 const MistakesContext = createContext<MistakesContextValue | null>(null);
 
-export function MistakesProvider({ children }: { children: ReactNode }) {
+export function MistakesProvider({
+  children,
+  examples,
+}: {
+  children: ReactNode;
+  /** The site's example entries, loaded on the server (see ./examples.ts). */
+  examples: Mistake[];
+}) {
   const [ready, setReady] = useState(false);
   /** 'remote' once the database has loaded; 'local' when using device storage. */
   const [mode, setMode] = useState<'remote' | 'local'>('local');
@@ -212,11 +220,11 @@ export function MistakesProvider({ children }: { children: ReactNode }) {
   const resync = useCallback(
     (action: string, error: unknown) => {
       logError(action, error);
-      fetchRemote()
+      fetchRemote(examples)
         .then((data) => data && applyRemote(data))
         .catch((e) => logError('reload data', e));
     },
-    [applyRemote],
+    [applyRemote, examples],
   );
 
   useEffect(() => {
@@ -225,7 +233,7 @@ export function MistakesProvider({ children }: { children: ReactNode }) {
       setMine(loadLocalMine());
       setReactions(loadMyReactions());
     };
-    fetchRemote()
+    fetchRemote(examples)
       .then((data) => {
         if (cancelled) return;
         if (data) {
@@ -246,7 +254,7 @@ export function MistakesProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [applyRemote]);
+  }, [applyRemote, examples]);
 
   // Device storage is only written in local mode; with the database, that's the source of truth.
   useEffect(() => {
@@ -343,13 +351,13 @@ export function MistakesProvider({ children }: { children: ReactNode }) {
       publicFeed: [
         ...sortedMine.filter((m) => m.visibility === 'public'),
         ...others,
-        ...SEED_MISTAKES,
+        ...examples,
       ].sort(byNewest),
       getMine: (id) => mine.find((m) => m.id === id),
       getMistake: (id) =>
         mine.find((m) => m.id === id) ??
         others.find((m) => m.id === id) ??
-        SEED_MISTAKES.find((m) => m.id === id),
+        examples.find((m) => m.id === id),
       addMistake,
       updateMistake,
       setVisibility,
@@ -363,6 +371,7 @@ export function MistakesProvider({ children }: { children: ReactNode }) {
     };
   }, [
     ready,
+    examples,
     mine,
     others,
     reactions,

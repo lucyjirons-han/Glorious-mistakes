@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getArticles } from '@/lib/learn';
-import { SEED_MISTAKES } from '@/lib/seed';
+import { getExampleMistakes } from '@/lib/examples';
 import { SITE_URL } from '@/lib/site';
 
 /**
@@ -8,7 +8,7 @@ import { SITE_URL } from '@/lib/site';
  * /mine and /log are left out on purpose: they're personal pages marked noindex.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const articles = await getArticles();
+  const [articles, examples] = await Promise.all([getArticles(), getExampleMistakes()]);
 
   const pages: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: 'weekly', priority: 1 },
@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const mistakePages: MetadataRoute.Sitemap = SEED_MISTAKES.map((m) => ({
+  const mistakePages: MetadataRoute.Sitemap = examples.map((m) => ({
     url: `${SITE_URL}/mistakes/${encodeURIComponent(m.id)}`,
     changeFrequency: 'yearly',
     priority: 0.3,
