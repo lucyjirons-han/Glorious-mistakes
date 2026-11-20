@@ -4,6 +4,7 @@ import { Asterisk } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import type { SearchLink } from '@/lib/search';
 import { HeaderSearch } from './HeaderSearch';
 import { Icon } from './Icon';
 import { ThemeToggle } from './ThemeToggle';
@@ -16,7 +17,11 @@ const NAV_LINKS = [
   { href: '/about', label: 'About' },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({
+  searchLinks,
+}: {
+  searchLinks: { articles: SearchLink[]; faqs: SearchLink[] };
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpenState] = useState(false);
@@ -90,7 +95,7 @@ export function SiteHeader() {
           </Link>
         </nav>
 
-        <HeaderSearch open={searchOpen} onOpenChange={setSearchOpen} />
+        <HeaderSearch open={searchOpen} onOpenChange={setSearchOpen} links={searchLinks} />
         <ThemeToggle />
       </div>
     </header>

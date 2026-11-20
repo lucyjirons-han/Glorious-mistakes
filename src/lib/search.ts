@@ -89,3 +89,60 @@ export function matches(terms: string[], ...fields: (string | undefined)[]): boo
   const haystack = normalise(fields.filter(Boolean).join(' '));
   return terms.every((term) => haystack.includes(term));
 }
+
+/** One line in the header's suggestions list. */
+export interface Suggestion {
+  href: string;
+  title: string;
+  /** What sort of thing it is, shown beside the title. */
+  kind: 'Mistake' | 'Article' | 'FAQ' | 'Page';
+}
+
+interface SuggestSource {
+  kind: Suggestion['kind'];
+  href: string;
+  title: string;
+  /** Text that also counts as a match, but ranks below the title. */
+  body: (string | undefined)[];
+}
+
+/**
+ * The best few matches for the header's suggestions. Titles that contain the whole search
+ * rank first, then titles that contain every word, then matches anywhere else.
+ */
+export function suggest(query: string, sources: SuggestSource[], limit = 6): Suggestion[] {
+  const terms = searchTerms(query);
+  if (terms.length === 0) return [];
+  const phrase = terms.join(' ');
+  const scored: { s: Suggestion; score: number; index: number }[] = [];
+  sources.forEach((src, index) => {
+    if (!matches(terms, src.title, ...src.body)) return;
+    const title = normalise(src.title);
+    const score = title.startsWith(phrase) ? 4 : title.includes(phrase) ? 3 : matches(terms, src.title) ? 2 : 1;
+    scored.push({ s: { href: src.href, title: src.title, kind: src.kind }, score, index });
+  });
+  return scored
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, limit)
+    .map((x) => x.s);
+}
+
+/** Splits text into plain and matching parts, so the matching words can be highlighted. */
+export function highlightParts(text: string, query: string): { text: string; match: boolean }[] {
+  const terms = searchTerms(query);
+  if (terms.length === 0) return [{ text, match: false }];
+  const lower = normalise(text);
+  const marked = new Array<boolean>(text.length).fill(false);
+  for (const term of terms) {
+    for (let i = lower.indexOf(term); i !== -1; i = lower.indexOf(term, i + 1)) {
+      marked.fill(true, i, i + term.length);
+    }
+  }
+  const parts: { text: string; match: boolean }[] = [];
+  for (let i = 0; i < text.length; i++) {
+    const last = parts[parts.length - 1];
+    if (last && last.match === marked[i]) last.text += text[i];
+    else parts.push({ text: text[i], match: marked[i] });
+  }
+  return parts;
+}

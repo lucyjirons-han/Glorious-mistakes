@@ -37,7 +37,7 @@ Then open http://localhost:3000.
 | `/learn`     | Learn articles, listed as cards                                      |
 | `/learn/[slug]` | One Learn article                                                 |
 | `/faq`       | Frequently asked questions                                           |
-| `/search?q=` | Site search (opened from the header): entries, Learn articles, FAQ answers and pages. The pages list is `SITE_PAGES` in `src/lib/search.ts` |
+| `/search?q=` | Site search (opened from the header, which suggests matches as you type): entries, Learn articles, FAQ answers and pages. The pages list is `SITE_PAGES` in `src/lib/search.ts` |
 | `/about`, `/guidelines` | About the site, and the community guidelines              |
 | `/admin`     | Admin: view, add, edit and delete entries, reactions, reports and subscribers |
 

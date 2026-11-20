@@ -9,6 +9,7 @@ import { ThemeScript } from '@/components/ThemeScript';
 import { ToastProvider } from '@/components/Toast';
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from '@/lib/site';
 import { getExampleMistakes } from '@/lib/examples';
+import { getSearchLinks } from '@/lib/search-index';
 import { MistakesProvider } from '@/lib/store';
 import './globals.css';
 
@@ -55,6 +56,13 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
+  // For the header's search suggestions. The full FAQ answers stay on the search page.
+  const { articles, faqs } = await getSearchLinks();
+  const searchLinks = {
+    articles: articles.map(({ href, title, summary }) => ({ href, title, summary })),
+    faqs: faqs.map(({ href, title }) => ({ href, title, summary: '' })),
+  };
+
   return (
     // suppressHydrationWarning only covers these two elements' own attributes, which browser
     // extensions (Grammarly, ColorZilla, password managers…) often change before React loads.
@@ -73,7 +81,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         </a>
         <MistakesProvider examples={await getExampleMistakes()}>
           <ToastProvider>
-            <SiteHeader />
+            <SiteHeader searchLinks={searchLinks} />
             <main id="main" tabIndex={-1}>
               {children}
             </main>

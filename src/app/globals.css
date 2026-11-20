@@ -921,6 +921,84 @@ textarea {
   padding-inline: 22px;
 }
 
+/* Predictive suggestions under the header search box. */
+.header-search__form {
+  position: relative;
+}
+
+/* Spans the box and the button, inside the container's gutters. */
+.suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: var(--gutter);
+  right: var(--gutter);
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 32px -12px rgb(0 0 0 / 0.3);
+}
+
+.suggestions[hidden] {
+  display: none;
+}
+
+.suggestions__option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.suggestions__option[aria-selected='true'] {
+  background: var(--c-neutral);
+  outline: 2px solid var(--c-focus);
+  outline-offset: -2px;
+}
+
+.suggestions__option--all {
+  border-top: var(--hairline);
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+.suggestions__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestions__title mark {
+  background: none;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.suggestions__kind {
+  flex-shrink: 0;
+  color: var(--c-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.suggestions__icon {
+  flex-shrink: 0;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .header-search.is-open {
     animation: drop-in var(--t) var(--ease);
