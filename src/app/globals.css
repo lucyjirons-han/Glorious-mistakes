@@ -1045,6 +1045,57 @@ textarea {
   }
 }
 
+/* Phones: keep the logo on one line beside the search, theme and menu buttons. */
+@media (max-width: 520px) {
+  .site-header__inner {
+    gap: 8px;
+  }
+
+  .logo {
+    gap: 10px;
+  }
+
+  .logo__text {
+    white-space: nowrap;
+  }
+
+  .logo__mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header-search__toggle,
+  .theme-toggle,
+  .nav-toggle {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 400px) {
+  .site-header__inner {
+    gap: 6px;
+  }
+
+  .logo__text {
+    font-size: 1.05rem;
+  }
+
+  .header-search__toggle,
+  .theme-toggle,
+  .nav-toggle {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* The smallest phones (320px) drop the logo's icon to make room for the name. */
+@media (max-width: 350px) {
+  .logo__mark {
+    display: none;
+  }
+}
+
 .site-footer {
   margin-top: auto;
   background: var(--c-bg);
@@ -3702,9 +3753,6 @@ fieldset.field > .field__label {
     font-size: 1.9rem;
   }
 
-  .logo__text {
-    font-size: 1.1rem;
-  }
 }
 
 /* 15. Forced colours (High Contrast) -------------------------------------- */
