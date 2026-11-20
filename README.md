@@ -133,7 +133,7 @@ Supabase settings this needs (Authentication):
 
 [`/admin`](src/app/admin/AdminView.tsx) lets admins see, add, edit and delete entries, people,
 reactions, reports and newsletter subscribers. Admins log in with Google like everyone else,
-and the account menu shows an **Admin** link to them. Row level security does the access
+land on `/admin` straight after logging in, and see an **Admin** link in the account menu. Row level security does the access
 control: the `public.admins` list (unreadable through the API) and `public.is_admin()`, which is
 never true for anonymous sessions. To make someone an admin, have them log in once, then run
 this in the SQL editor:

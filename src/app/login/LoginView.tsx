@@ -33,7 +33,7 @@ export function LoginView({ next }: { next: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const finished = useRef(false);
-  const { signInWithGoogle, ready, user, movedEntries, clearMovedEntries } = auth;
+  const { signInWithGoogle, ready, user, isAdmin, movedEntries, clearMovedEntries } = auth;
 
   const start = async (link = true) => {
     setBusy(true);
@@ -72,7 +72,8 @@ export function LoginView({ next }: { next: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Back from Google and logged in: say hello and carry on to where they were going.
+  // Back from Google and logged in: say hello and carry on to where they were going. Admins go
+  // straight to the admin page instead.
   useEffect(() => {
     if (!ready || !user || finished.current || !session(LOGIN_PENDING_KEY)) return;
     finished.current = true;
@@ -84,8 +85,8 @@ export function LoginView({ next }: { next: string }) {
         : '';
     clearMovedEntries();
     toast(`You’re logged in. Welcome!${moved}`);
-    router.replace(next);
-  }, [ready, user, movedEntries, clearMovedEntries, toast, router, next]);
+    router.replace(isAdmin ? '/admin' : next);
+  }, [ready, user, isAdmin, movedEntries, clearMovedEntries, toast, router, next]);
 
   const header = (
     <header className="page-header">
