@@ -87,9 +87,21 @@ async function loadProfile(user: User): Promise<Profile> {
     .eq('id', user.id)
     .maybeSingle();
   if (error) throw error;
-  if (data) return { firstName: data.first_name, lastName: data.last_name };
-
   const profile = namesFromUser(user);
+
+  if (data) {
+    const saved = { firstName: data.first_name, lastName: data.last_name };
+    // A profile can be made before Google is linked (e.g. an existing email account), so fill
+    // in an empty one once Google's name is available.
+    if (saved.firstName || saved.lastName || (!profile.firstName && !profile.lastName)) return saved;
+    const { error: fillError } = await supabase
+      .from('profiles')
+      .update({ first_name: profile.firstName, last_name: profile.lastName })
+      .eq('id', user.id);
+    if (fillError) throw fillError;
+    return profile;
+  }
+
   const { error: insertError } = await supabase
     .from('profiles')
     .upsert({ id: user.id, first_name: profile.firstName, last_name: profile.lastName }, { ignoreDuplicates: true });
