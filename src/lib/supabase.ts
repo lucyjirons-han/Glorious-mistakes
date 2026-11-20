@@ -4,8 +4,9 @@ import type { CringeLevel, Mistake, MistakeInput, Visibility } from './types';
 
 /**
  * The browser's Supabase client, or null when the env vars aren't set (the site then falls
- * back to keeping everything in localStorage). Visitors are signed in anonymously, so there's
- * still no sign-up screen; row level security keeps each person's private entries to them.
+ * back to keeping everything in localStorage). Visitors are signed in anonymously so they can
+ * read and react; logging a mistake needs a Google login (row level security checks it), and
+ * row level security keeps each person's private entries to them.
  */
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

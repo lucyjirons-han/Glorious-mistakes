@@ -1,6 +1,6 @@
 'use client';
 
-import { CircleHelp, Lightbulb, PartyPopper } from 'lucide-react';
+import { CircleHelp, Lightbulb, LogIn, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -8,7 +8,9 @@ import { EmptyState } from '@/components/EmptyState';
 import { Icon, IconBadge } from '@/components/Icon';
 import { MistakeForm } from '@/components/MistakeForm';
 import { useToast } from '@/components/Toast';
+import { useAuth } from '@/lib/auth';
 import { CELEBRATIONS } from '@/lib/constants';
+import { loginHref } from '@/lib/login';
 import { useMistakes } from '@/lib/store';
 import type { Mistake, MistakeInput } from '@/lib/types';
 
@@ -22,6 +24,7 @@ export function LogView() {
     editId && params.get('from') === 'entry' ? `/mistakes/${encodeURIComponent(editId)}` : '/mine';
   const router = useRouter();
   const toast = useToast();
+  const auth = useAuth();
   const { ready, getMine, addMistake, updateMistake } = useMistakes();
   const [logged, setLogged] = useState<{ mistake: Mistake; message: string } | null>(null);
   const [formKey, setFormKey] = useState(0);
@@ -67,6 +70,37 @@ export function LogView() {
         />
       </div>
     );
+  }
+
+  // New entries need a logged-in account (row level security insists on it too). Editing an
+  // older entry logged before that rule stays open. Without Supabase there's no way to log in,
+  // so the device-storage fallback still lets people log.
+  if (auth.available && !logged) {
+    if (!auth.ready) return <div className="container page" aria-busy="true" />;
+    if (!auth.user) {
+      return (
+        <div className="container page page--narrow">
+          <header className="page-header">
+            <p className="eyebrow">New entry</p>
+            <h1 className="page-header__title">Log a glorious mistake</h1>
+          </header>
+          <EmptyState
+            icon={LogIn}
+            title="Log in to log a mistake"
+            action={
+              <Link href={loginHref('/log')} className="btn btn--primary">
+                Log in with Google
+              </Link>
+            }
+          >
+            <p>
+              It takes a few seconds, and it means your mistakes are safe in your account and on every
+              device. Your name stays off your entries unless you choose to add it.
+            </p>
+          </EmptyState>
+        </div>
+      );
+    }
   }
 
   const handleCreate = (input: MistakeInput) => {

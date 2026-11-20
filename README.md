@@ -39,7 +39,7 @@ Then open http://localhost:3000.
 | `/faq`       | Frequently asked questions                                           |
 | `/search?q=` | Site search (opened from the header, which suggests matches as you type): entries, Learn articles, FAQ answers and pages. The pages list is `SITE_PAGES` in `src/lib/search.ts` |
 | `/about`, `/guidelines` | About the site, and the community guidelines              |
-| `/login`     | Log in with Google (optional). `?next=` is where to go afterwards     |
+| `/login`     | Log in with Google (needed to log a mistake). `?next=` is where to go afterwards |
 | `/settings`  | Logged-in people change their name, email address and newsletter setting |
 | `/admin`     | Admin (admins only): view, add, edit and delete entries, people, reactions, reports and subscribers |
 
@@ -71,9 +71,9 @@ Every page builds its title, description, canonical link and Open Graph / Twitte
 ## How data is stored
 
 Entries, reactions and reports live in [Supabase](https://supabase.com). Each browser is
-signed in anonymously on its first visit (no sign-up screen), and row level security means
+signed in anonymously on its first visit so it can read and react, and row level security means
 people can read public entries plus their own, and change only their own. Logging in with
-Google is optional; see [Accounts](#accounts) below. The store
+Google is needed to log a mistake; see [Accounts](#accounts) below. The store
 ([`src/lib/store.tsx`](src/lib/store.tsx)) loads everything and saves changes in the
 background; the client is in [`src/lib/supabase.ts`](src/lib/supabase.ts).
 
@@ -103,8 +103,8 @@ is connected, import the list there and empty the table.
 
 Visitors can log in with Google from the header (a round button on wide screens, or in the menu
 on narrow ones). Once logged in, the account menu holds My mistakes, Settings and (for admins)
-Admin; "My mistakes" isn't in the main nav, so visitors who haven't logged in reach `/mine` from
-the footer and the "you logged it" screen after saving an entry. Everything lives in [`src/lib/auth.tsx`](src/lib/auth.tsx) (`useAuth()`), and
+Admin. Logging a mistake needs a login: `/log` asks anonymous visitors to log in, and row level
+security rejects inserts from anonymous sessions. Reading and reacting don't need one. Everything lives in [`src/lib/auth.tsx`](src/lib/auth.tsx) (`useAuth()`), and
 the store reloads whenever the user changes.
 
 - **Logging in keeps your entries.** The anonymous user is upgraded with

@@ -36,7 +36,7 @@ export function SiteFooter() {
           </ul>
         </nav>
         <p className="site-footer__note">
-          No account needed. Private entries are only ever visible to you.
+          Read and react freely; log in to log your own. Private entries are only ever visible to you.
         </p>
       </div>
     </footer>

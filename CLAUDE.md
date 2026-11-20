@@ -43,7 +43,12 @@ in the code.
 - **TEMPORARY:** the admin page's Reactions and Reports tabs are hidden (`hidden: true` in
   `RESOURCES`). The user will bring them back later.
 - When a mailing-list provider or pricing arrives, update the FAQ answers in
-  `src/app/faq/questions.ts`. Several say the site is free and logging in is optional.
+  `src/app/faq/questions.ts`. Several say the site is free and logging in is only needed to log
+  a mistake.
+- **Logging a mistake needs a Google login.** `/log` shows a log-in prompt to anonymous
+  visitors, and the "Logged-in owners can add mistakes" policy rejects inserts from anonymous
+  sessions. Reading, reacting, reporting and editing older anonymous entries stay open. With no
+  Supabase (device-storage fallback) logging is still allowed, since nobody can log in.
 
 ## Conventions
 
