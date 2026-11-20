@@ -1,7 +1,7 @@
 'use client';
 
 import type { Session } from '@supabase/supabase-js';
-import { CircleAlert, Flag, LogOut, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, CircleAlert, Flag, LogOut, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { EmptyState } from '@/components/EmptyState';
@@ -285,6 +285,8 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
   const [loadError, setLoadError] = useState('');
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<Filters>({});
+  /** null keeps the order rows were loaded in (newest first). */
+  const [sort, setSort] = useState<Sort | null>(null);
   /** 'new' while adding, a row key while editing, null otherwise. */
   const [editing, setEditing] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
@@ -360,6 +362,22 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
           })),
     );
   }, [rows, query, filters, resource, titles]);
+
+  const sorted = useMemo(() => {
+    if (!sort) return visible;
+    const column = resource.columns.find((c) => c.key === sort.key);
+    if (!column) return visible;
+    const factor = sort.direction === 'ascending' ? 1 : -1;
+    // Array.prototype.sort is stable, so ties keep their newest-first order.
+    return [...visible].sort((a, b) => factor * compareCells(column, a, b, titles));
+  }, [visible, sort, resource, titles]);
+
+  const toggleSort = (column: AdminColumn) => {
+    const direction: SortDirection =
+      sort?.key === column.key && sort.direction === 'ascending' ? 'descending' : 'ascending';
+    setSort({ key: column.key, direction });
+    toast(`Sorted by ${column.label}, ${sortDescription(column, direction)}.`);
+  };
 
   const editingRow = editing && editing !== 'new' ? (rows?.find((r) => rowKey(resource, r) === editing) ?? null) : null;
 
@@ -497,18 +515,36 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
           <table className="admin-table">
             <thead>
               <tr>
-                {resource.columns.map((c) => (
-                  <th key={c.key} scope="col">
-                    {c.label}
-                  </th>
-                ))}
+                {resource.columns.map((c) => {
+                  const direction = sort?.key === c.key ? sort.direction : undefined;
+                  return (
+                    <th key={c.key} scope="col" aria-sort={direction ?? 'none'}>
+                      <button
+                        type="button"
+                        className={`admin-table__sort${direction ? ' admin-table__sort--active' : ''}`}
+                        onClick={() => toggleSort(c)}
+                      >
+                        {c.label}
+                        <Icon
+                          icon={direction === 'ascending' ? ArrowUp : direction === 'descending' ? ArrowDown : ArrowUpDown}
+                          size={14}
+                        />
+                        <span className="sr-only">
+                          {direction
+                            ? `, sorted ${sortDescription(c, direction)}`
+                            : ', select to sort'}
+                        </span>
+                      </button>
+                    </th>
+                  );
+                })}
                 <th scope="col">
                   <span className="sr-only">Actions</span>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {visible.map((row) => {
+              {sorted.map((row) => {
                 const key = rowKey(resource, row);
                 const name = describeRow(resource, row, titles);
                 return (
@@ -558,6 +594,40 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
       )}
     </section>
   );
+}
+
+/* Sorting ----------------------------------------------------------------- */
+
+type SortDirection = 'ascending' | 'descending';
+type Sort = { key: string; direction: SortDirection };
+
+const collator = new Intl.Collator('en-AU', { sensitivity: 'base', numeric: true });
+
+/** What a cell is sorted by: what the table shows, not the stored code. */
+function sortText(column: AdminColumn, row: Row, titles: Map<string, string>): string {
+  const value = row[column.key];
+  if (column.kind === 'mistake') return titles.get(String(value)) ?? '';
+  if (column.kind === 'id') return value ? `1${value}` : '0'; // Example entries (no owner) first.
+  const option = column.options?.find((o) => o.value === String(value));
+  return option?.label ?? String(value ?? '');
+}
+
+function compareCells(column: AdminColumn, a: Row, b: Row, titles: Map<string, string>): number {
+  if (column.kind === 'date') {
+    return new Date(String(a[column.key])).getTime() - new Date(String(b[column.key])).getTime();
+  }
+  const left = sortText(column, a, titles);
+  const right = sortText(column, b, titles);
+  // Empty cells go last when sorting A to Z.
+  if (!left !== !right) return left ? -1 : 1;
+  return collator.compare(left, right);
+}
+
+/** "A to Z", "oldest first" and so on, for the toast and screen-reader text. */
+function sortDescription(column: AdminColumn, direction: SortDirection): string {
+  if (column.kind === 'date') return direction === 'ascending' ? 'oldest first' : 'newest first';
+  if (column.kind === 'id') return direction === 'ascending' ? 'examples first' : 'examples last';
+  return direction === 'ascending' ? 'A to Z' : 'Z to A';
 }
 
 /* Column filters ----------------------------------------------------------- */

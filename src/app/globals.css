@@ -1712,6 +1712,46 @@ textarea {
   white-space: nowrap;
 }
 
+/* Column headings are buttons that sort the table. The arrow shows the current order. */
+.admin-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  margin: -6px -8px;
+  padding: 6px 8px;
+  background: none;
+  color: inherit;
+  border: 0;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.admin-table__sort:hover {
+  background: var(--c-neutral);
+  color: var(--c-text);
+}
+
+.admin-table__sort:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+.admin-table__sort .icon {
+  opacity: 0.55;
+}
+
+.admin-table__sort--active {
+  color: var(--c-text);
+}
+
+.admin-table__sort--active .icon {
+  opacity: 1;
+}
+
 .admin-table td {
   white-space: nowrap;
 }

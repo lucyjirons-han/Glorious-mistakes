@@ -115,7 +115,8 @@ which is never true for anonymous sessions. To make someone an admin:
 
 The table, filter and form settings for each section are in
 [`src/lib/admin.ts`](src/lib/admin.ts). Mistakes and Newsletter have a filter per column (text,
-dropdown or date range); add `filter` to a column to give it one.
+dropdown or date range); add `filter` to a column to give it one. Every column sorts when
+you click its heading.
 
 > **Reactions and Reports tabs hidden for now.** They're marked `hidden: true` in
 > `src/lib/admin.ts`; remove that to bring them back (the data and database rules are unchanged).
