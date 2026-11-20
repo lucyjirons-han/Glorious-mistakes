@@ -113,7 +113,12 @@ which is never true for anonymous sessions. To make someone an admin:
 2. In the SQL editor:
    `insert into public.admins (user_id) select id from auth.users where email = 'them@example.com';`
 
-The table and form settings for each section are in [`src/lib/admin.ts`](src/lib/admin.ts).
+The table, filter and form settings for each section are in
+[`src/lib/admin.ts`](src/lib/admin.ts). Mistakes and Newsletter have a filter per column (text,
+dropdown or date range); add `filter` to a column to give it one.
+
+> **Reactions and Reports tabs hidden for now.** They're marked `hidden: true` in
+> `src/lib/admin.ts`; remove that to bring them back (the data and database rules are unchanged).
 
 When accounts or pricing are added, update the answers in
 [`src/app/faq/questions.ts`](src/app/faq/questions.ts).

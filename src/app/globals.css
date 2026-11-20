@@ -1602,8 +1602,83 @@ textarea {
   max-width: 420px;
 }
 
-/* Wide tables scroll inside their box rather than widening the page. */
+/* Search box, column filters and the "Showing x of y" line share one panel. */
+.admin-filters {
+  display: grid;
+  gap: 18px;
+  padding: clamp(16px, 3vw, 24px);
+  background: var(--c-surface);
+  border: var(--hairline);
+  border-radius: var(--radius);
+}
+
+.admin-filters__fields {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.admin-filters__legend {
+  padding: 0;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.admin-filters__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.admin-filters__grid .field__label {
+  font-size: 0.9375rem;
+}
+
+/* A date range takes two grid cells so both inputs stay readable. */
+.admin-filters__dates {
+  grid-column: span 2;
+}
+
+.admin-filters__date-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-filters__date-pair .input {
+  min-width: 0;
+  width: 100%;
+}
+
+.admin-filters__sub-label {
+  color: var(--c-muted);
+  font-size: 0.875rem;
+}
+
+.admin-filters__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  color: var(--c-muted);
+}
+
+@media (max-width: 460px) {
+  .admin-filters__dates {
+    grid-column: auto;
+  }
+
+  .admin-filters__date-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Wide tables scroll inside their box rather than widening the page. `position: relative` keeps
+   the buttons' hidden screen-reader text (.sr-only, absolutely positioned) inside the box too. */
 .admin-table-wrap {
+  position: relative;
   overflow-x: auto;
   background: var(--c-surface);
   border: var(--hairline);

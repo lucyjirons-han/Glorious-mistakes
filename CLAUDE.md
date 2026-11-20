@@ -36,6 +36,8 @@ in the code.
 - **TEMPORARY:** the admin login is switched off (`ADMIN_LOGIN_REQUIRED = false`, and
   `is_admin()` returns true for every session), so anyone can read and change all data. The
   user will turn it back on later; the steps are in the `temporarily_open_admin` migration.
+- **TEMPORARY:** the admin page's Reactions and Reports tabs are hidden (`hidden: true` in
+  `RESOURCES`). The user will bring them back later.
 - When real accounts, a mailing-list provider or pricing arrive, update the FAQ answers in
   `src/app/faq/questions.ts`. Several say the site is free and needs no account.
 

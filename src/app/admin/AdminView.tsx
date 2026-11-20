@@ -10,13 +10,16 @@ import { useToast } from '@/components/Toast';
 import {
   ADMIN_LOGIN_REQUIRED,
   getAdminSupabase,
-  RESOURCES,
+  matchesFilters,
   rowKey,
   rowToValues,
   validateRow,
   valuesToRow,
+  VISIBLE_RESOURCES,
   type AdminField,
+  type AdminColumn,
   type AdminResource,
+  type Filters,
   type Row,
 } from '@/lib/admin';
 
@@ -243,12 +246,12 @@ function Dashboard() {
     return map;
   }, [mistakeOptions]);
 
-  const resource = RESOURCES.find((r) => r.id === tab)!;
+  const resource = VISIBLE_RESOURCES.find((r) => r.id === tab) ?? VISIBLE_RESOURCES[0];
 
   return (
     <>
       <div className="chip-group admin-tabs" role="group" aria-label="Show">
-        {RESOURCES.map((r) => (
+        {VISIBLE_RESOURCES.map((r) => (
           <button key={r.id} type="button" className="chip" aria-pressed={tab === r.id} onClick={() => setTab(r.id)}>
             <Icon icon={TAB_ICONS[r.id]} size={16} />
             {r.label}
@@ -281,6 +284,7 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
   const [rows, setRows] = useState<Row[] | null>(null);
   const [loadError, setLoadError] = useState('');
   const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState<Filters>({});
   /** 'new' while adding, a row key while editing, null otherwise. */
   const [editing, setEditing] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
@@ -338,18 +342,24 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
     if (resource.id === 'mistakes') onMistakesChanged();
   };
 
+  const filterable = resource.columns.filter((c) => c.filter);
+  const activeFilters = Object.values(filters).filter((v) => v.trim()).length;
+  const narrowed = query.trim() !== '' || activeFilters > 0;
+
   const visible = useMemo(() => {
     if (!rows) return [];
     const q = query.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((row) =>
-      resource.searchable.some((k) => {
-        const value = String(row[k] ?? '').toLowerCase();
-        const title = k === 'mistake_id' ? (titles.get(String(row[k])) ?? '').toLowerCase() : '';
-        return value.includes(q) || title.includes(q);
-      }),
+    return rows.filter(
+      (row) =>
+        matchesFilters(resource.columns, row, filters) &&
+        (!q ||
+          resource.searchable.some((k) => {
+            const value = String(row[k] ?? '').toLowerCase();
+            const title = k === 'mistake_id' ? (titles.get(String(row[k])) ?? '').toLowerCase() : '';
+            return value.includes(q) || title.includes(q);
+          })),
     );
-  }, [rows, query, resource, titles]);
+  }, [rows, query, filters, resource, titles]);
 
   const editingRow = editing && editing !== 'new' ? (rows?.find((r) => rowKey(resource, r) === editing) ?? null) : null;
 
@@ -359,6 +369,7 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
       case 'date':
         return formatDateTime(value);
       case 'id':
+        if (!value) return <span className="admin-table__missing">Example</span>;
         return (
           <code className="admin-table__id" title={String(value)}>
             {String(value).slice(0, 8)}
@@ -415,19 +426,57 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
         />
       )}
 
-      <div className="toolbar__search admin-panel__search">
-        <Icon icon={Search} size={18} className="toolbar__search-icon" />
-        <label htmlFor={`admin-${resource.id}-search`} className="sr-only">
-          Search {resource.label.toLowerCase()}
-        </label>
-        <input
-          id={`admin-${resource.id}-search`}
-          type="search"
-          className="input"
-          placeholder="Search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+      <div className="admin-filters">
+        <div className="toolbar__search admin-panel__search">
+          <Icon icon={Search} size={18} className="toolbar__search-icon" />
+          <label htmlFor={`admin-${resource.id}-search`} className="sr-only">
+            Search {resource.label.toLowerCase()}
+          </label>
+          <input
+            id={`admin-${resource.id}-search`}
+            type="search"
+            className="input"
+            placeholder="Search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+
+        {filterable.length > 0 && (
+          <fieldset className="admin-filters__fields">
+            <legend className="admin-filters__legend">Filter by column</legend>
+            <div className="admin-filters__grid">
+              {filterable.map((column) => (
+                <ColumnFilter
+                  key={column.key}
+                  idPrefix={`admin-${resource.id}-filter`}
+                  column={column}
+                  filters={filters}
+                  onChange={(key, value) => setFilters((f) => ({ ...f, [key]: value }))}
+                />
+              ))}
+            </div>
+          </fieldset>
+        )}
+
+        {rows && narrowed && (
+          <div className="admin-filters__summary">
+            <p>
+              Showing {visible.length} of {rows.length}
+            </p>
+            <button
+              type="button"
+              className="btn btn--ghost btn--sm"
+              onClick={() => {
+                setFilters({});
+                setQuery('');
+                toast('Filters cleared.');
+              }}
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
       </div>
 
       {loadError && (
@@ -440,8 +489,8 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
       {rows === null ? (
         <div className="card card--skeleton" aria-busy="true" />
       ) : visible.length === 0 ? (
-        <EmptyState icon={TAB_ICONS[resource.id]} title={query ? 'Nothing matches that search' : 'Nothing here yet'}>
-          <p>{query ? 'Try a different word.' : `No ${resource.label.toLowerCase()} so far.`}</p>
+        <EmptyState icon={TAB_ICONS[resource.id]} title={narrowed ? 'Nothing matches' : 'Nothing here yet'}>
+          <p>{narrowed ? 'Try loosening the search or filters.' : `No ${resource.label.toLowerCase()} so far.`}</p>
         </EmptyState>
       ) : (
         <div className="admin-table-wrap">
@@ -508,6 +557,97 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
         </div>
       )}
     </section>
+  );
+}
+
+/* Column filters ----------------------------------------------------------- */
+
+interface ColumnFilterProps {
+  idPrefix: string;
+  column: AdminColumn;
+  filters: Filters;
+  onChange: (key: string, value: string) => void;
+}
+
+const OWNER_OPTIONS = [
+  { value: 'example', label: 'Example entries' },
+  { value: 'visitor', label: 'Visitors’ entries' },
+];
+
+function ColumnFilter({ idPrefix, column, filters, onChange }: ColumnFilterProps) {
+  const id = `${idPrefix}-${column.key}`;
+
+  if (column.filter === 'date') {
+    const fromKey = `${column.key}:from`;
+    const toKey = `${column.key}:to`;
+    return (
+      <fieldset className="field admin-filters__dates">
+        <legend className="field__label">{column.label}</legend>
+        <div className="admin-filters__date-pair">
+          <div className="field">
+            <label htmlFor={`${id}-from`} className="admin-filters__sub-label">
+              From
+            </label>
+            <input
+              id={`${id}-from`}
+              type="date"
+              className="input"
+              value={filters[fromKey] ?? ''}
+              max={filters[toKey] || undefined}
+              onChange={(e) => onChange(fromKey, e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor={`${id}-to`} className="admin-filters__sub-label">
+              To
+            </label>
+            <input
+              id={`${id}-to`}
+              type="date"
+              className="input"
+              value={filters[toKey] ?? ''}
+              min={filters[fromKey] || undefined}
+              onChange={(e) => onChange(toKey, e.target.value)}
+            />
+          </div>
+        </div>
+      </fieldset>
+    );
+  }
+
+  const options = column.filter === 'owner' ? OWNER_OPTIONS : column.options;
+
+  return (
+    <div className="field">
+      <label htmlFor={id} className="field__label">
+        {column.label}
+      </label>
+      {column.filter === 'text' ? (
+        <input
+          id={id}
+          type="text"
+          className="input"
+          placeholder="Contains…"
+          autoComplete="off"
+          value={filters[column.key] ?? ''}
+          onChange={(e) => onChange(column.key, e.target.value)}
+        />
+      ) : (
+        <select
+          id={id}
+          className="input input--select"
+          value={filters[column.key] ?? ''}
+          onChange={(e) => onChange(column.key, e.target.value)}
+        >
+          <option value="">Any</option>
+          {options?.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      )}
+    </div>
   );
 }
 

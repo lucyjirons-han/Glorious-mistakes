@@ -50,6 +50,12 @@ export interface AdminColumn {
   key: string;
   label: string;
   kind?: 'date' | 'id' | 'mistake' | 'long';
+  /**
+   * How the column can be filtered: words it contains, one of `options`, a date range, or
+   * (for owners) example entries versus visitors' entries. Leave out for no filter.
+   */
+  filter?: 'text' | 'select' | 'date' | 'owner';
+  options?: { value: string; label: string }[];
 }
 
 export interface AdminResource {
@@ -67,11 +73,17 @@ export interface AdminResource {
   searchable: string[];
   /** Shown above the table. */
   note?: string;
+  /** TEMPORARY: true hides the section from the admin page (the data and rules stay as they are). */
+  hidden?: boolean;
 }
 
 const categoryOptions = CATEGORIES.map((c) => ({ value: c.id, label: c.label }));
 const cringeOptions = CRINGE_LEVELS.map((c) => ({ value: String(c.level), label: `${c.level} · ${c.label}` }));
 const reactionOptions = REACTIONS.map((r) => ({ value: r.id, label: r.label }));
+const visibilityOptions = [
+  { value: 'public', label: 'Public (on the feed)' },
+  { value: 'private', label: 'Private' },
+];
 
 export const RESOURCES: AdminResource[] = [
   {
@@ -91,23 +103,20 @@ export const RESOURCES: AdminResource[] = [
         label: 'Visibility',
         type: 'select',
         required: true,
-        options: [
-          { value: 'public', label: 'Public (on the feed)' },
-          { value: 'private', label: 'Private' },
-        ],
+        options: visibilityOptions,
       },
       { key: 'author', label: 'Display name', type: 'text', maxLength: 80 },
     ],
     columns: [
-      { key: 'title', label: 'Headline', kind: 'long' },
-      { key: 'category', label: 'Category' },
-      { key: 'visibility', label: 'Visibility' },
-      { key: 'author', label: 'Name' },
-      { key: 'created_at', label: 'Logged', kind: 'date' },
-      { key: 'user_id', label: 'Owner', kind: 'id' },
+      { key: 'title', label: 'Headline', kind: 'long', filter: 'text' },
+      { key: 'category', label: 'Category', filter: 'select', options: categoryOptions },
+      { key: 'visibility', label: 'Visibility', filter: 'select', options: visibilityOptions },
+      { key: 'author', label: 'Name', filter: 'text' },
+      { key: 'created_at', label: 'Logged', kind: 'date', filter: 'date' },
+      { key: 'user_id', label: 'Owner', kind: 'id', filter: 'owner' },
     ],
     searchable: ['title', 'what_happened', 'lesson', 'author', 'id', 'user_id'],
-    note: 'Entries stored in the database. The built-in example entries live in the code (src/lib/seed.ts), so they aren’t listed.',
+    note: 'Every entry, including the example entries (shown with “Example” as the owner).',
   },
   {
     id: 'reactions',
@@ -127,6 +136,8 @@ export const RESOURCES: AdminResource[] = [
     ],
     searchable: ['mistake_id', 'reaction', 'user_id'],
     note: 'Reactions you add here count as yours, so you can add each reaction once per entry.',
+    // TEMPORARY: hidden for now; set to false (or remove) to bring the Reactions tab back.
+    hidden: true,
   },
   {
     id: 'reports',
@@ -142,6 +153,8 @@ export const RESOURCES: AdminResource[] = [
     ],
     searchable: ['mistake_id', 'reporter_id'],
     note: 'Deleting a report only clears the flag. To take an entry down, make it private or delete it under Mistakes.',
+    // TEMPORARY: hidden for now; set to false (or remove) to bring the Reports tab back.
+    hidden: true,
   },
   {
     id: 'newsletter_signups',
@@ -154,14 +167,58 @@ export const RESOURCES: AdminResource[] = [
       { key: 'email', label: 'Email', type: 'email', required: true, maxLength: 254 },
     ],
     columns: [
-      { key: 'first_name', label: 'First name' },
-      { key: 'email', label: 'Email' },
-      { key: 'consented_at', label: 'Signed up', kind: 'date' },
+      { key: 'first_name', label: 'First name', filter: 'text' },
+      { key: 'email', label: 'Email', filter: 'text' },
+      { key: 'consented_at', label: 'Signed up', kind: 'date', filter: 'date' },
     ],
     searchable: ['first_name', 'email'],
     note: 'Only add people who have asked to be on the list.',
   },
 ];
+
+/** The sections shown on the admin page. */
+export const VISIBLE_RESOURCES = RESOURCES.filter((r) => !r.hidden);
+
+export type Filters = Record<string, string>;
+
+/** A date as YYYY-MM-DD in the viewer's time zone, to compare with date inputs. */
+function localDay(value: unknown): string {
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/**
+ * True when a row passes every column filter. Date columns use `<key>:from` and `<key>:to`
+ * (both inclusive); the rest use the column's key.
+ */
+export function matchesFilters(columns: AdminColumn[], row: Row, filters: Filters): boolean {
+  return columns.every((column) => {
+    const value = row[column.key];
+    switch (column.filter) {
+      case 'text': {
+        const wanted = (filters[column.key] ?? '').trim().toLowerCase();
+        return !wanted || String(value ?? '').toLowerCase().includes(wanted);
+      }
+      case 'select':
+        return !filters[column.key] || String(value) === filters[column.key];
+      case 'owner':
+        if (filters[column.key] === 'example') return !value;
+        if (filters[column.key] === 'visitor') return !!value;
+        return true;
+      case 'date': {
+        const from = filters[`${column.key}:from`];
+        const to = filters[`${column.key}:to`];
+        if (!from && !to) return true;
+        const day = localDay(value);
+        return !!day && (!from || day >= from) && (!to || day <= to);
+      }
+      default:
+        return true;
+    }
+  });
+}
 
 /** Checks a form's values against the field rules. Returns an error message per field. */
 export function validateRow(fields: AdminField[], values: Record<string, string>): Record<string, string> {
