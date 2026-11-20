@@ -3617,6 +3617,12 @@ fieldset.field > .field__label {
     grid-template-columns: 1fr;
   }
 
+  /* Stacked, the drawings' different widths show, so centre them in the column. */
+  .step__art {
+    display: block;
+    margin-inline: auto;
+  }
+
   .values {
     grid-template-columns: 1fr;
   }
