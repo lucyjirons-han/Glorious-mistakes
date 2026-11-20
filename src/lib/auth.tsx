@@ -136,7 +136,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   const sessionUser = session?.user ?? null;
-  const userKey = sessionUser ? `${sessionUser.id}:${sessionUser.is_anonymous ? 'anon' : 'account'}` : null;
+  // 'unknown' until Supabase has read the stored session, then 'none' or the person. A first
+  // visit goes unknown → none, which must still re-run the effect below to start a session.
+  const userKey =
+    session === undefined
+      ? 'unknown'
+      : sessionUser
+        ? `${sessionUser.id}:${sessionUser.is_anonymous ? 'anon' : 'account'}`
+        : 'none';
 
   useEffect(() => {
     if (!supabase || session === undefined) return;
