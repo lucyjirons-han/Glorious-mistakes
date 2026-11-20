@@ -1636,6 +1636,14 @@ textarea {
   font-size: 0.9375rem;
 }
 
+/* Dropdowns are normally as wide as their longest option; here every field fills its own
+   column so long options can't push into the next one. */
+.admin-filters__grid .input,
+.admin-form__grid .input {
+  width: 100%;
+  min-width: 0;
+}
+
 /* A date range takes two grid cells so both inputs stay readable. */
 .admin-filters__dates {
   grid-column: span 2;
@@ -1792,6 +1800,92 @@ textarea {
 /* The row whose details are open in the form above the table. */
 .admin-table__editing > td {
   background: var(--c-neutral);
+}
+
+/* Under each table: "Showing x–y of z", rows per page, and the page buttons. */
+.admin-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  color: var(--c-muted);
+}
+
+.admin-pagination__size {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-pagination__size .input {
+  min-height: 40px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  color: var(--c-text);
+}
+
+.admin-pagination__pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.admin-pagination__pages .btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.admin-pagination__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-pagination__page {
+  display: grid;
+  place-items: center;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 8px;
+  background: transparent;
+  color: var(--c-text);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-pagination__page:hover {
+  background: var(--c-neutral);
+}
+
+.admin-pagination__page:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+/* The current page is filled, with an edge too, so it doesn't rely on colour alone. */
+.admin-pagination__page[aria-current='page'] {
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+  color: var(--c-on-primary);
+}
+
+.admin-pagination__gap {
+  padding: 0 4px;
+}
+
+@media (max-width: 560px) {
+  .admin-pagination__pages {
+    margin-left: 0;
+  }
 }
 
 .admin-form {
@@ -3444,7 +3538,8 @@ fieldset.field > .field__label {
   .been-there.is-pressed,
   .reaction.is-pressed,
   .choice input:checked + span,
-  .site-nav__link[aria-current='page'] {
+  .site-nav__link[aria-current='page'],
+  .admin-pagination__page[aria-current='page'] {
     forced-color-adjust: none;
     background: Highlight !important;
     border-color: Highlight !important;
@@ -3455,7 +3550,8 @@ fieldset.field > .field__label {
   .been-there.is-pressed *,
   .reaction.is-pressed *,
   .choice input:checked + span *,
-  .site-nav__link[aria-current='page'] * {
+  .site-nav__link[aria-current='page'] *,
+  .admin-pagination__page[aria-current='page'] * {
     color: inherit !important;
     border-color: currentColor !important;
   }

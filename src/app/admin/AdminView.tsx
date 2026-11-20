@@ -1,7 +1,7 @@
 'use client';
 
 import type { Session } from '@supabase/supabase-js';
-import { ArrowDown, ArrowUp, ArrowUpDown, CircleAlert, Flag, LogOut, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Flag, LogOut, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { EmptyState } from '@/components/EmptyState';
@@ -287,6 +287,9 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
   const [filters, setFilters] = useState<Filters>({});
   /** null keeps the order rows were loaded in (newest first). */
   const [sort, setSort] = useState<Sort | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(PAGE_SIZES[1]);
+  const tableRef = useRef<HTMLDivElement>(null);
   /** 'new' while adding, a row key while editing, null otherwise. */
   const [editing, setEditing] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
@@ -371,6 +374,24 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
     // Array.prototype.sort is stable, so ties keep their newest-first order.
     return [...visible].sort((a, b) => factor * compareCells(column, a, b, titles));
   }, [visible, sort, resource, titles]);
+
+  // A new search, filter, sort or page size starts again from page 1.
+  useEffect(() => {
+    setPage(1);
+  }, [query, filters, sort, pageSize]);
+
+  const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
+  // Deleting the last row on the last page would otherwise leave an empty page.
+  const currentPage = Math.min(page, pageCount);
+  const firstIndex = (currentPage - 1) * pageSize;
+  const pageRows = sorted.slice(firstIndex, firstIndex + pageSize);
+
+  const goToPage = (next: number) => {
+    setPage(next);
+    toast(`Page ${next} of ${pageCount}.`);
+    const top = tableRef.current?.getBoundingClientRect().top ?? 0;
+    if (top < 0) tableRef.current?.scrollIntoView({ block: 'start' });
+  };
 
   const toggleSort = (column: AdminColumn) => {
     const direction: SortDirection =
@@ -511,89 +532,178 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
           <p>{narrowed ? 'Try loosening the search or filters.' : `No ${resource.label.toLowerCase()} so far.`}</p>
         </EmptyState>
       ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                {resource.columns.map((c) => {
-                  const direction = sort?.key === c.key ? sort.direction : undefined;
+        <>
+          <div className="admin-table-wrap" ref={tableRef}>
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  {resource.columns.map((c) => {
+                    const direction = sort?.key === c.key ? sort.direction : undefined;
+                    return (
+                      <th key={c.key} scope="col" aria-sort={direction ?? 'none'}>
+                        <button
+                          type="button"
+                          className={`admin-table__sort${direction ? ' admin-table__sort--active' : ''}`}
+                          onClick={() => toggleSort(c)}
+                        >
+                          {c.label}
+                          <Icon
+                            icon={direction === 'ascending' ? ArrowUp : direction === 'descending' ? ArrowDown : ArrowUpDown}
+                            size={14}
+                          />
+                          <span className="sr-only">
+                            {direction
+                              ? `, sorted ${sortDescription(c, direction)}`
+                              : ', select to sort'}
+                          </span>
+                        </button>
+                      </th>
+                    );
+                  })}
+                  <th scope="col">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map((row) => {
+                  const key = rowKey(resource, row);
+                  const name = describeRow(resource, row, titles);
                   return (
-                    <th key={c.key} scope="col" aria-sort={direction ?? 'none'}>
-                      <button
-                        type="button"
-                        className={`admin-table__sort${direction ? ' admin-table__sort--active' : ''}`}
-                        onClick={() => toggleSort(c)}
-                      >
-                        {c.label}
-                        <Icon
-                          icon={direction === 'ascending' ? ArrowUp : direction === 'descending' ? ArrowDown : ArrowUpDown}
-                          size={14}
-                        />
-                        <span className="sr-only">
-                          {direction
-                            ? `, sorted ${sortDescription(c, direction)}`
-                            : ', select to sort'}
-                        </span>
-                      </button>
-                    </th>
+                    <tr key={key} className={editing === key ? 'admin-table__editing' : undefined}>
+                      {resource.columns.map((c) => (
+                        <td key={c.key} className={c.kind === 'long' ? 'admin-table__long' : undefined}>
+                          {renderCell(row, c)}
+                        </td>
+                      ))}
+                      <td className="admin-table__actions">
+                        {confirmingDelete === key ? (
+                          <div className="confirm" role="group" aria-label={`Delete ${name}?`}>
+                            <p className="confirm__text">Delete for good?</p>
+                            <button type="button" className="btn btn--danger btn--sm" onClick={() => void remove(row)}>
+                              Yes, delete
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn--ghost btn--sm"
+                              autoFocus
+                              onClick={() => setConfirmingDelete(null)}
+                            >
+                              Keep it
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="owner-actions">
+                            <button type="button" className="btn btn--ghost btn--sm" onClick={() => setEditing(key)}>
+                              Edit<span className="sr-only"> {name}</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn--ghost btn--sm btn--danger-text"
+                              onClick={() => setConfirmingDelete(key)}
+                            >
+                              Delete<span className="sr-only"> {name}</span>
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
                   );
                 })}
-                <th scope="col">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((row) => {
-                const key = rowKey(resource, row);
-                const name = describeRow(resource, row, titles);
-                return (
-                  <tr key={key} className={editing === key ? 'admin-table__editing' : undefined}>
-                    {resource.columns.map((c) => (
-                      <td key={c.key} className={c.kind === 'long' ? 'admin-table__long' : undefined}>
-                        {renderCell(row, c)}
-                      </td>
-                    ))}
-                    <td className="admin-table__actions">
-                      {confirmingDelete === key ? (
-                        <div className="confirm" role="group" aria-label={`Delete ${name}?`}>
-                          <p className="confirm__text">Delete for good?</p>
-                          <button type="button" className="btn btn--danger btn--sm" onClick={() => void remove(row)}>
-                            Yes, delete
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn--ghost btn--sm"
-                            autoFocus
-                            onClick={() => setConfirmingDelete(null)}
-                          >
-                            Keep it
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="owner-actions">
-                          <button type="button" className="btn btn--ghost btn--sm" onClick={() => setEditing(key)}>
-                            Edit<span className="sr-only"> {name}</span>
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn--ghost btn--sm btn--danger-text"
-                            onClick={() => setConfirmingDelete(key)}
-                          >
-                            Delete<span className="sr-only"> {name}</span>
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="admin-pagination">
+            <p className="admin-pagination__summary">
+              Showing {firstIndex + 1}&ndash;{firstIndex + pageRows.length} of {sorted.length}
+            </p>
+
+            <div className="admin-pagination__size">
+              <label htmlFor={`admin-${resource.id}-page-size`}>Rows per page</label>
+              <select
+                id={`admin-${resource.id}-page-size`}
+                className="input input--select"
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+              >
+                {PAGE_SIZES.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {pageCount > 1 && (
+              <nav className="admin-pagination__pages" aria-label={`${resource.label} pages`}>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <Icon icon={ChevronLeft} size={16} />
+                  Previous<span className="sr-only"> page</span>
+                </button>
+                <ul className="admin-pagination__list">
+                  {pageNumbers(currentPage, pageCount).map((n, i) =>
+                    n === null ? (
+                      <li key={`gap-${i}`} className="admin-pagination__gap" aria-hidden="true">
+                        &hellip;
+                      </li>
+                    ) : (
+                      <li key={n}>
+                        <button
+                          type="button"
+                          className="admin-pagination__page"
+                          aria-current={n === currentPage ? 'page' : undefined}
+                          onClick={() => goToPage(n)}
+                        >
+                          <span className="sr-only">Page </span>
+                          {n}
+                        </button>
+                      </li>
+                    ),
+                  )}
+                </ul>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === pageCount}
+                >
+                  Next<span className="sr-only"> page</span>
+                  <Icon icon={ChevronRight} size={16} />
+                </button>
+              </nav>
+            )}
+          </div>
+        </>
       )}
     </section>
   );
+}
+
+/* Pagination -------------------------------------------------------------- */
+
+const PAGE_SIZES = [10, 25, 50, 100] as const;
+
+/**
+ * The page numbers to show: all of them when there are few, otherwise the first, the last and
+ * the ones either side of the current page, with null marking a gap ("…").
+ */
+function pageNumbers(current: number, count: number): (number | null)[] {
+  if (count <= 7) return Array.from({ length: count }, (_, i) => i + 1);
+  const wanted = new Set([1, count, current - 1, current, current + 1]);
+  const list: (number | null)[] = [];
+  for (let n = 1; n <= count; n++) {
+    if (!wanted.has(n)) continue;
+    const last = list[list.length - 1];
+    if (typeof last === 'number' && n - last > 1) list.push(null);
+    list.push(n);
+  }
+  return list;
 }
 
 /* Sorting ----------------------------------------------------------------- */
