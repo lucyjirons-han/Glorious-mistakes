@@ -3,7 +3,8 @@
 import { Asterisk } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { HeaderSearch } from './HeaderSearch';
 import { Icon } from './Icon';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -18,6 +19,17 @@ const NAV_LINKS = [
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpenState] = useState(false);
+
+  // Only one of the mobile menu and the search box is open at a time.
+  const setSearchOpen = useCallback((next: boolean) => {
+    setSearchOpenState(next);
+    if (next) setOpen(false);
+  }, []);
+  const toggleMenu = () => {
+    setOpen((o) => !o);
+    setSearchOpenState(false);
+  };
 
   // Close the mobile menu after navigating, or when Escape is pressed.
   useEffect(() => setOpen(false), [pathname]);
@@ -47,7 +59,7 @@ export function SiteHeader() {
           className="nav-toggle"
           aria-expanded={open}
           aria-controls="site-nav"
-          onClick={() => setOpen((o) => !o)}
+          onClick={toggleMenu}
         >
           <span className="nav-toggle__bars" aria-hidden="true" />
           <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
@@ -78,6 +90,7 @@ export function SiteHeader() {
           </Link>
         </nav>
 
+        <HeaderSearch open={searchOpen} onOpenChange={setSearchOpen} />
         <ThemeToggle />
       </div>
     </header>

@@ -37,10 +37,11 @@ Then open http://localhost:3000.
 | `/learn`     | Learn articles, listed as cards                                      |
 | `/learn/[slug]` | One Learn article                                                 |
 | `/faq`       | Frequently asked questions                                           |
+| `/search?q=` | Site search (opened from the header): entries, Learn articles, FAQ answers and pages. The pages list is `SITE_PAGES` in `src/lib/search.ts` |
 | `/about`, `/guidelines` | About the site, and the community guidelines              |
 | `/admin`     | Admin: view, add, edit and delete entries, reactions, reports and subscribers |
 
-`/mine` and `/log` are marked `noindex`. The sitemap (`/sitemap.xml`) and `robots.txt` are
+`/mine`, `/log` and `/search` are marked `noindex`. The sitemap (`/sitemap.xml`) and `robots.txt` are
 generated from `src/app/sitemap.ts` and `src/app/robots.ts`.
 
 ## Adding a Learn article
