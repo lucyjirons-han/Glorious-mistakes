@@ -13,7 +13,6 @@ import { ThemeToggle } from './ThemeToggle';
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/feed', label: 'Public feed' },
-  { href: '/mine', label: 'My mistakes' },
   { href: '/learn', label: 'Learn' },
   { href: '/about', label: 'About' },
 ];

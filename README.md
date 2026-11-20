@@ -102,7 +102,9 @@ is connected, import the list there and empty the table.
 ### Accounts
 
 Visitors can log in with Google from the header (a round button on wide screens, or in the menu
-on narrow ones). Everything lives in [`src/lib/auth.tsx`](src/lib/auth.tsx) (`useAuth()`), and
+on narrow ones). Once logged in, the account menu holds My mistakes, Settings and (for admins)
+Admin; "My mistakes" isn't in the main nav, so visitors who haven't logged in reach `/mine` from
+the footer and the "you logged it" screen after saving an entry. Everything lives in [`src/lib/auth.tsx`](src/lib/auth.tsx) (`useAuth()`), and
 the store reloads whenever the user changes.
 
 - **Logging in keeps your entries.** The anonymous user is upgraded with

@@ -1,6 +1,6 @@
 'use client';
 
-import { LogIn, LogOut, Settings, ShieldCheck } from 'lucide-react';
+import { LogIn, LogOut, NotebookPen, Settings, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -20,7 +20,7 @@ function useLogOut() {
 
 /**
  * The account control in the header bar (wide screens): "Log in", or a round button with the
- * person's initials that opens a small menu. On narrow screens the same links sit in the main
+ * person's initials that opens a small menu (My mistakes, Settings, Admin, Log out). On narrow screens the same links sit in the main
  * menu instead (AccountNavLinks).
  */
 export function AccountMenu() {
@@ -96,6 +96,12 @@ export function AccountMenu() {
         </p>
         <ul className="account-menu__list">
           <li>
+            <Link href="/mine" className="account-menu__item" aria-current={pathname === '/mine' ? 'page' : undefined}>
+              <Icon icon={NotebookPen} size={18} />
+              My mistakes
+            </Link>
+          </li>
+          <li>
             <Link href="/settings" className="account-menu__item" aria-current={pathname === '/settings' ? 'page' : undefined}>
               <Icon icon={Settings} size={18} />
               Settings
@@ -145,6 +151,12 @@ export function AccountNavLinks() {
   return (
     <ul className="site-nav__list site-nav__account" aria-label="Your account">
       <li className="site-nav__who">Logged in as {displayName(auth.profile, auth.user)}</li>
+      <li>
+        <Link href="/mine" className="site-nav__link" aria-current={pathname === '/mine' ? 'page' : undefined}>
+          <Icon icon={NotebookPen} size={20} />
+          My mistakes
+        </Link>
+      </li>
       <li>
         <Link href="/settings" className="site-nav__link" aria-current={pathname === '/settings' ? 'page' : undefined}>
           <Icon icon={Settings} size={20} />

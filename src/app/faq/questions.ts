@@ -88,9 +88,11 @@ export const FAQ_GROUPS: QuestionGroup[] = [
             list: [
               ['Anything you’ve already logged on this device comes with you when you log in.'],
               [
-                'Once you’re logged in, ',
+                'Once you’re logged in, the round button with your initials (top right) opens your account menu. That’s where you’ll find ',
+                { href: '/mine', text: 'My mistakes' },
+                ' and ',
                 { href: '/settings', text: 'Settings' },
-                ' is where you change your name, email address and newsletter preference.',
+                ', where you change your name, email address and newsletter preference.',
               ],
               [
                 'Logging out keeps everything safe in your account. This browser goes back to a fresh, empty start until you log in again.',
@@ -212,7 +214,7 @@ export const FAQ_GROUPS: QuestionGroup[] = [
             p: [
               'Yes, any time. Head to ',
               { href: '/mine', text: 'My mistakes' },
-              ' to edit an entry, switch it between private and shared, or delete it.',
+              ' to edit an entry, switch it between private and shared, or delete it. If you’re logged in, it’s in your account menu (the round button with your initials, top right). If not, there’s a link at the bottom of every page.',
             ],
           },
           {
