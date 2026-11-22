@@ -137,8 +137,6 @@ export const RESOURCES: AdminResource[] = [
     ],
     searchable: ['mistake_id', 'reaction', 'user_id'],
     note: 'Reactions you add here count as yours, so you can add each reaction once per entry.',
-    // TEMPORARY: hidden for now; set to false (or remove) to bring the Reactions tab back.
-    hidden: true,
   },
   {
     id: 'reports',
@@ -154,8 +152,6 @@ export const RESOURCES: AdminResource[] = [
     ],
     searchable: ['mistake_id', 'reporter_id'],
     note: 'Deleting a report only clears the flag. To take an entry down, make it private or delete it under Mistakes.',
-    // TEMPORARY: hidden for now; set to false (or remove) to bring the Reports tab back.
-    hidden: true,
   },
   {
     id: 'newsletter_signups',

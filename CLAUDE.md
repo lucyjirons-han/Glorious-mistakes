@@ -40,8 +40,6 @@ in the code.
   (anonymous or not) and wait for `ready`. Logged-in-only UI checks `useAuth().user`.
 - Admins log in with Google too; `/admin` and the account menu's Admin link check
   `useAuth().isAdmin`, but row level security is what actually protects the data.
-- **TEMPORARY:** the admin page's Reactions and Reports tabs are hidden (`hidden: true` in
-  `RESOURCES`). The user will bring them back later.
 - When a mailing-list provider or pricing arrives, update the FAQ answers in
   `src/app/faq/questions.ts`. Several say the site is free and logging in is only needed to log
   a mistake.

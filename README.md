@@ -154,9 +154,6 @@ you click its heading, and long tables are split into pages (10, 25, 50 or 100 r
 Newsletter has an **Export CSV** button (the rows matching the current search and filters, in
 the current order); give another section an `exportName` to add one there.
 
-> **Reactions and Reports tabs hidden for now.** They're marked `hidden: true` in
-> `src/lib/admin.ts`; remove that to bring them back (the data and database rules are unchanged).
-
 When pricing or a mailing-list provider arrives, update the answers in
 [`src/app/faq/questions.ts`](src/app/faq/questions.ts).
 
