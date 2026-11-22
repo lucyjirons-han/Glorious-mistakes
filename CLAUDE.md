@@ -43,6 +43,12 @@ in the code.
 - When a mailing-list provider or pricing arrives, update the FAQ answers in
   `src/app/faq/questions.ts`. Several say the site is free and logging in is only needed to log
   a mistake.
+- **Public profiles** (`public_profiles`, `src/lib/profiles.ts`) are separate from `profiles`,
+  which holds private first and last names: never show those on a profile or entry. Anonymous
+  entries (blank display name) must never link to or appear on a profile. Social links are saved
+  as handles and turned into links by `SOCIAL_PLATFORMS`, never stored as free URLs, and avatar
+  addresses are limited by a database check to Google's photo servers and the person's own
+  `avatars/<user id>/` folder. Postgres regexes allow repeat counts up to 255 only (`{1,255}`).
 - **Logging a mistake needs a Google login.** `/log` shows a log-in prompt to anonymous
   visitors, and the "Logged-in owners can add mistakes" policy rejects inserts from anonymous
   sessions. Reading, reacting, reporting and editing older anonymous entries stay open. With no

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Download, Flag, LogIn, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile, UsersRound } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Download, Flag, IdCard, LogIn, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { EmptyState } from '@/components/EmptyState';
@@ -33,6 +33,7 @@ const TAB_ICONS = {
   reports: Flag,
   newsletter_signups: Mail,
   profiles: UsersRound,
+  public_profiles: IdCard,
 } as const;
 
 const dateTime = new Intl.DateTimeFormat('en-AU', {
@@ -795,6 +796,8 @@ function describeRow(resource: AdminResource, row: Row, titles: Map<string, stri
       return `${row.first_name} (${row.email})`;
     case 'profiles':
       return [row.first_name, row.last_name].filter(Boolean).join(' ') || 'person with no name';
+    case 'public_profiles':
+      return `@${row.username}`;
   }
 }
 

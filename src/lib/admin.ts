@@ -43,7 +43,7 @@ export interface AdminColumn {
 }
 
 export interface AdminResource {
-  id: 'mistakes' | 'reactions' | 'reports' | 'newsletter_signups' | 'profiles';
+  id: 'mistakes' | 'reactions' | 'reports' | 'newsletter_signups' | 'profiles' | 'public_profiles';
   label: string;
   /** One row, for the "Add" button and the empty state. */
   singular: string;
@@ -80,6 +80,15 @@ const reactionOptions = REACTIONS.map((r) => ({ value: r.id, label: r.label }));
 const roleOptions = [
   { value: 'member', label: 'Member' },
   { value: 'admin', label: 'Admin' },
+];
+const yesNoOptions = [
+  { value: 'true', label: 'Yes' },
+  { value: 'false', label: 'No' },
+];
+const avatarOptions = [
+  { value: 'google', label: 'Google photo' },
+  { value: 'upload', label: 'Uploaded picture' },
+  { value: 'initials', label: 'Initial only (hides the picture)' },
 ];
 const visibilityOptions = [
   { value: 'public', label: 'Public (on the feed)' },
@@ -207,6 +216,39 @@ export const RESOURCES: AdminResource[] = [
     note: 'Everyone who has logged in with Google. Admins can open this page and manage everything on it. Clearing a profile only removes the name; their account, role and entries stay.',
     noAdd: true,
     deleteWords: { button: 'Clear name', confirm: 'Clear their name?', yes: 'Yes, clear it', done: 'Cleared their name.' },
+  },
+  {
+    id: 'public_profiles',
+    label: 'Profiles',
+    singular: 'profile',
+    orderBy: 'created_at',
+    primaryKey: ['id'],
+    fields: [
+      { key: 'username', label: 'Username', type: 'text', required: true, maxLength: 30 },
+      { key: 'display_name', label: 'Display name', type: 'text', maxLength: 50 },
+      { key: 'pronouns', label: 'Pronouns', type: 'text', maxLength: 30 },
+      { key: 'bio', label: 'Bio', type: 'textarea', maxLength: 300 },
+      { key: 'avatar_source', label: 'Picture', type: 'select', options: avatarOptions, required: true },
+      { key: 'is_public', label: 'Public', type: 'select', options: yesNoOptions, required: true },
+      { key: 'show_entries', label: 'Lists their entries', type: 'select', options: yesNoOptions, required: true },
+    ],
+    columns: [
+      { key: 'username', label: 'Username', filter: 'text' },
+      { key: 'display_name', label: 'Display name', filter: 'text' },
+      { key: 'bio', label: 'Bio', kind: 'long' },
+      { key: 'is_public', label: 'Public', filter: 'select', options: yesNoOptions },
+      { key: 'created_at', label: 'Made', kind: 'date', filter: 'date' },
+      { key: 'id', label: 'User', kind: 'id' },
+    ],
+    searchable: ['username', 'display_name', 'bio', 'pronouns', 'website', 'id'],
+    note: 'People’s public profiles at /u/<username>. To moderate one, set Public to No (the page disappears), clear the bio, or set Picture to “Initial only”. Social links can only be changed by their owner.',
+    noAdd: true,
+    deleteWords: {
+      button: 'Delete',
+      confirm: 'Delete this profile?',
+      yes: 'Yes, delete it',
+      done: 'Deleted the profile. Their account and entries stay.',
+    },
   },
 ];
 

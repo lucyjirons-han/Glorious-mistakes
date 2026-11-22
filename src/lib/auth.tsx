@@ -4,6 +4,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { readJSON, writeJSON } from './community';
 import { LOGIN_PENDING_KEY, safeNext } from './login';
+import { googleAvatarUrl, PROFILE_COLUMNS, rowToProfile, type PublicProfile, type PublicProfileRow } from './profiles';
 import { ensureUserId, getSupabase } from './supabase';
 
 /**
@@ -41,6 +42,10 @@ interface AuthContextValue {
   /** The logged-in account, or null for anonymous visitors. */
   user: User | null;
   profile: Profile | null;
+  /** Their public profile (see ./profiles.ts), or null if they haven't made one. */
+  publicProfile: PublicProfile | null;
+  /** Updates the public profile on screen after it's been saved. */
+  setPublicProfile: (profile: PublicProfile | null) => void;
   isAdmin: boolean;
   /** How many entries were moved from this browser into the account at the last login. */
   movedEntries: number;
@@ -109,6 +114,25 @@ async function loadProfile(user: User): Promise<Profile> {
   return profile;
 }
 
+/**
+ * The account's public profile, if they've made one. Keeps a Google avatar current, since
+ * Google's photo address changes when they change their photo.
+ */
+async function loadPublicProfile(user: User): Promise<PublicProfile | null> {
+  const supabase = getSupabase()!;
+  const { data, error } = await supabase.from('public_profiles').select(PROFILE_COLUMNS).eq('id', user.id).maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const profile = rowToProfile(data as PublicProfileRow);
+  const google = googleAvatarUrl(user);
+  if (profile.avatarSource === 'google' && google && google !== profile.avatarUrl) {
+    const { error: updateError } = await supabase.from('public_profiles').update({ avatar_url: google }).eq('id', user.id);
+    if (updateError) logError('refresh your Google photo', updateError);
+    else profile.avatarUrl = google;
+  }
+  return profile;
+}
+
 /** Moves this browser's anonymous entries into the account, if a login started a transfer. */
 async function finishTransfer(): Promise<number> {
   const token = readJSON<string | null>(TRANSFER_KEY, null);
@@ -123,7 +147,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = getSupabase();
   /** undefined until Supabase has told us about the stored session. */
   const [session, setSession] = useState<Session | null | undefined>(undefined);
-  const [settled, setSettled] = useState<{ userId: string; profile: Profile | null; isAdmin: boolean } | null>(null);
+  const [settled, setSettled] = useState<{
+    userId: string;
+    profile: Profile | null;
+    publicProfile: PublicProfile | null;
+    isAdmin: boolean;
+  } | null>(null);
   const [failed, setFailed] = useState(false);
   const [movedEntries, setMovedEntries] = useState(0);
 
@@ -164,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const user = session.user;
       if (user.is_anonymous) {
-        if (!cancelled) setSettled({ userId: user.id, profile: null, isAdmin: false });
+        if (!cancelled) setSettled({ userId: user.id, profile: null, publicProfile: null, isAdmin: false });
         return;
       }
 
@@ -175,14 +204,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logError('move your entries into your account', error);
       }
 
-      const [profile, admin] = await Promise.all([
+      const [profile, publicProfile, admin] = await Promise.all([
         loadProfile(user).catch((error) => {
           logError('load your profile', error);
           return namesFromUser(user);
         }),
+        loadPublicProfile(user).catch((error) => {
+          logError('load your public profile', error);
+          return null;
+        }),
         supabase.rpc('is_admin').then(({ data, error }) => !error && data === true),
       ]);
-      if (!cancelled) setSettled({ userId: user.id, profile, isAdmin: admin });
+      if (!cancelled) setSettled({ userId: user.id, profile, publicProfile, isAdmin: admin });
     })();
 
     return () => {
@@ -242,6 +275,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [supabase, settled],
   );
 
+  const setPublicProfile = useCallback((publicProfile: PublicProfile | null) => {
+    setSettled((prev) => (prev ? { ...prev, publicProfile } : prev));
+  }, []);
+
   const clearMovedEntries = useCallback(() => setMovedEntries(0), []);
 
   // Only trust the settled state once it matches the current session.
@@ -257,6 +294,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       userId: current?.userId ?? null,
       user: current && isAccount ? sessionUser : null,
       profile: current && isAccount ? current.profile : null,
+      publicProfile: current && isAccount ? current.publicProfile : null,
+      setPublicProfile,
       isAdmin: !!current && isAccount && current.isAdmin,
       movedEntries,
       clearMovedEntries,
@@ -264,7 +303,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       saveProfile,
     }),
-    [supabase, ready, failed, current, isAccount, sessionUser, movedEntries, clearMovedEntries, signInWithGoogle, signOut, saveProfile],
+    [supabase, ready, failed, current, isAccount, sessionUser, movedEntries, clearMovedEntries, signInWithGoogle, signOut, saveProfile, setPublicProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

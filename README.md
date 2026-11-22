@@ -41,9 +41,11 @@ Then open http://localhost:3000.
 | `/about`, `/guidelines` | About the site, and the community guidelines              |
 | `/login`     | Log in with Google (needed to log a mistake). `?next=` is where to go afterwards |
 | `/settings`  | Logged-in people change their name, email address and newsletter setting |
+| `/profile`   | Logged-in people set up their optional public profile, with a live preview |
+| `/u/[username]` | A public profile: picture, name, pronouns, bio, links and their named public entries |
 | `/admin`     | Admin (admins only): view, add, edit and delete entries, people, reactions, reports and subscribers |
 
-`/mine`, `/log`, `/search`, `/login`, `/settings` and `/admin` are marked `noindex`. The sitemap (`/sitemap.xml`) and `robots.txt` are
+`/mine`, `/log`, `/search`, `/login`, `/settings`, `/profile` and `/admin` are marked `noindex`. Public profiles can be indexed but aren't in the sitemap. The sitemap (`/sitemap.xml`) and `robots.txt` are
 generated from `src/app/sitemap.ts` and `src/app/robots.ts`.
 
 ## Adding a Learn article
@@ -102,7 +104,7 @@ is connected, import the list there and empty the table.
 ### Accounts
 
 Visitors can log in with Google from the header (a round button on wide screens, or in the menu
-on narrow ones). Once logged in, the account menu holds My mistakes, Settings and (for admins)
+on narrow ones). Once logged in, the account menu holds My mistakes, Your profile, Settings and (for admins)
 Admin. Logging a mistake needs a login: `/log` asks anonymous visitors to log in, and row level
 security rejects inserts from anonymous sessions. Reading and reacting don't need one. Everything lives in [`src/lib/auth.tsx`](src/lib/auth.tsx) (`useAuth()`), and
 the store reloads whenever the user changes.
@@ -114,8 +116,23 @@ the store reloads whenever the user changes.
   (`start_account_transfer()` before, `finish_account_transfer()` after; codes last an hour).
 - **Logging out** (this browser only) starts a fresh anonymous session, so "My mistakes" is
   empty until they log back in.
-- **Profiles** (`profiles` table) hold a first and last name, filled from Google the first time
-  and editable in `/settings`.
+- **Names** (`profiles` table) hold a first and last name, filled from Google the first time
+  and editable in `/settings`. Only the person and admins can read them.
+- **Public profiles** (`public_profiles` table, [`src/lib/profiles.ts`](src/lib/profiles.ts))
+  are optional pages at `/u/<username>`, set up at `/profile`: a username, display name,
+  pronouns, bio, avatar and links (website, Instagram, TikTok, YouTube, X, Threads, LinkedIn,
+  Facebook). Anyone can read the ones marked public; hidden or missing ones are a 404. Only
+  logged-in owners can create or edit theirs. Social accounts are stored as handles and the links
+  are built in code, and the database checks every field, so a profile can't link or load a
+  picture from anywhere unexpected. `useAuth().publicProfile` holds the visitor's own.
+  - **Avatars** are the person's Google photo (refreshed at each login), a picture uploaded to
+    the public `avatars` Storage bucket (cropped to a 400 × 400 WebP in the browser first; people
+    can only write to their own `avatars/<user id>/` folder), or their initial.
+  - **Entries and profiles:** a public entry with a display name links to its author's profile
+    when the profile is public and "List my shared mistakes" is on. Anonymous entries never link.
+    The store looks these up (`fetchAuthorProfiles`) and sets `authorProfile` on each entry.
+  - The profile page is rendered on the server on every request (`src/lib/profiles-server.ts`),
+    as a signed-out visitor.
 - **Newsletter:** `my_newsletter_subscription()` and `set_my_newsletter_subscription()` only
   ever touch the address on the person's own account, so the list stays unreadable.
 - **Changing email** uses `supabase.auth.updateUser({ email })`, which emails a confirmation
@@ -134,7 +151,8 @@ Supabase settings this needs (Authentication):
 ### Admin page
 
 [`/admin`](src/app/admin/AdminView.tsx) lets admins see, add, edit and delete entries, people,
-reactions, reports and newsletter subscribers. Admins log in with Google like everyone else,
+public profiles, reactions, reports and newsletter subscribers. On the **Profiles** tab, an
+admin can hide a profile (Public: No), clear a bio, or switch a picture off (Picture: Initial only). Admins log in with Google like everyone else,
 land on `/admin` straight after logging in, and see an **Admin** link in the account menu. Row level security does the access
 control: the `public.admins` list (unreadable through the API) and `public.is_admin()`, which is
 never true for anonymous sessions.

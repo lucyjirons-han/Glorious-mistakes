@@ -1,11 +1,12 @@
 'use client';
 
-import { LogIn, LogOut, NotebookPen, Settings, ShieldCheck } from 'lucide-react';
+import { CircleUserRound, LogIn, LogOut, NotebookPen, Settings, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { displayName, initialsFor, useAuth } from '@/lib/auth';
 import { loginHref } from '@/lib/login';
+import { avatarSrc } from '@/lib/profiles';
 import { Icon } from './Icon';
 import { useToast } from './Toast';
 
@@ -20,7 +21,7 @@ function useLogOut() {
 
 /**
  * The account control in the header bar (wide screens): "Log in", or a round button with the
- * person's initials that opens a small menu (My mistakes, Settings, Admin, Log out). On narrow screens the same links sit in the main
+ * person's initials that opens a small menu (My mistakes, Your profile, Settings, Admin, Log out). On narrow screens the same links sit in the main
  * menu instead (AccountNavLinks).
  */
 export function AccountMenu() {
@@ -66,6 +67,7 @@ export function AccountMenu() {
   }
 
   const name = displayName(auth.profile, auth.user);
+  const photo = auth.publicProfile ? avatarSrc(auth.publicProfile) : null;
 
   return (
     <div
@@ -84,9 +86,15 @@ export function AccountMenu() {
         aria-controls="account-menu-panel"
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="avatar account-menu__avatar" aria-hidden="true">
-          {initialsFor(auth.profile, auth.user)}
-        </span>
+        {photo ? (
+          <span className="avatar avatar--photo account-menu__avatar" aria-hidden="true">
+            <img src={photo} alt="" className="avatar__img" referrerPolicy="no-referrer" />
+          </span>
+        ) : (
+          <span className="avatar account-menu__avatar" aria-hidden="true">
+            {initialsFor(auth.profile, auth.user)}
+          </span>
+        )}
         <span className="sr-only">Your account</span>
       </button>
       <div id="account-menu-panel" className={`account-menu__panel${open ? ' is-open' : ''}`} hidden={!open}>
@@ -99,6 +107,12 @@ export function AccountMenu() {
             <Link href="/mine" className="account-menu__item" aria-current={pathname === '/mine' ? 'page' : undefined}>
               <Icon icon={NotebookPen} size={18} />
               My mistakes
+            </Link>
+          </li>
+          <li>
+            <Link href="/profile" className="account-menu__item" aria-current={pathname === '/profile' ? 'page' : undefined}>
+              <Icon icon={CircleUserRound} size={18} />
+              {auth.publicProfile ? 'Your profile' : 'Set up your profile'}
             </Link>
           </li>
           <li>
@@ -155,6 +169,12 @@ export function AccountNavLinks() {
         <Link href="/mine" className="site-nav__link" aria-current={pathname === '/mine' ? 'page' : undefined}>
           <Icon icon={NotebookPen} size={20} />
           My mistakes
+        </Link>
+      </li>
+      <li>
+        <Link href="/profile" className="site-nav__link" aria-current={pathname === '/profile' ? 'page' : undefined}>
+          <Icon icon={CircleUserRound} size={20} />
+          {auth.publicProfile ? 'Your profile' : 'Set up your profile'}
         </Link>
       </li>
       <li>

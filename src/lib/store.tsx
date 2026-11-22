@@ -21,8 +21,9 @@ import {
 } from './community';
 import { useAuth } from './auth';
 import { normaliseCategory } from './constants';
+import { avatarSrc, type AvatarSource } from './profiles';
 import { getSupabase, inputToRow, rowToMistake, type MistakeRow } from './supabase';
-import type { Mistake, MistakeInput, ReactionId, Visibility } from './types';
+import type { AuthorProfile, Mistake, MistakeInput, ReactionId, Visibility } from './types';
 
 /**
  * Client-side store for the visitor's own mistakes, other people's public entries and
@@ -115,6 +116,42 @@ async function uploadLocalData(userId: string) {
   writeJSON(UPLOADED_KEY, true);
 }
 
+/**
+ * Public profiles for the authors of these entries, keyed by user id. Only profiles that are
+ * public and list their entries come back, and only signed (non-anonymous) entries are looked up.
+ */
+async function fetchAuthorProfiles(rows: MistakeRow[]): Promise<Map<string, AuthorProfile>> {
+  const supabase = getSupabase();
+  const found = new Map<string, AuthorProfile>();
+  const ids = [
+    ...new Set(rows.filter((r) => r.user_id && r.visibility === 'public' && r.author.trim()).map((r) => r.user_id!)),
+  ];
+  if (!supabase || !ids.length) return found;
+  // A few ids per request keeps the query string short.
+  const chunks: string[][] = [];
+  for (let i = 0; i < ids.length; i += 60) chunks.push(ids.slice(i, i + 60));
+  const results = await Promise.all(
+    chunks.map((chunk) =>
+      supabase
+        .from('public_profiles')
+        .select('id, username, avatar_source, avatar_url')
+        .in('id', chunk)
+        .eq('is_public', true)
+        .eq('show_entries', true),
+    ),
+  );
+  for (const { data, error } of results) {
+    if (error) throw error;
+    for (const row of data as { id: string; username: string; avatar_source: AvatarSource; avatar_url: string }[]) {
+      found.set(row.id, {
+        username: row.username,
+        avatarUrl: avatarSrc({ avatarSource: row.avatar_source, avatarUrl: row.avatar_url }),
+      });
+    }
+  }
+  return found;
+}
+
 interface RemoteData {
   mine: Mistake[];
   others: Mistake[];
@@ -144,7 +181,16 @@ async function fetchRemote(examples: Mistake[], userId: string): Promise<RemoteD
   if (reactionsRes.error) throw reactionsRes.error;
 
   const mine = (mineRes.data as MistakeRow[]).map((r) => rowToMistake(r, userId));
-  const others = (othersRes.data as MistakeRow[]).map((r) => rowToMistake(r, userId));
+  const otherRows = othersRes.data as MistakeRow[];
+  const authors = await fetchAuthorProfiles(otherRows).catch((error) => {
+    logError('load authors’ profiles', error);
+    return new Map<string, AuthorProfile>();
+  });
+  const others = otherRows.map((r) => {
+    const mistake = rowToMistake(r, userId);
+    const author = r.user_id && mistake.author.trim() ? authors.get(r.user_id) : undefined;
+    return author ? { ...mistake, authorProfile: author } : mistake;
+  });
 
   const reactions: MyReactions = {};
   for (const { mistake_id, reaction } of reactionsRes.data as {
@@ -187,6 +233,8 @@ interface MistakesContextValue {
   hasReaction: (id: string, reaction: ReactionId) => boolean;
   toggleReaction: (id: string, reaction: ReactionId) => void;
   reactionCount: (mistake: Mistake, reaction: ReactionId) => number;
+  /** Loads other people's reaction counts for entries that aren't in the feed (e.g. on a profile). */
+  loadCounts: (mistakes: Mistake[]) => void;
   /** Shorthands for the "been there" reaction shown on cards. */
   hasReacted: (id: string) => boolean;
   toggleBeenThere: (id: string) => void;
@@ -284,6 +332,35 @@ export function MistakesProvider({
 
   const remote = mode === 'remote' ? getSupabase() : null;
 
+  /** Ids whose counts have been asked for by loadCounts, so each is only fetched once. */
+  const requestedCounts = useRef(new Set<string>());
+  const loadCounts = useCallback(
+    (list: Mistake[]) => {
+      if (!remote) return;
+      const ids = list.map((m) => m.id).filter((id) => !(id in counts) && !requestedCounts.current.has(id));
+      if (!ids.length) return;
+      for (const id of ids) requestedCounts.current.add(id);
+      remote.rpc('reaction_counts', { mistake_ids: ids }).then(({ data, error }) => {
+        if (error) {
+          logError('load reaction counts', error);
+          return;
+        }
+        const found: ReactionCounts = {};
+        for (const id of ids) found[id] = {};
+        for (const { mistake_id, reaction, total } of data as {
+          mistake_id: string;
+          reaction: ReactionId;
+          total: number;
+        }[]) {
+          const own = reactions[mistake_id]?.includes(reaction) ? 1 : 0;
+          found[mistake_id][reaction] = Math.max(0, Number(total) - own);
+        }
+        setCounts((prev) => ({ ...found, ...prev }));
+      });
+    },
+    [remote, counts, reactions],
+  );
+
   const addMistake = useCallback(
     (input: MistakeInput) => {
       const mistake: Mistake = {
@@ -361,7 +438,15 @@ export function MistakesProvider({
       baseReactionCount(m, reaction) +
       (counts[m.id]?.[reaction] ?? 0) +
       (has(m.id, reaction) ? 1 : 0);
-    const sortedMine = [...mine].sort(byNewest);
+    const ownProfile = auth.publicProfile;
+    const ownAuthor: AuthorProfile | undefined =
+      ownProfile && ownProfile.isPublic && ownProfile.showEntries
+        ? { username: ownProfile.username, avatarUrl: avatarSrc(ownProfile) }
+        : undefined;
+    // The visitor's own entries follow their profile as they edit it.
+    const withAuthor = (m: Mistake): Mistake =>
+      ownAuthor && m.visibility === 'public' && m.author.trim() ? { ...m, authorProfile: ownAuthor } : m;
+    const sortedMine = [...mine].sort(byNewest).map(withAuthor);
     return {
       ready,
       mine: sortedMine,
@@ -370,9 +455,9 @@ export function MistakesProvider({
         ...others,
         ...examples,
       ].sort(byNewest),
-      getMine: (id) => mine.find((m) => m.id === id),
+      getMine: (id) => sortedMine.find((m) => m.id === id),
       getMistake: (id) =>
-        mine.find((m) => m.id === id) ??
+        sortedMine.find((m) => m.id === id) ??
         others.find((m) => m.id === id) ??
         examples.find((m) => m.id === id),
       addMistake,
@@ -382,6 +467,7 @@ export function MistakesProvider({
       hasReaction: has,
       toggleReaction,
       reactionCount: count,
+      loadCounts,
       hasReacted: (id) => has(id, 'been-there'),
       toggleBeenThere: (id) => toggleReaction(id, 'been-there'),
       beenThereCount: (m) => count(m, 'been-there'),
@@ -398,6 +484,8 @@ export function MistakesProvider({
     setVisibility,
     deleteMistake,
     toggleReaction,
+    loadCounts,
+    auth.publicProfile,
   ]);
 
   return <MistakesContext.Provider value={value}>{children}</MistakesContext.Provider>;

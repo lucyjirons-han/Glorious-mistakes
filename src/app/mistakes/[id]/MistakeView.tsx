@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Avatar } from '@/components/Avatar';
 import { BeenThereButton } from '@/components/BeenThereButton';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon, IconBadge } from '@/components/Icon';
@@ -24,6 +25,7 @@ import { ReactionBar } from '@/components/ReactionBar';
 import { useToast } from '@/components/Toast';
 import { hasReported, reportMistake } from '@/lib/community';
 import { displayAuthor, formatDate, getCategory, getCringe, summarise } from '@/lib/constants';
+import { profileHref } from '@/lib/profiles';
 import { revealOffset } from '@/lib/reveal';
 import { useMistakes } from '@/lib/store';
 import type { Mistake } from '@/lib/types';
@@ -225,27 +227,32 @@ function EntryDetails({ mistake }: { mistake: Mistake }) {
   );
 }
 
-const AVATAR_TINTS = ['#C3B8E6', '#D0E8C6', '#B0D3D0', '#F6D5D8'];
-
 function AuthorLine({ mistake }: { mistake: Mistake }) {
   const name = displayAuthor(mistake);
   const anonymous = !mistake.author.trim();
-  const tint = AVATAR_TINTS[[...name].reduce((n, ch) => n + ch.codePointAt(0)!, 0) % AVATAR_TINTS.length];
+  const profile = anonymous ? undefined : mistake.authorProfile;
 
   return (
     <p className="author-line">
-      <span
-        className={`avatar${anonymous ? ' avatar--anonymous' : ''}`}
-        style={anonymous ? undefined : { background: tint }}
-        aria-hidden="true"
-      >
-        {anonymous ? <Icon icon={VenetianMask} size={22} /> : [...name][0].toUpperCase()}
-      </span>
+      {anonymous ? (
+        <span className="avatar avatar--anonymous" aria-hidden="true">
+          <Icon icon={VenetianMask} size={22} />
+        </span>
+      ) : (
+        <Avatar src={profile?.avatarUrl ?? null} name={name} />
+      )}
       <span>
         <span className="author-line__label">
           {mistake.mine && mistake.visibility === 'private' ? 'Written by' : 'Shared by'}
         </span>{' '}
-        <span className="author-line__name">{name}</span>
+        {profile ? (
+          <Link href={profileHref(profile.username)} className="author-line__name author-line__link">
+            {name}
+            <span className="author-line__handle"> @{profile.username}</span>
+          </Link>
+        ) : (
+          <span className="author-line__name">{name}</span>
+        )}
         {mistake.mine && <span className="author-line__you"> (that&rsquo;s you)</span>}
       </span>
     </p>

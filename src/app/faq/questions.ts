@@ -142,7 +142,30 @@ export const FAQ_GROUPS: QuestionGroup[] = [
           },
           {
             p: [
+              'If you make a public profile, shared mistakes with a name on them link to it (you can switch that off). Anonymous ones never do.',
+            ],
+          },
+          {
+            p: [
               'The one thing that can give you away is the story itself, so leave out names, workplaces and other details that would make you (or anyone else) easy to spot.',
+            ],
+          },
+        ],
+      },
+      {
+        id: 'profile',
+        question: 'Can I have a public profile?',
+        answer: [
+          {
+            p: [
+              'Yes, if you’d like one. Once you’re logged in, open ',
+              { href: '/profile', text: 'Your profile' },
+              ' to choose a username and add a short bio, a photo (your Google one, or upload your own) and links to your website, Instagram, TikTok, YouTube and more. It lives at its own address you can share, like glorious-mistakes.vercel.app/u/yourname.',
+            ],
+          },
+          {
+            p: [
+              'It’s entirely optional. Your profile can list the mistakes you’ve shared with a name on them, never the anonymous or private ones, and you can hide or delete it any time.',
             ],
           },
         ],

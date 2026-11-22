@@ -2,7 +2,9 @@ import { Globe, Lightbulb, Lock } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { displayAuthor, formatDate, getCategory, getCringe } from '@/lib/constants';
+import { profileHref } from '@/lib/profiles';
 import type { Mistake } from '@/lib/types';
+import { Avatar } from './Avatar';
 import { Icon, IconBadge } from './Icon';
 
 interface MistakeCardProps {
@@ -62,9 +64,16 @@ export function MistakeCard({ mistake, children }: MistakeCardProps) {
 
       <footer className="card__footer">
         <p className="card__meta">
-          <span className="card__author">
-            {mistake.mine ? 'You' : displayAuthor(mistake)}
-          </span>
+          {mistake.authorProfile && !mistake.mine ? (
+            // Sits above the card's stretched link, so it opens the profile instead of the entry.
+            <Link href={profileHref(mistake.authorProfile.username)} className="card__author card__author-link">
+              <Avatar src={mistake.authorProfile.avatarUrl} name={displayAuthor(mistake)} size="sm" />
+              {displayAuthor(mistake)}
+              <span className="sr-only"> (view profile)</span>
+            </Link>
+          ) : (
+            <span className="card__author">{mistake.mine ? 'You' : displayAuthor(mistake)}</span>
+          )}
           <span aria-hidden="true"> · </span>
           <time dateTime={mistake.createdAt}>{formatDate(mistake.createdAt)}</time>
         </p>

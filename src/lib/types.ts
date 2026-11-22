@@ -34,6 +34,17 @@ export interface Mistake {
   baseReactions?: Partial<Record<Exclude<ReactionId, 'been-there'>, number>>;
   /** True when the current visitor wrote this entry. */
   mine: boolean;
+  /**
+   * The author's public profile, for public entries that carry a name when the author has a
+   * public profile that lists their entries. Anonymous entries never link to a profile.
+   */
+  authorProfile?: AuthorProfile;
+}
+
+export interface AuthorProfile {
+  username: string;
+  /** Null shows initials. */
+  avatarUrl: string | null;
 }
 
 /** The fields a person fills in when logging or editing a mistake. */
