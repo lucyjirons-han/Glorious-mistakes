@@ -200,10 +200,9 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
 
   const load = useCallback(async () => {
     setLoadError('');
-    const { data, error } = await supabase
-      .from(resource.id)
-      .select('*')
-      .order(resource.orderBy, { ascending: false });
+    const { data, error } = resource.listFunction
+      ? await supabase.rpc(resource.listFunction)
+      : await supabase.from(resource.id).select('*').order(resource.orderBy, { ascending: false });
     if (error) {
       setLoadError(error.message);
       toast(`Couldn’t load ${resource.label.toLowerCase()}.`);
@@ -220,7 +219,10 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
   const save = async (values: Record<string, string>, original: Row | null): Promise<string | null> => {
     const row = valuesToRow(resource.fields, values);
     let request;
-    if (original) {
+    if (original && resource.upsert) {
+      for (const k of resource.primaryKey) row[k] = original[k];
+      request = supabase.from(resource.id).upsert(row);
+    } else if (original) {
       let q = supabase.from(resource.id).update(row);
       for (const k of resource.primaryKey) q = q.eq(k, original[k] as string);
       request = q;
@@ -229,6 +231,18 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
     }
     const { error } = await request;
     if (error) return friendlyError(error.code, error.message);
+    // Fields kept in other tables (like roles) are saved through their own function.
+    if (original) {
+      for (const field of resource.fields) {
+        const value = (values[field.key] ?? '').trim();
+        if (!field.saveFunction || value === String(original[field.key] ?? '')) continue;
+        const { error: fnError } = await supabase.rpc(field.saveFunction, { target: original.id, value });
+        if (fnError) {
+          await load();
+          return friendlyError(fnError.code, fnError.message);
+        }
+      }
+    }
     toast(original ? `Saved the ${resource.singular}.` : `Added the ${resource.singular}.`);
     setEditing(null);
     await load();
@@ -245,7 +259,7 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
       toast(`Couldn’t delete that ${resource.singular}: ${error.message}`);
       return;
     }
-    toast(`Deleted the ${resource.singular}.`);
+    toast(resource.deleteWords?.done ?? `Deleted the ${resource.singular}.`);
     await load();
     if (resource.id === 'mistakes') onMistakesChanged();
   };
@@ -319,7 +333,9 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
     const value = row[column.key];
     switch (column.kind) {
       case 'date':
-        return formatDateTime(value);
+        return formatDateTime(value) || <span className="admin-table__missing">Never</span>;
+      case 'number':
+        return Number(value ?? 0).toLocaleString('en-AU');
       case 'id':
         if (!value) return <span className="admin-table__missing">Example</span>;
         return (
@@ -336,8 +352,10 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
           </Link>
         );
       }
-      default:
-        return String(value ?? '') || <span className="admin-table__missing">None</span>;
+      default: {
+        const label = column.options?.find((o) => o.value === String(value))?.label;
+        return label ?? (String(value ?? '') || <span className="admin-table__missing">None</span>);
+      }
     }
   };
 
@@ -507,9 +525,9 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
                       <td className="admin-table__actions">
                         {confirmingDelete === key ? (
                           <div className="confirm" role="group" aria-label={`Delete ${name}?`}>
-                            <p className="confirm__text">Delete for good?</p>
+                            <p className="confirm__text">{resource.deleteWords?.confirm ?? 'Delete for good?'}</p>
                             <button type="button" className="btn btn--danger btn--sm" onClick={() => void remove(row)}>
-                              Yes, delete
+                              {resource.deleteWords?.yes ?? 'Yes, delete'}
                             </button>
                             <button
                               type="button"
@@ -530,7 +548,8 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
                               className="btn btn--ghost btn--sm btn--danger-text"
                               onClick={() => setConfirmingDelete(key)}
                             >
-                              Delete<span className="sr-only"> {name}</span>
+                              {resource.deleteWords?.button ?? 'Delete'}
+                              <span className="sr-only"> {name}</span>
                             </button>
                           </div>
                         )}
@@ -651,8 +670,11 @@ function sortText(column: AdminColumn, row: Row, titles: Map<string, string>): s
 }
 
 function compareCells(column: AdminColumn, a: Row, b: Row, titles: Map<string, string>): number {
+  if (column.kind === 'number') return Number(a[column.key] ?? 0) - Number(b[column.key] ?? 0);
   if (column.kind === 'date') {
-    return new Date(String(a[column.key])).getTime() - new Date(String(b[column.key])).getTime();
+    // Missing dates (e.g. never logged in) count as the oldest.
+    const time = (row: Row) => (row[column.key] ? new Date(String(row[column.key])).getTime() : 0);
+    return time(a) - time(b);
   }
   const left = sortText(column, a, titles);
   const right = sortText(column, b, titles);
@@ -664,6 +686,7 @@ function compareCells(column: AdminColumn, a: Row, b: Row, titles: Map<string, s
 /** "A to Z", "oldest first" and so on, for the toast and screen-reader text. */
 function sortDescription(column: AdminColumn, direction: SortDirection): string {
   if (column.kind === 'date') return direction === 'ascending' ? 'oldest first' : 'newest first';
+  if (column.kind === 'number') return direction === 'ascending' ? 'lowest first' : 'highest first';
   if (column.kind === 'id') return direction === 'ascending' ? 'examples first' : 'examples last';
   return direction === 'ascending' ? 'A to Z' : 'Z to A';
 }
@@ -778,6 +801,7 @@ function describeRow(resource: AdminResource, row: Row, titles: Map<string, stri
 function friendlyError(code: string | undefined, message: string): string {
   if (code === '23505') return 'That already exists.';
   if (code === '23514') return 'One of the values isn’t allowed. Check the lengths and formats.';
+  if (code === 'P0001' || code === 'P0002') return message;
   if (code === '42501') return 'The database said no. Is this account still an admin?';
   return message;
 }
@@ -807,6 +831,8 @@ function RowForm({ resource, row, mistakeOptions, onSave, onCancel }: RowFormPro
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
   const toast = useToast();
+  const { userId } = useAuth();
+  const isSelf = !!row && !!userId && row.id === userId;
   const formRef = useRef<HTMLFormElement>(null);
   const prefix = `admin-${resource.id}-${row ? 'edit' : 'new'}`;
   const heading = row ? `Edit ${resource.singular}` : `Add a ${resource.singular}`;
@@ -841,13 +867,16 @@ function RowForm({ resource, row, mistakeOptions, onSave, onCancel }: RowFormPro
 
   const control = (field: AdminField) => {
     const id = `${prefix}-${field.key}`;
+    const locked = isSelf && !!field.notForSelf;
+    const describedBy = [errors[field.key] && `${id}-error`, locked && `${id}-hint`].filter(Boolean).join(' ');
     const common = {
       id,
       name: field.key,
       value: values[field.key] ?? '',
       required: field.required,
+      disabled: locked || undefined,
       'aria-invalid': errors[field.key] ? true : undefined,
-      'aria-describedby': errors[field.key] ? `${id}-error` : undefined,
+      'aria-describedby': describedBy || undefined,
     };
     switch (field.type) {
       case 'textarea':
@@ -917,6 +946,11 @@ function RowForm({ resource, row, mistakeOptions, onSave, onCancel }: RowFormPro
               {!field.required && <span className="field__optional"> (optional)</span>}
             </label>
             {control(field)}
+            {isSelf && field.notForSelf && (
+              <p id={`${prefix}-${field.key}-hint`} className="field__hint">
+                {field.notForSelf}
+              </p>
+            )}
             {errors[field.key] && (
               <p id={`${prefix}-${field.key}-error`} className="field__error">
                 <Icon icon={CircleAlert} size={16} className="field__error-icon" />

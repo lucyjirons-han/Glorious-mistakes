@@ -20,12 +20,20 @@ export interface AdminField {
   maxLength?: number;
   /** Stored as a number (the select's value is converted before saving). */
   numeric?: boolean;
+  /**
+   * Saved by calling this database function with `{ target: <row id>, value }` instead of
+   * updating the row (e.g. roles, which live in their own locked table). Only called when the
+   * value changes.
+   */
+  saveFunction?: string;
+  /** When set, the field can't be changed on your own row; this text explains why. */
+  notForSelf?: string;
 }
 
 export interface AdminColumn {
   key: string;
   label: string;
-  kind?: 'date' | 'id' | 'mistake' | 'long';
+  kind?: 'date' | 'id' | 'mistake' | 'long' | 'number';
   /**
    * How the column can be filtered: words it contains, one of `options`, a date range, or
    * (for owners) example entries versus visitors' entries. Leave out for no filter.
@@ -53,6 +61,15 @@ export interface AdminResource {
   exportName?: string;
   /** True hides the "Add" button (rows are created some other way, e.g. by logging in). */
   noAdd?: boolean;
+  /**
+   * Load rows by calling this admin-only database function instead of reading the table (for
+   * data from more than one table, like people's emails and roles).
+   */
+  listFunction?: string;
+  /** Save with an upsert, for rows the list can show before they exist in the table. */
+  upsert?: boolean;
+  /** Wording for the Delete button, its confirmation and toast, when "delete" isn't accurate. */
+  deleteWords?: { button: string; confirm: string; yes: string; done: string };
   /** TEMPORARY: true hides the section from the admin page (the data and rules stay as they are). */
   hidden?: boolean;
 }
@@ -60,6 +77,10 @@ export interface AdminResource {
 const categoryOptions = CATEGORIES.map((c) => ({ value: c.id, label: c.label }));
 const cringeOptions = CRINGE_LEVELS.map((c) => ({ value: String(c.level), label: `${c.level} · ${c.label}` }));
 const reactionOptions = REACTIONS.map((r) => ({ value: r.id, label: r.label }));
+const roleOptions = [
+  { value: 'member', label: 'Member' },
+  { value: 'admin', label: 'Admin' },
+];
 const visibilityOptions = [
   { value: 'public', label: 'Public (on the feed)' },
   { value: 'private', label: 'Private' },
@@ -161,19 +182,35 @@ export const RESOURCES: AdminResource[] = [
     singular: 'person',
     orderBy: 'created_at',
     primaryKey: ['id'],
+    listFunction: 'admin_people',
+    upsert: true,
     fields: [
       { key: 'first_name', label: 'First name', type: 'text', maxLength: 60 },
       { key: 'last_name', label: 'Last name', type: 'text', maxLength: 60 },
+      {
+        key: 'role',
+        label: 'Role',
+        type: 'select',
+        options: roleOptions,
+        required: true,
+        saveFunction: 'admin_set_role',
+        notForSelf: 'You can’t change your own role, so there’s always an admin. Ask another admin to do it.',
+      },
     ],
     columns: [
       { key: 'first_name', label: 'First name', filter: 'text' },
       { key: 'last_name', label: 'Last name', filter: 'text' },
+      { key: 'email', label: 'Email', filter: 'text' },
+      { key: 'role', label: 'Role', filter: 'select', options: roleOptions },
+      { key: 'entries', label: 'Entries', kind: 'number' },
       { key: 'created_at', label: 'Joined', kind: 'date', filter: 'date' },
+      { key: 'last_sign_in_at', label: 'Last logged in', kind: 'date' },
       { key: 'id', label: 'User', kind: 'id' },
     ],
-    searchable: ['first_name', 'last_name', 'id'],
-    note: 'Everyone who has logged in with Google. A profile is made when someone first logs in, so there’s no Add button. Deleting a profile only clears the name; their account and entries stay.',
+    searchable: ['first_name', 'last_name', 'email', 'id'],
+    note: 'Everyone who has logged in with Google. Admins can open this page and manage everything on it. Clearing a profile only removes the name; their account, role and entries stay.',
     noAdd: true,
+    deleteWords: { button: 'Clear name', confirm: 'Clear their name?', yes: 'Yes, clear it', done: 'Cleared their name.' },
   },
 ];
 
@@ -270,10 +307,14 @@ export function validateRow(fields: AdminField[], values: Record<string, string>
   return errors;
 }
 
-/** Turns form values into a row to save: trimmed, with numeric fields converted. */
+/**
+ * Turns form values into a row to save: trimmed, with numeric fields converted. Fields saved
+ * through a database function are left out.
+ */
 export function valuesToRow(fields: AdminField[], values: Record<string, string>): Row {
   const row: Row = {};
   for (const field of fields) {
+    if (field.saveFunction) continue;
     const value = (values[field.key] ?? '').trim();
     row[field.key] = field.numeric ? Number(value) : value;
   }

@@ -137,8 +137,13 @@ Supabase settings this needs (Authentication):
 reactions, reports and newsletter subscribers. Admins log in with Google like everyone else,
 land on `/admin` straight after logging in, and see an **Admin** link in the account menu. Row level security does the access
 control: the `public.admins` list (unreadable through the API) and `public.is_admin()`, which is
-never true for anonymous sessions. To make someone an admin, have them log in once, then run
-this in the SQL editor:
+never true for anonymous sessions.
+
+The **People** tab lists everyone who has logged in, with their email, role, number of entries
+and last login, through the admin-only `admin_people()` function. To make someone an admin
+(or take it away), have them log in once, then edit them there and change their **Role**; that
+calls `admin_set_role()`, which won't let an admin remove their own role, so there's always at
+least one. With no admins at all, add the first one in the SQL editor:
 
 `insert into public.admins (user_id) select id from auth.users where email = 'them@example.com';`
 
