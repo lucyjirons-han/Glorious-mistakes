@@ -1,13 +1,24 @@
 'use client';
 
-import { CircleAlert, Globe, Handshake, Lock } from 'lucide-react';
+import { CircleAlert, Globe, Handshake, Lock, PenLine, VenetianMask } from 'lucide-react';
+import Link from 'next/link';
 import { useRef, useState, type FormEvent } from 'react';
+import { Avatar } from './Avatar';
 import { Icon, IconBadge } from './Icon';
+import { useAuth } from '@/lib/auth';
+import { readJSON, writeJSON } from '@/lib/community';
 import { CATEGORIES, CRINGE_LEVELS, LIMITS } from '@/lib/constants';
+import { avatarSrc, profileName } from '@/lib/profiles';
 import type { MistakeInput } from '@/lib/types';
 
 type TextField = 'title' | 'whatHappened' | 'lesson';
 type Errors = Partial<Record<TextField, string>>;
+
+/** How a shared entry is signed: with the profile name, anonymously, or with any other name. */
+type AuthorMode = 'profile' | 'anonymous' | 'custom';
+
+/** The last way they signed a new entry, so the next one starts the same. */
+const AUTHOR_MODE_KEY = 'glorious-mistakes:author-mode:v1';
 
 const EMPTY: MistakeInput = {
   title: '',
@@ -35,7 +46,19 @@ function validate(values: MistakeInput): Errors {
 }
 
 export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: MistakeFormProps) {
+  const { user, publicProfile } = useAuth();
+  const ownName = publicProfile ? profileName(publicProfile) : '';
   const [values, setValues] = useState<MistakeInput>(initial ?? EMPTY);
+  const [authorMode, setAuthorMode] = useState<AuthorMode>(() => {
+    if (initial) {
+      const author = initial.author.trim();
+      if (!author) return 'anonymous';
+      return ownName && author === ownName ? 'profile' : 'custom';
+    }
+    const last = readJSON<AuthorMode | null>(AUTHOR_MODE_KEY, null);
+    if (last === 'profile') return ownName ? 'profile' : 'anonymous';
+    return last === 'custom' ? 'custom' : 'anonymous';
+  });
   const [errors, setErrors] = useState<Errors>({});
   const refs = {
     title: useRef<HTMLInputElement>(null),
@@ -57,8 +80,15 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
       refs[firstInvalid].current?.focus();
       return;
     }
-    onSubmit(values);
+    // Without a profile there's just the name box, which is "custom" (blank means Anonymous).
+    const mode: AuthorMode = ownName ? authorMode : 'custom';
+    const author = mode === 'profile' ? ownName : mode === 'anonymous' ? '' : values.author;
+    if (!initial && values.visibility === 'public') writeJSON(AUTHOR_MODE_KEY, mode);
+    onSubmit({ ...values, author });
   };
+
+  /** "Links to your profile" only when the profile is public and lists entries. */
+  const profileLinked = !!publicProfile?.isPublic && !!publicProfile.showEntries;
 
   const fieldProps = (name: TextField) => ({
     id: `field-${name}`,
@@ -251,13 +281,72 @@ export function MistakeForm({ initial, submitLabel, onSubmit, onCancel }: Mistak
           </p>
         )}
 
-        {values.visibility === 'public' && (
+        {values.visibility === 'public' && ownName && (
+          <fieldset className="field">
+            <legend className="field__label">Post as</legend>
+            <div className="choice-grid choice-grid--author">
+              <label className="choice choice--card">
+                <input
+                  type="radio"
+                  name="author-mode"
+                  value="profile"
+                  checked={authorMode === 'profile'}
+                  onChange={() => setAuthorMode('profile')}
+                />
+                <span>
+                  <Avatar src={avatarSrc(publicProfile!)} name={ownName} className="choice__icon" />
+                  <strong className="choice__name">{ownName}</strong>
+                  <span className="choice__desc">
+                    {profileLinked ? 'Your profile name. Links to your profile.' : 'Your profile name.'}
+                  </span>
+                </span>
+              </label>
+              <label className="choice choice--card">
+                <input
+                  type="radio"
+                  name="author-mode"
+                  value="anonymous"
+                  checked={authorMode === 'anonymous'}
+                  onChange={() => setAuthorMode('anonymous')}
+                />
+                <span>
+                  <IconBadge icon={VenetianMask} tone="neutral" className="choice__icon" />
+                  <strong>Anonymous</strong>
+                  <span className="choice__desc">No name, and no link to your profile.</span>
+                </span>
+              </label>
+              <label className="choice choice--card">
+                <input
+                  type="radio"
+                  name="author-mode"
+                  value="custom"
+                  checked={authorMode === 'custom'}
+                  onChange={() => setAuthorMode('custom')}
+                />
+                <span>
+                  <IconBadge icon={PenLine} tone="blush" className="choice__icon" />
+                  <strong>Another name</strong>
+                  <span className="choice__desc">A nickname, just for this one.</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+        )}
+
+        {values.visibility === 'public' && (!ownName || authorMode === 'custom') && (
           <div className="field">
             <label htmlFor="field-author" className="field__label">
-              Name on the feed <span className="field__optional">(optional)</span>
+              {ownName ? 'Name for this entry' : 'Name on the feed'} <span className="field__optional">(optional)</span>
             </label>
             <p id="field-author-hint" className="field__hint">
               Leave blank to post as Anonymous.
+              {ownName && profileLinked && ' Named entries link to your profile.'}
+              {!ownName && user && (
+                <>
+                  {' '}
+                  Or <Link href="/profile">set up a profile</Link> to post under your profile name with one click.
+                </>
+              )}
             </p>
             <input
               id="field-author"

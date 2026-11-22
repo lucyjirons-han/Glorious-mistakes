@@ -3641,6 +3641,17 @@ fieldset.field > .field__label {
   gap: 14px;
 }
 
+.choice-grid--author {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+/* A profile name can be long; let it wrap rather than widen the card. */
+.choice__name {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .choice {
   position: relative;
   cursor: pointer;
@@ -3745,6 +3756,11 @@ fieldset.field > .field__label {
 
 .choice--card input:checked + span .icon-badge {
   background: var(--white);
+}
+
+/* Initial avatars get their pastel inline, so this needs !important to stand out from the lilac. */
+.choice--card input:checked + span .avatar:not(.avatar--photo) {
+  background: var(--white) !important;
 }
 
 .choice--card strong {
