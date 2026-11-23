@@ -2869,17 +2869,6 @@ h2.profile-card__name {
   border-radius: var(--radius-lg);
 }
 
-.quiz-intro__style {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px 6px 6px;
-  background: var(--c-neutral);
-  border-radius: var(--radius-pill);
-  font-size: 0.9375rem;
-  font-weight: 700;
-}
-
 .quiz-intro__facts {
   display: grid;
   gap: 10px;
@@ -3290,15 +3279,6 @@ h2.profile-card__name {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 24px 48px;
-}
-
-.quiz-teaser__styles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 20px 0 0;
-  padding: 0;
-  list-style: none;
 }
 
 /* 9. Cards --------------------------------------------------------------- */
