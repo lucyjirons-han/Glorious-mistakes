@@ -236,6 +236,11 @@ textarea {
   padding-inline: var(--gutter);
 }
 
+/* Data-heavy pages (the admin tables) get more room on big screens. */
+.container--wide {
+  --container: 1440px;
+}
+
 .page {
   padding-block: clamp(32px, 6vw, 64px) clamp(48px, 8vw, 96px);
 }
@@ -2396,10 +2401,20 @@ h2.profile-card__name {
 
 .admin-table th,
 .admin-table td {
-  padding: 12px 16px;
+  padding: 12px;
   text-align: left;
   vertical-align: middle;
   border-bottom: var(--hairline);
+}
+
+.admin-table th:first-child,
+.admin-table td:first-child {
+  padding-left: 20px;
+}
+
+.admin-table th:last-child,
+.admin-table td:last-child {
+  padding-right: 20px;
 }
 
 .admin-table tbody tr:last-child > td {
@@ -2455,13 +2470,20 @@ h2.profile-card__name {
   opacity: 1;
 }
 
+/* Cells wrap when space is tight, so the table fits the frame on most desktop screens. Very narrow
+   screens still scroll the table sideways. */
 .admin-table td {
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 .admin-table td.admin-table__long {
-  min-width: 220px;
-  white-space: normal;
+  min-width: 200px;
+}
+
+.admin-table__date > span,
+.admin-table__id,
+.admin-table__actions {
+  white-space: nowrap;
 }
 
 .admin-table__id {

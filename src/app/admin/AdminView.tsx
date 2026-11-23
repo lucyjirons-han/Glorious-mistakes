@@ -44,6 +44,18 @@ const dateTime = new Intl.DateTimeFormat('en-AU', {
   minute: '2-digit',
 });
 
+/** A date for the table: the day and the time each stay on one line, so narrow columns wrap between them. */
+function DateCell({ value }: { value: unknown }) {
+  const text = formatDateTime(value);
+  if (!text) return <span className="admin-table__missing">Never</span>;
+  const [day, time] = text.split(', ');
+  return (
+    <span className="admin-table__date">
+      <span>{day}{time ? ',' : ''}</span> {time && <span>{time}</span>}
+    </span>
+  );
+}
+
 function formatDateTime(value: unknown): string {
   const date = new Date(String(value));
   return Number.isNaN(date.getTime()) ? '' : dateTime.format(date);
@@ -71,7 +83,7 @@ export function AdminView() {
 
   if (!supabase) {
     return (
-      <div className="container page">
+      <div className="container container--wide page">
         {header}
         <EmptyState icon={ShieldAlert} title="No database connected">
           <p>The admin page needs Supabase. Add the keys to .env.local and restart the site.</p>
@@ -81,7 +93,7 @@ export function AdminView() {
   }
 
   return (
-    <div className="container page">
+    <div className="container container--wide page">
       {header}
       {status === 'loading' && <div className="card card--skeleton" aria-busy="true" />}
       {status === 'signed-out' && (
@@ -334,7 +346,7 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
     const value = row[column.key];
     switch (column.kind) {
       case 'date':
-        return formatDateTime(value) || <span className="admin-table__missing">Never</span>;
+        return <DateCell value={value} />;
       case 'number':
         return Number(value ?? 0).toLocaleString('en-AU');
       case 'id':
@@ -355,7 +367,19 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
       }
       default: {
         const label = column.options?.find((o) => o.value === String(value))?.label;
-        return label ?? (String(value ?? '') || <span className="admin-table__missing">None</span>);
+        const text = String(value ?? '');
+        // Long email addresses may wrap just before the @ rather than widen the table.
+        if (!label && column.key === 'email' && text.includes('@')) {
+          const at = text.lastIndexOf('@');
+          return (
+            <>
+              {text.slice(0, at)}
+              <wbr />
+              {text.slice(at)}
+            </>
+          );
+        }
+        return label ?? (text || <span className="admin-table__missing">None</span>);
       }
     }
   };
