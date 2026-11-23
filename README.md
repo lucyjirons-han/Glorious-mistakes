@@ -199,6 +199,7 @@ one inline SVG component each. They're decorative, so they're hidden from screen
 | `PaperPlane`       | Home, How it works: "Keep it or share it"    |
 | `DentedTrophy`     | Home, beside "Why celebrate mistakes?"       |
 | `MicrowaveEgg`     | Home, bottom call to action                  |
+| `QuizClipboard`    | Quiz, first page (`/quiz`)                   |
 | `PhoneLoveYouBye`  | Not used yet (e.g. the 404 page)             |
 | `WavingHand`       | Not used yet (e.g. empty states)             |
 

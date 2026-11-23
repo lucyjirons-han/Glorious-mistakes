@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Icon } from '@/components/Icon';
+import { QuizClipboard } from '@/components/illustrations';
 import {
   formatQuizDate,
   QUIZ_QUESTIONS,
@@ -49,28 +50,31 @@ export function QuizView() {
           <h2 id="quiz-intro-title" className="sr-only">
             About the quiz
           </h2>
-          <ul className="quiz-intro__facts">
-            <li>
-              <Icon icon={Clock} size={18} /> About two minutes
-            </li>
-            <li>
-              <Icon icon={UserRound} size={18} /> Open to everyone, no login needed
-            </li>
-            <li>
-              <Icon icon={Lightbulb} size={18} /> You&rsquo;ll get a strength, a growth edge and a mistake worth logging
-            </li>
-          </ul>
-          <div className="btn-row">
-            <button type="button" className="btn btn--primary btn--lg" onClick={() => setStep(0)}>
-              Start the quiz
-            </button>
+          <QuizClipboard className="quiz-intro__art" />
+          <div className="quiz-intro__body">
+            <ul className="quiz-intro__facts">
+              <li>
+                <Icon icon={Clock} size={18} /> About two minutes
+              </li>
+              <li>
+                <Icon icon={UserRound} size={18} /> Open to everyone, no login needed
+              </li>
+              <li>
+                <Icon icon={Lightbulb} size={18} /> You&rsquo;ll get a strength, a growth edge and a mistake worth logging
+              </li>
+            </ul>
+            <div className="btn-row">
+              <button type="button" className="btn btn--primary btn--lg" onClick={() => setStep(0)}>
+                Start the quiz
+              </button>
+            </div>
+            {last && (
+              <p className="quiz-intro__last">
+                Last time ({formatQuizDate(last.takenAt)}) you were {QUIZ_STYLES[last.style].name}.{' '}
+                <Link href={yourResultHref(last.style)}>See that result</Link>
+              </p>
+            )}
           </div>
-          {last && (
-            <p className="quiz-intro__last">
-              Last time ({formatQuizDate(last.takenAt)}) you were {QUIZ_STYLES[last.style].name}.{' '}
-              <Link href={yourResultHref(last.style)}>See that result</Link>
-            </p>
-          )}
         </section>
       </div>
     );

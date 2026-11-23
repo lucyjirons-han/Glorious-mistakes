@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { cache } from 'react';
 import { avatarSrc, PROFILE_COLUMNS, rowToProfile, USERNAME_PATTERN, type PublicProfile, type PublicProfileRow } from './profiles';
+import { isStyleId, type StyleId } from './quiz';
 import { rowToMistake, type MistakeRow } from './supabase';
 import type { Mistake } from './types';
 
@@ -25,6 +26,8 @@ export interface ProfilePageData {
   profile: PublicProfile;
   /** Their public entries that carry a name (anonymous ones never appear), newest first. */
   entries: Mistake[];
+  /** Their latest mistake style, when they've chosen to show it on their profile. */
+  quizStyle: StyleId | null;
 }
 
 export const getProfilePage = cache(async (username: string): Promise<ProfilePageData | null> => {
@@ -63,6 +66,13 @@ export const getProfilePage = cache(async (username: string): Promise<ProfilePag
       .map((m) => ({ ...m, authorProfile: { username: profile.username, avatarUrl: avatarSrc(profile) } }));
   }
 
-  return { profile, entries };
+  let quizStyle: StyleId | null = null;
+  if (profile.showQuizStyle) {
+    const { data: style, error: styleError } = await supabase.rpc('profile_quiz_style', { profile_id: profile.id });
+    if (styleError) console.error('[profiles] could not load the mistake style', styleError.code, styleError.message);
+    if (isStyleId(style)) quizStyle = style;
+  }
+
+  return { profile, entries, quizStyle };
 });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { CircleAlert, ExternalLink, ImageUp, LogIn, Trash2, UserRoundX, VenetianMask } from 'lucide-react';
+import { CircleAlert, ExternalLink, ImageUp, LogIn, Shapes, Trash2, UserRoundX, VenetianMask } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Avatar } from '@/components/Avatar';
@@ -10,6 +10,8 @@ import { ProfileCard } from '@/components/ProfileCard';
 import { useToast } from '@/components/Toast';
 import { useAuth } from '@/lib/auth';
 import { loginHref } from '@/lib/login';
+import { QUIZ_STYLES } from '@/lib/quiz';
+import { useQuizResults } from '@/lib/quiz-results';
 import {
   AVATAR_BUCKET,
   AVATAR_MAX_INPUT_BYTES,
@@ -110,6 +112,7 @@ interface Values {
   /** What's typed in each box (a handle or a pasted link). */
   links: SocialLinks;
   showEntries: boolean;
+  showQuizStyle: boolean;
 }
 
 type ErrorKey = 'username' | 'displayName' | 'pronouns' | 'bio' | 'avatar' | 'website' | SocialId;
@@ -140,6 +143,7 @@ function valuesFrom(profile: PublicProfile | null, suggestedName: string, sugges
       website: profile.website,
       links: { ...profile.links },
       showEntries: profile.showEntries,
+      showQuizStyle: profile.showQuizStyle,
     };
   }
   return {
@@ -152,12 +156,14 @@ function valuesFrom(profile: PublicProfile | null, suggestedName: string, sugges
     website: '',
     links: emptyLinks(),
     showEntries: true,
+    showQuizStyle: false,
   };
 }
 
 function ProfileEditor() {
   const { user, userId, profile: names, publicProfile, setPublicProfile } = useAuth();
   const toast = useToast();
+  const quiz = useQuizResults();
   const supabase = getSupabase()!;
   const googlePhoto = googleAvatarUrl(user);
 
@@ -369,6 +375,7 @@ function ProfileEditor() {
         links,
         isPublic: values.isPublic,
         showEntries: values.showEntries,
+        showQuizStyle: values.showQuizStyle,
       };
       const { data, error } = await supabase
         .from('public_profiles')
@@ -494,6 +501,36 @@ function ProfileEditor() {
             <p id="profile-entries-hint" className="field__hint profile-editor__switch-hint">
               <Icon icon={VenetianMask} size={16} className="inline-icon" /> Only public entries with a name on them are
               listed and linked to your profile. Anonymous ones stay anonymous.
+            </p>
+          </div>
+          <div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={values.showQuizStyle}
+              aria-describedby="profile-quiz-style-hint"
+              className="switch"
+              onClick={() => set('showQuizStyle', !values.showQuizStyle)}
+            >
+              <span className="switch__track" aria-hidden="true">
+                <span className="switch__thumb" />
+              </span>
+              <span>Show my mistake style on my profile</span>
+            </button>
+            <p id="profile-quiz-style-hint" className="field__hint profile-editor__switch-hint">
+              <Icon icon={Shapes} size={16} className="inline-icon" />{' '}
+              {quiz.latest ? (
+                <>
+                  Shows your latest result from the <Link href="/quiz">mistake style quiz</Link> (
+                  {QUIZ_STYLES[quiz.latest.style].name}), and updates when you retake it. Your answers and
+                  older results stay private.
+                </>
+              ) : (
+                <>
+                  You haven&rsquo;t taken the <Link href="/quiz">mistake style quiz</Link> yet. Once you have, your
+                  latest style shows here. Your answers stay private.
+                </>
+              )}
             </p>
           </div>
         </fieldset>
@@ -780,7 +817,11 @@ function ProfileEditor() {
         <h2 id="profile-preview-title" className="profile-editor__preview-title">
           Preview
         </h2>
-        <ProfileCard profile={preview} headingLevel={2} />
+        <ProfileCard
+          profile={preview}
+          headingLevel={2}
+          quizStyle={values.showQuizStyle ? (quiz.latest?.style ?? null) : null}
+        />
       </aside>
 
       {saved && (

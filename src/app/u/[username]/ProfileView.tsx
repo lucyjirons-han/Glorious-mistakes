@@ -12,6 +12,7 @@ import { useToast } from '@/components/Toast';
 import { useAuth } from '@/lib/auth';
 import { profileName, type PublicProfile } from '@/lib/profiles';
 import { useMistakes } from '@/lib/store';
+import type { StyleId } from '@/lib/quiz';
 import type { Mistake } from '@/lib/types';
 import { ReportProfile } from './ReportProfile';
 
@@ -19,9 +20,11 @@ interface ProfileViewProps {
   profile: PublicProfile;
   /** Their signed public entries, loaded on the server. */
   entries: Mistake[];
+  /** Their mistake style badge, when they show it. */
+  quizStyle: StyleId | null;
 }
 
-export function ProfileView({ profile, entries: serverEntries }: ProfileViewProps) {
+export function ProfileView({ profile, entries: serverEntries, quizStyle }: ProfileViewProps) {
   const auth = useAuth();
   const { ready, getMine, loadCounts, beenThereCount } = useMistakes();
   const toast = useToast();
@@ -58,7 +61,7 @@ export function ProfileView({ profile, entries: serverEntries }: ProfileViewProp
 
   return (
     <div className="container page profile-page">
-      <ProfileCard profile={profile} headingId="profile-name">
+      <ProfileCard profile={profile} headingId="profile-name" quizStyle={quizStyle}>
         {profile.showEntries && (
           <ul className="profile-stats" aria-label="Stats">
             <li>

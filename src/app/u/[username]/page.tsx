@@ -28,5 +28,5 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params;
   const data = await getProfilePage(decodeURIComponent(username));
   if (!data) notFound();
-  return <ProfileView key={data.profile.id} profile={data.profile} entries={data.entries} />;
+  return <ProfileView key={data.profile.id} profile={data.profile} entries={data.entries} quizStyle={data.quizStyle} />;
 }

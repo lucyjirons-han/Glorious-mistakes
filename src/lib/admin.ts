@@ -265,6 +265,7 @@ export const RESOURCES: AdminResource[] = [
       { key: 'avatar_source', label: 'Picture', type: 'select', options: avatarOptions, required: true },
       { key: 'is_public', label: 'Public', type: 'select', options: yesNoOptions, required: true },
       { key: 'show_entries', label: 'Lists their entries', type: 'select', options: yesNoOptions, required: true },
+      { key: 'show_quiz_style', label: 'Shows their mistake style', type: 'select', options: yesNoOptions, required: true },
     ],
     columns: [
       { key: 'username', label: 'Username', filter: 'text' },

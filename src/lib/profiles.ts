@@ -140,6 +140,8 @@ export interface PublicProfile {
   links: SocialLinks;
   isPublic: boolean;
   showEntries: boolean;
+  /** Show their latest mistake style (from the quiz) as a badge on the profile. */
+  showQuizStyle: boolean;
   createdAt: string;
 }
 
@@ -162,11 +164,12 @@ export interface PublicProfileRow {
   facebook: string;
   is_public: boolean;
   show_entries: boolean;
+  show_quiz_style: boolean;
   created_at: string;
 }
 
 export const PROFILE_COLUMNS =
-  'id, username, display_name, pronouns, bio, avatar_source, avatar_url, website, instagram, tiktok, youtube, x, threads, linkedin, facebook, is_public, show_entries, created_at';
+  'id, username, display_name, pronouns, bio, avatar_source, avatar_url, website, instagram, tiktok, youtube, x, threads, linkedin, facebook, is_public, show_entries, show_quiz_style, created_at';
 
 export function emptyLinks(): SocialLinks {
   return { instagram: '', tiktok: '', youtube: '', x: '', threads: '', linkedin: '', facebook: '' };
@@ -187,6 +190,7 @@ export function rowToProfile(row: PublicProfileRow): PublicProfile {
     links,
     isPublic: row.is_public,
     showEntries: row.show_entries,
+    showQuizStyle: row.show_quiz_style ?? false,
     createdAt: row.created_at,
   };
 }
@@ -204,6 +208,7 @@ export function profileToRow(profile: Omit<PublicProfile, 'createdAt'>) {
     ...profile.links,
     is_public: profile.isPublic,
     show_entries: profile.showEntries,
+    show_quiz_style: profile.showQuizStyle,
   };
 }
 

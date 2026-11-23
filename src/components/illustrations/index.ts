@@ -8,3 +8,4 @@ export { NotebookScribble } from './NotebookScribble';
 export { WonkyLightbulb } from './WonkyLightbulb';
 export { PaperPlane } from './PaperPlane';
 export { DentedTrophy } from './DentedTrophy';
+export { QuizClipboard } from './QuizClipboard';

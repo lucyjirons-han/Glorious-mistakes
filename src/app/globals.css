@@ -109,6 +109,7 @@
 .author-panel--confirm,
 .quiz-card,
 .quiz-prompt,
+.profile-style,
 ::selection {
   --c-text: var(--ink);
   --c-muted: var(--ink-muted);
@@ -1948,6 +1949,24 @@ h2.profile-card__name {
   overflow-wrap: anywhere;
 }
 
+.profile-style {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  width: fit-content;
+  margin-top: 14px;
+  padding: 6px 16px 6px 6px;
+  background: var(--quiz-tone, var(--lilac));
+  border-radius: var(--radius-pill);
+  font-size: 0.9375rem;
+  text-decoration: none;
+}
+
+.profile-style:hover {
+  text-decoration: underline;
+}
+
 .profile-editor__switch-hint {
   margin-top: 10px;
 }
@@ -2862,11 +2881,23 @@ h2.profile-card__name {
 /* Mistake style quiz (/quiz, /quiz/[style]) */
 .quiz-intro {
   display: grid;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px clamp(24px, 5vw, 56px);
   padding: clamp(24px, 4vw, 36px);
   background: var(--c-surface);
   border: var(--hairline);
   border-radius: var(--radius-lg);
+}
+
+.quiz-intro__body {
+  display: grid;
+  gap: 24px;
+}
+
+.quiz-intro__art {
+  order: 1;
+  width: clamp(150px, 22vw, 210px);
 }
 
 .quiz-intro__facts {
@@ -4896,6 +4927,16 @@ fieldset.field > .field__label {
 
 /* Mistake style quiz */
 @media (max-width: 720px) {
+  .quiz-intro {
+    grid-template-columns: 1fr;
+  }
+
+  .quiz-intro__art {
+    order: 0;
+    justify-self: center;
+    width: 150px;
+  }
+
   .quiz-teaser {
     grid-template-columns: 1fr;
   }

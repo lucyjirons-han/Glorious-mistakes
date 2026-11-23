@@ -49,6 +49,9 @@ in the code.
   as handles and turned into links by `SOCIAL_PLATFORMS`, never stored as free URLs, and avatar
   addresses are limited by a database check to Google's photo servers and the person's own
   `avatars/<user id>/` folder. Postgres regexes allow repeat counts up to 255 only (`{1,255}`).
+- **Quiz results** (`quiz_results`) are private to their owner. The only public view is the
+  opt-in profile badge: `profile_quiz_style()` returns just the latest style, and only when the
+  profile is public and `show_quiz_style` is on. Don't add policies that expose the table.
 - **Logging a mistake needs a Google login.** `/log` shows a log-in prompt to anonymous
   visitors, and the "Logged-in owners can add mistakes" policy rejects inserts from anonymous
   sessions. Reading, reacting, reporting and editing older anonymous entries stay open. With no

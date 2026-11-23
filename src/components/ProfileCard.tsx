@@ -1,5 +1,6 @@
 import { CalendarDays } from 'lucide-react';
-import type { ReactNode } from 'react';
+import Link from 'next/link';
+import type { CSSProperties, ReactNode } from 'react';
 import {
   avatarSrc,
   joinedLabel,
@@ -9,20 +10,23 @@ import {
   WEBSITE_ICON,
   type PublicProfile,
 } from '@/lib/profiles';
+import { QUIZ_STYLES, styleHref, type StyleId } from '@/lib/quiz';
 import { Avatar } from './Avatar';
-import { Icon } from './Icon';
+import { Icon, IconBadge } from './Icon';
 
 interface ProfileCardProps {
-  profile: Omit<PublicProfile, 'id' | 'isPublic' | 'showEntries'>;
+  profile: Omit<PublicProfile, 'id' | 'isPublic' | 'showEntries' | 'showQuizStyle'>;
   /** h1 on the profile page; h2 in the editor's preview. */
   headingLevel?: 1 | 2;
   headingId?: string;
+  /** Their mistake style badge, when they've chosen to show it. */
+  quizStyle?: StyleId | null;
   /** Extra lines under the bio (stats, share button). */
   children?: ReactNode;
 }
 
 /** The top of a public profile: picture, name, pronouns, bio and links. */
-export function ProfileCard({ profile, headingLevel = 1, headingId, children }: ProfileCardProps) {
+export function ProfileCard({ profile, headingLevel = 1, headingId, quizStyle, children }: ProfileCardProps) {
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
   const name = profileName(profile);
   const hasDisplayName = !!profile.displayName.trim();
@@ -51,6 +55,8 @@ export function ProfileCard({ profile, headingLevel = 1, headingId, children }: 
           </p>
         )}
         {profile.bio.trim() && <p className="profile-card__bio">{profile.bio}</p>}
+
+        {quizStyle && <QuizStyleBadge style={quizStyle} />}
 
         {hasLinks && (
           <ul className="profile-links" aria-label="Links">
@@ -84,5 +90,22 @@ export function ProfileCard({ profile, headingLevel = 1, headingId, children }: 
         {children}
       </div>
     </section>
+  );
+}
+
+/** "Mistake style: The Fixer", linking to the style's page (and from there, the quiz). */
+function QuizStyleBadge({ style: id }: { style: StyleId }) {
+  const style = QUIZ_STYLES[id];
+  return (
+    <Link
+      href={styleHref(id)}
+      className="profile-style"
+      style={{ '--quiz-tone': `var(--${style.tone})` } as CSSProperties}
+    >
+      <IconBadge icon={style.icon} tone="white" size="sm" />
+      <span>
+        Mistake style: <strong>{style.name}</strong>
+      </span>
+    </Link>
   );
 }

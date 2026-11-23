@@ -125,7 +125,7 @@ export const FAQ_GROUPS: QuestionGroup[] = [
                 'Without an account, your latest result stays on your device, and retaking the quiz replaces it.',
               ],
               [
-                'Log in with Google and each result is saved to your account, so you can retake the quiz in three months and see whether your style has shifted. Only you can see your results, and you can remove them any time.',
+                'Log in with Google and each result is saved to your account, so you can retake the quiz in three months and see whether your style has shifted. Only you can see your results, and you can remove them any time. If you like, you can show your latest style as a badge on your public profile.',
               ],
               [
                 'Sharing a result shares the style’s page, never your name or answers.',
@@ -188,7 +188,7 @@ export const FAQ_GROUPS: QuestionGroup[] = [
             p: [
               'Yes, if you’d like one. Once you’re logged in, open ',
               { href: '/profile', text: 'Your profile' },
-              ' to choose a username and add a short bio, a photo (your Google one, or upload your own) and links to your website, Instagram, TikTok, YouTube and more. It lives at its own address you can share, like glorious-mistakes.vercel.app/u/yourname.',
+              ' to choose a username and add a short bio, a photo (your Google one, or upload your own) and links to your website, Instagram, TikTok, YouTube and more. You can also show your mistake style from the quiz. It lives at its own address you can share, like glorious-mistakes.vercel.app/u/yourname.',
             ],
           },
           {
