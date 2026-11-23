@@ -4,14 +4,13 @@ import { CircleAlert, Clock, Lightbulb, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Icon, IconBadge } from '@/components/Icon';
+import { Icon } from '@/components/Icon';
 import {
   formatQuizDate,
   QUIZ_QUESTIONS,
   QUIZ_STYLES,
   QUIZ_VERSION,
   scoreAnswers,
-  STYLE_LIST,
   yourResultHref,
   type StyleId,
 } from '@/lib/quiz';
@@ -50,14 +49,6 @@ export function QuizView() {
           <h2 id="quiz-intro-title" className="sr-only">
             About the quiz
           </h2>
-          <ul className="quiz-intro__styles" aria-label="The five styles">
-            {STYLE_LIST.map((s) => (
-              <li key={s.id} className="quiz-intro__style">
-                <IconBadge icon={s.icon} tone={s.tone} size="sm" />
-                {s.name}
-              </li>
-            ))}
-          </ul>
           <ul className="quiz-intro__facts">
             <li>
               <Icon icon={Clock} size={18} /> About two minutes

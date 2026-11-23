@@ -2869,15 +2869,6 @@ h2.profile-card__name {
   border-radius: var(--radius-lg);
 }
 
-.quiz-intro__styles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .quiz-intro__style {
   display: inline-flex;
   align-items: center;
