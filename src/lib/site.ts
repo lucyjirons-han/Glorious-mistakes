@@ -23,6 +23,8 @@ interface PageMetadataOptions {
   path: string;
   /** Keep the page out of search results (it still follows links). */
   noindex?: boolean;
+  /** A share image of the page's own (1200 × 630), instead of the site-wide one. */
+  image?: { url: string; alt: string };
   openGraph?: Partial<NonNullable<Metadata['openGraph']>>;
 }
 
@@ -38,9 +40,11 @@ export function pageMetadata({
   description,
   path,
   noindex,
+  image,
   openGraph,
 }: PageMetadataOptions): Metadata {
   const fullTitle = `${title} · ${SITE_NAME}`;
+  const shareImage = image ? { ...SHARE_IMAGE, ...image } : SHARE_IMAGE;
   return {
     title,
     description,
@@ -52,10 +56,10 @@ export function pageMetadata({
       url: path,
       title: fullTitle,
       description,
-      images: [SHARE_IMAGE],
+      images: [shareImage],
       ...openGraph,
     } as Metadata['openGraph'],
-    twitter: { card: 'summary_large_image', title: fullTitle, description, images: [SHARE_IMAGE] },
+    twitter: { card: 'summary_large_image', title: fullTitle, description, images: [shareImage] },
     ...(noindex ? { robots: { index: false, follow: true } } : {}),
   };
 }

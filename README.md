@@ -35,6 +35,8 @@ Then open http://localhost:3000.
 | `/mine`      | Your entries with stats, visibility toggle, edit and delete          |
 | `/feed?category=` | The feed filtered to one category, e.g. `/feed?category=food`   |
 | `/learn`     | Learn articles, listed as cards                                      |
+| `/quiz`      | “What’s your mistake style?”: seven questions, open to guests. Content and scoring are in `src/lib/quiz.ts` |
+| `/quiz/[style]` | One of the five styles (shareable; `?you=1` adds the visitor's own panel: save, retake, history). Its share card is `/quiz/[style]/card` |
 | `/learn/[slug]` | One Learn article                                                 |
 | `/faq`       | Frequently asked questions                                           |
 | `/search?q=` | Site search (opened from the header, which suggests matches as you type): entries, Learn articles, FAQ answers and pages. The pages list is `SITE_PAGES` in `src/lib/search.ts` |
@@ -100,6 +102,13 @@ Newsletter sign-ups go to the `newsletter_signups` table through the `subscribe_
 function, so the publishable key can add to the list but nobody can read it through the API.
 See them in the Supabase dashboard (Table Editor). It's a stopgap: when a mailing-list provider
 is connected, import the list there and empty the table.
+
+Mistake style quiz results ([`src/lib/quiz-results.ts`](src/lib/quiz-results.ts)): guests keep
+only their latest result in `localStorage`. Logged-in people save every result to the
+`quiz_results` table (only non-anonymous sessions can add rows, and people only see their own),
+so they can retake the quiz after three months and see whether their style has shifted. When
+someone logs in with a result still on their device, it's saved to their account with its
+original date and cleared from the device; that's how "Save this" on a guest's result works.
 
 ### Accounts
 

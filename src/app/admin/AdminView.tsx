@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Download, Flag, IdCard, LogIn, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile, UserRoundX, UsersRound } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Download, Flag, IdCard, LogIn, Mail, NotebookPen, Plus, RefreshCw, Search, Shapes, ShieldAlert, Smile, UserRoundX, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { EmptyState } from '@/components/EmptyState';
@@ -24,6 +24,7 @@ import {
 import { useAuth } from '@/lib/auth';
 import { loginHref } from '@/lib/login';
 import { profileHref } from '@/lib/profiles';
+import { formatQuizDate } from '@/lib/quiz';
 import { getSupabase } from '@/lib/supabase';
 
 type Status = 'loading' | 'signed-out' | 'not-admin' | 'admin';
@@ -36,6 +37,7 @@ const TAB_ICONS = {
   profiles: UsersRound,
   public_profiles: IdCard,
   profile_reports: UserRoundX,
+  quiz_results: Shapes,
 } as const;
 
 const dateTime = new Intl.DateTimeFormat('en-AU', {
@@ -834,6 +836,8 @@ function describeRow(resource: AdminResource, row: Row, titles: Map<string, stri
       return `@${row.username}`;
     case 'profile_reports':
       return `report on @${row.username}`;
+    case 'quiz_results':
+      return `quiz result from ${formatQuizDate(String(row.taken_at))}`;
   }
 }
 

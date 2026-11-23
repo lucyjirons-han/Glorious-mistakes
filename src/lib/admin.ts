@@ -1,5 +1,6 @@
 import { CATEGORIES, CRINGE_LEVELS } from './constants';
 import { REACTIONS } from './community';
+import { STYLE_LIST } from './quiz';
 
 /**
  * The tables the admin page manages.
@@ -44,7 +45,7 @@ export interface AdminColumn {
 }
 
 export interface AdminResource {
-  id: 'mistakes' | 'reactions' | 'reports' | 'profile_reports' | 'newsletter_signups' | 'profiles' | 'public_profiles';
+  id: 'mistakes' | 'reactions' | 'reports' | 'profile_reports' | 'newsletter_signups' | 'profiles' | 'public_profiles' | 'quiz_results';
   label: string;
   /** One row, for the "Add" button and the empty state. */
   singular: string;
@@ -101,6 +102,7 @@ const avatarOptions = [
   { value: 'upload', label: 'Uploaded picture' },
   { value: 'initials', label: 'Initial only (hides the picture)' },
 ];
+const quizStyleOptions = STYLE_LIST.map((s) => ({ value: s.id, label: s.name }));
 const visibilityOptions = [
   { value: 'public', label: 'Public (on the feed)' },
   { value: 'private', label: 'Private' },
@@ -281,6 +283,24 @@ export const RESOURCES: AdminResource[] = [
       yes: 'Yes, delete it',
       done: 'Deleted the profile. Their account and entries stay.',
     },
+  },
+  {
+    id: 'quiz_results',
+    label: 'Quiz results',
+    singular: 'quiz result',
+    orderBy: 'taken_at',
+    primaryKey: ['id'],
+    fields: [],
+    columns: [
+      { key: 'style', label: 'Mistake style', filter: 'select', options: quizStyleOptions },
+      { key: 'quiz_version', label: 'Quiz version', kind: 'number' },
+      { key: 'taken_at', label: 'Taken', kind: 'date', filter: 'date' },
+      { key: 'user_id', label: 'Person', kind: 'id' },
+    ],
+    searchable: ['style', 'user_id'],
+    note: 'Mistake style quiz results saved by logged-in people. Guests’ results stay on their own device and never reach this list.',
+    noAdd: true,
+    noEdit: true,
   },
 ];
 

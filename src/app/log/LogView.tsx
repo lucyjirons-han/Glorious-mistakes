@@ -11,6 +11,7 @@ import { useToast } from '@/components/Toast';
 import { useAuth } from '@/lib/auth';
 import { CELEBRATIONS } from '@/lib/constants';
 import { loginHref } from '@/lib/login';
+import { isStyleId, QUIZ_STYLES, styleHref, type StyleId } from '@/lib/quiz';
 import { useMistakes } from '@/lib/store';
 import type { Mistake, MistakeInput } from '@/lib/types';
 
@@ -19,6 +20,9 @@ const CONFETTI_COLOURS = ['#C3B8E6', '#D0E8C6', '#B0D3D0', '#F6D5D8', '#F5C842']
 export function LogView() {
   const params = useSearchParams();
   const editId = params.get('edit');
+  // Arriving from a quiz result (/log?style=fixer) shows that style's prompt above the form.
+  const styleParam = params.get('style');
+  const quizStyle = isStyleId(styleParam) ? styleParam : null;
   // Editing can start from the entry's own page; send people back there afterwards.
   const returnTo =
     editId && params.get('from') === 'entry' ? `/mistakes/${encodeURIComponent(editId)}` : '/mine';
@@ -88,7 +92,7 @@ export function LogView() {
             icon={LogIn}
             title="Log in to log a mistake"
             action={
-              <Link href={loginHref('/log')} className="btn btn--primary">
+              <Link href={loginHref(quizStyle ? `/log?style=${quizStyle}` : '/log')} className="btn btn--primary">
                 Log in with Google
               </Link>
             }
@@ -131,10 +135,27 @@ export function LogView() {
               Two questions, zero judgement. What happened, and what did you take from it?
             </p>
           </header>
+          {quizStyle && <QuizLogPrompt style={quizStyle} />}
           <MistakeForm key={formKey} submitLabel="Log my mistake" onSubmit={handleCreate} />
         </>
       )}
     </div>
+  );
+}
+
+/** The prompt from a mistake style quiz result, shown above a new entry. */
+function QuizLogPrompt({ style: id }: { style: StyleId }) {
+  const style = QUIZ_STYLES[id];
+  return (
+    <aside className="quiz-log-prompt" aria-labelledby="quiz-log-prompt-title">
+      <IconBadge icon={style.icon} tone={style.tone} size="lg" />
+      <div>
+        <p id="quiz-log-prompt-title" className="quiz-log-prompt__title">
+          A prompt for <Link href={styleHref(id)}>{style.name}</Link>
+        </p>
+        <p>{style.logPrompt}</p>
+      </div>
+    </aside>
   );
 }
 

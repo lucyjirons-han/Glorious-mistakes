@@ -62,9 +62,11 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'Yes, completely free right now. Reading the feed and reacting cost nothing and need no account. To ',
+              'Yes, completely free right now. Reading the feed, reacting and taking the ',
+              { href: '/quiz', text: 'mistake style quiz' },
+              ' cost nothing and need no account. To ',
               { href: '/log', text: 'log a mistake' },
-              ', you log in with Google, which is free too. The newsletter is optional.',
+              ' or save your quiz results, you log in with Google, which is free too. The newsletter is optional.',
             ],
           },
           {
@@ -80,9 +82,9 @@ export const FAQ_GROUPS: QuestionGroup[] = [
         answer: [
           {
             p: [
-              'Only to log a mistake. Anyone can read the ',
+              'Only to log a mistake or save your quiz results. Anyone can read the ',
               { href: '/feed', text: 'public feed' },
-              ' and react with “been there”. To log your own, ',
+              ', react with “been there” and take the quiz. To log your own, ',
               { href: '/login', text: 'log in with Google' },
               '. That keeps your entries safe in your account, so you can see them on any device and won’t lose them if you clear your browser.',
             ],
@@ -101,6 +103,32 @@ export const FAQ_GROUPS: QuestionGroup[] = [
               ],
               [
                 'Logging out keeps everything safe in your account. This browser goes back to a fresh, empty start until you log in again.',
+              ],
+            ],
+          },
+        ],
+      },
+      {
+        id: 'quiz',
+        question: 'What’s the mistake style quiz?',
+        answer: [
+          {
+            p: [
+              'Seven quick questions about what you do after a stuff-up. The ',
+              { href: '/quiz', text: 'quiz' },
+              ' gives you one of five styles (the Fixer, the Replayer, the Laugher, the Owner or the Vault), each with a strength, a growth edge and a mistake worth logging. Anyone can take it, no login needed.',
+            ],
+          },
+          {
+            list: [
+              [
+                'Without an account, your latest result stays on your device, and retaking the quiz replaces it.',
+              ],
+              [
+                'Log in with Google and each result is saved to your account, so you can retake the quiz in three months and see whether your style has shifted. Only you can see your results, and you can remove them any time.',
+              ],
+              [
+                'Sharing a result shares the style’s page, never your name or answers.',
               ],
             ],
           },

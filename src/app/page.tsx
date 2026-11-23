@@ -12,6 +12,7 @@ import {
   WonkyLightbulb,
   type IllustrationProps,
 } from '@/components/illustrations';
+import { STYLE_LIST } from '@/lib/quiz';
 import { revealOffset } from '@/lib/reveal';
 
 // The title and share tags come from the layout's defaults; this adds the canonical link.
@@ -153,6 +154,31 @@ export default function HomePage() {
               ))}
             </ul>
           </div>
+        </div>
+      </section>
+
+      {/* Quiz teaser */}
+      <section className="section section--tinted" aria-labelledby="quiz-teaser-title">
+        <div className="container quiz-teaser" data-reveal data-reveal-stagger>
+          <div>
+            <h2 id="quiz-teaser-title" className="section__title">
+              What&rsquo;s your mistake style?
+            </h2>
+            <p className="section__lead">
+              Fixer, Replayer, Laugher, Owner or Vault? Seven quick questions about what you do after a stuff-up.
+            </p>
+            <ul className="quiz-teaser__styles" aria-label="The five styles">
+              {STYLE_LIST.map((s) => (
+                <li key={s.id} className="quiz-intro__style">
+                  <IconBadge icon={s.icon} tone={s.tone} size="sm" />
+                  {s.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <Link href="/quiz" className="btn btn--primary btn--lg">
+            Take the quiz
+          </Link>
         </div>
       </section>
 

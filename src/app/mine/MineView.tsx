@@ -7,6 +7,7 @@ import { BeenThereButton } from '@/components/BeenThereButton';
 import { EmptyState } from '@/components/EmptyState';
 import { Icon, IconBadge } from '@/components/Icon';
 import { MistakeCard } from '@/components/MistakeCard';
+import { QuizStyleNudge } from '@/components/QuizStyleNudge';
 import { useToast } from '@/components/Toast';
 import { useMistakes } from '@/lib/store';
 import type { Mistake, Visibility } from '@/lib/types';
@@ -67,6 +68,7 @@ export function MineView() {
         >
           <p>No mistakes logged yet. We both know that can&rsquo;t be true.</p>
         </EmptyState>
+        <QuizStyleNudge />
       </div>
     );
   }
@@ -98,6 +100,8 @@ export function MineView() {
           ))}
         </ul>
       </section>
+
+      <QuizStyleNudge />
 
       <section aria-labelledby="entries-title">
         <div className="section__header section__header--compact">

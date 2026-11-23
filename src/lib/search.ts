@@ -34,6 +34,12 @@ export const SITE_PAGES: SearchLink[] = [
     keywords: 'my entries collection private',
   },
   {
+    href: '/quiz',
+    title: 'What’s your mistake style?',
+    summary: 'Seven quick questions about what you do after a stuff-up, and a strength and growth edge to go with your style.',
+    keywords: 'quiz test personality style fixer replayer laugher owner vault',
+  },
+  {
     href: '/learn',
     title: 'Learn',
     summary: 'Short, friendly reads about stuffing up, laughing it off and keeping the lesson.',

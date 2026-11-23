@@ -22,6 +22,9 @@ export function SiteFooter() {
               <Link href="/learn">Learn</Link>
             </li>
             <li>
+              <Link href="/quiz">Mistake style quiz</Link>
+            </li>
+            <li>
               <Link href="/about">About</Link>
             </li>
             <li>
