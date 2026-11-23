@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js';
+import { ensureUserId, getSupabase } from './supabase';
 import { AtSign, Facebook, Globe, Instagram, Linkedin, Music2, Twitter, Youtube, type LucideIcon } from 'lucide-react';
 
 /**
@@ -349,4 +350,54 @@ export async function resizeAvatar(file: File): Promise<Blob> {
   const jpeg = await toBlob('image/jpeg');
   if (!jpeg) throw new Error('Couldn’t encode the picture');
   return jpeg;
+}
+
+/* Reports ------------------------------------------------------------------ */
+
+export type ProfileReportReason = 'picture' | 'words' | 'links' | 'impersonation' | 'other';
+
+export const PROFILE_REPORT_REASONS: { id: ProfileReportReason; label: string }[] = [
+  { id: 'picture', label: 'Their picture is offensive or inappropriate' },
+  { id: 'words', label: 'Their name or bio is offensive' },
+  { id: 'links', label: 'Their links look like spam or aren’t safe' },
+  { id: 'impersonation', label: 'They’re pretending to be someone else' },
+  { id: 'other', label: 'Something else' },
+];
+
+export const PROFILE_REPORT_DETAILS_LIMIT = 300;
+
+/** Profiles this device has reported, so the "thanks" stays put on a return visit. */
+const PROFILE_REPORTS_KEY = 'glorious-mistakes:profile-reports:v1';
+
+function reportedProfiles(): string[] {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(PROFILE_REPORTS_KEY) ?? '[]');
+    return Array.isArray(stored) ? stored.filter((id): id is string => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+export function hasReportedProfile(profileId: string): boolean {
+  return reportedProfiles().includes(profileId);
+}
+
+/**
+ * Flags a public profile for the admins (the `profile_reports` table, shown on the admin page's
+ * Profile reports tab). Throws if it couldn't be sent. Reporting the same profile twice counts
+ * as done.
+ */
+export async function reportProfile(profileId: string, reason: ProfileReportReason, details: string): Promise<void> {
+  const supabase = getSupabase();
+  if (!supabase) throw new Error('Reports need the database');
+  await ensureUserId(supabase);
+  const { error } = await supabase
+    .from('profile_reports')
+    .insert({ profile_id: profileId, reason, details: details.trim().slice(0, PROFILE_REPORT_DETAILS_LIMIT) });
+  if (error && error.code !== '23505') throw error;
+  try {
+    window.localStorage.setItem(PROFILE_REPORTS_KEY, JSON.stringify([...new Set([...reportedProfiles(), profileId])]));
+  } catch {
+    // Storage can be blocked; the report still went through.
+  }
 }

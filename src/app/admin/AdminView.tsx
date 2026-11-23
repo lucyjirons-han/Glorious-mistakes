@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Download, Flag, IdCard, LogIn, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile, UsersRound } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, CircleAlert, Download, Flag, IdCard, LogIn, Mail, NotebookPen, Plus, RefreshCw, Search, ShieldAlert, Smile, UserRoundX, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { EmptyState } from '@/components/EmptyState';
@@ -23,6 +23,7 @@ import {
 } from '@/lib/admin';
 import { useAuth } from '@/lib/auth';
 import { loginHref } from '@/lib/login';
+import { profileHref } from '@/lib/profiles';
 import { getSupabase } from '@/lib/supabase';
 
 type Status = 'loading' | 'signed-out' | 'not-admin' | 'admin';
@@ -34,6 +35,7 @@ const TAB_ICONS = {
   newsletter_signups: Mail,
   profiles: UsersRound,
   public_profiles: IdCard,
+  profile_reports: UserRoundX,
 } as const;
 
 const dateTime = new Intl.DateTimeFormat('en-AU', {
@@ -356,6 +358,12 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
             {String(value).slice(0, 8)}
           </code>
         );
+      case 'profile':
+        return (
+          <Link href={profileHref(String(value))} className="admin-table__link">
+            @{String(value)}
+          </Link>
+        );
       case 'mistake': {
         const id = String(value);
         const title = titles.get(id);
@@ -565,9 +573,11 @@ function ResourcePanel({ resource, titles, mistakeOptions, onMistakesChanged }: 
                           </div>
                         ) : (
                           <div className="owner-actions">
-                            <button type="button" className="btn btn--ghost btn--sm" onClick={() => setEditing(key)}>
-                              Edit<span className="sr-only"> {name}</span>
-                            </button>
+                            {!resource.noEdit && (
+                              <button type="button" className="btn btn--ghost btn--sm" onClick={() => setEditing(key)}>
+                                Edit<span className="sr-only"> {name}</span>
+                              </button>
+                            )}
                             <button
                               type="button"
                               className="btn btn--ghost btn--sm btn--danger-text"
@@ -822,6 +832,8 @@ function describeRow(resource: AdminResource, row: Row, titles: Map<string, stri
       return [row.first_name, row.last_name].filter(Boolean).join(' ') || 'person with no name';
     case 'public_profiles':
       return `@${row.username}`;
+    case 'profile_reports':
+      return `report on @${row.username}`;
   }
 }
 

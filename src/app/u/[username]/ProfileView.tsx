@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/auth';
 import { profileName, type PublicProfile } from '@/lib/profiles';
 import { useMistakes } from '@/lib/store';
 import type { Mistake } from '@/lib/types';
+import { ReportProfile } from './ReportProfile';
 
 interface ProfileViewProps {
   profile: PublicProfile;
@@ -114,6 +115,9 @@ export function ProfileView({ profile, entries: serverEntries }: ProfileViewProp
           )}
         </section>
       )}
+
+      {/* Nobody reports their own profile. Waits for the session so owners never see it flash. */}
+      {auth.ready && !isOwner && auth.available && <ReportProfile profileId={profile.id} name={name} />}
     </div>
   );
 }

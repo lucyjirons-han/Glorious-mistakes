@@ -3362,6 +3362,70 @@ button.reaction.is-pressed:hover {
   margin-top: clamp(40px, 6vw, 64px);
 }
 
+/* "Report this profile": a short form that opens under the profile. */
+.report-form {
+  display: grid;
+  gap: 18px;
+  max-width: 560px;
+  margin: 40px auto 0;
+  padding: clamp(20px, 4vw, 28px);
+  background: var(--c-surface);
+  border: var(--hairline);
+  border-radius: var(--radius-lg);
+}
+
+.report-form__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.25rem;
+}
+
+.report-form__title + .field__hint {
+  margin-top: -8px;
+}
+
+.report-form__reasons {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.report-form__reasons legend {
+  margin-bottom: 6px;
+  padding: 0;
+}
+
+/* A plain radio button with its label, in a row you can click anywhere on. */
+.radio-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.radio-row:hover {
+  background: var(--c-neutral);
+}
+
+.radio-row input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--c-primary);
+  cursor: pointer;
+}
+
+.radio-row input:focus-visible {
+  outline: 2.5px solid var(--c-focus);
+  outline-offset: 3px;
+}
+
 .report {
   display: grid;
   justify-items: center;

@@ -133,6 +133,9 @@ the store reloads whenever the user changes.
     The store looks these up (`fetchAuthorProfiles`) and sets `authorProfile` on each entry.
   - The profile page is rendered on the server on every request (`src/lib/profiles-server.ts`),
     as a signed-out visitor.
+  - **Reports:** anyone but the owner can report a public profile once, with a reason and an
+    optional note (`profile_reports` table, `reportProfile()`). Admins see them on the
+    **Profile reports** tab (through `admin_profile_reports()`, which adds the username).
 - **Newsletter:** `my_newsletter_subscription()` and `set_my_newsletter_subscription()` only
   ever touch the address on the person's own account, so the list stays unreadable.
 - **Changing email** uses `supabase.auth.updateUser({ email })`, which emails a confirmation
@@ -151,7 +154,7 @@ Supabase settings this needs (Authentication):
 ### Admin page
 
 [`/admin`](src/app/admin/AdminView.tsx) lets admins see, add, edit and delete entries, people,
-public profiles, reactions, reports and newsletter subscribers. On the **Profiles** tab, an
+public profiles, reactions, reports (on entries and on profiles) and newsletter subscribers. On the **Profiles** tab, an
 admin can hide a profile (Public: No), clear a bio, or switch a picture off (Picture: Initial only). Admins log in with Google like everyone else,
 land on `/admin` straight after logging in, and see an **Admin** link in the account menu. Row level security does the access
 control: the `public.admins` list (unreadable through the API) and `public.is_admin()`, which is

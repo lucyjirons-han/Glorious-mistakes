@@ -33,7 +33,8 @@ export interface AdminField {
 export interface AdminColumn {
   key: string;
   label: string;
-  kind?: 'date' | 'id' | 'mistake' | 'long' | 'number';
+  /** `profile` shows the value (a username) as a link to that profile. */
+  kind?: 'date' | 'id' | 'mistake' | 'long' | 'number' | 'profile';
   /**
    * How the column can be filtered: words it contains, one of `options`, a date range, or
    * (for owners) example entries versus visitors' entries. Leave out for no filter.
@@ -43,7 +44,7 @@ export interface AdminColumn {
 }
 
 export interface AdminResource {
-  id: 'mistakes' | 'reactions' | 'reports' | 'newsletter_signups' | 'profiles' | 'public_profiles';
+  id: 'mistakes' | 'reactions' | 'reports' | 'profile_reports' | 'newsletter_signups' | 'profiles' | 'public_profiles';
   label: string;
   /** One row, for the "Add" button and the empty state. */
   singular: string;
@@ -61,6 +62,8 @@ export interface AdminResource {
   exportName?: string;
   /** True hides the "Add" button (rows are created some other way, e.g. by logging in). */
   noAdd?: boolean;
+  /** True hides each row's "Edit" button (rows can only be read or deleted). */
+  noEdit?: boolean;
   /**
    * Load rows by calling this admin-only database function instead of reading the table (for
    * data from more than one table, like people's emails and roles).
@@ -80,6 +83,14 @@ const reactionOptions = REACTIONS.map((r) => ({ value: r.id, label: r.label }));
 const roleOptions = [
   { value: 'member', label: 'Member' },
   { value: 'admin', label: 'Admin' },
+];
+/** Short labels for PROFILE_REPORT_REASONS in src/lib/profiles.ts; keep the two in step. */
+const reportReasonOptions = [
+  { value: 'picture', label: 'Picture' },
+  { value: 'words', label: 'Name or bio' },
+  { value: 'links', label: 'Links' },
+  { value: 'impersonation', label: 'Pretending to be someone' },
+  { value: 'other', label: 'Something else' },
 ];
 const yesNoOptions = [
   { value: 'true', label: 'Yes' },
@@ -161,6 +172,27 @@ export const RESOURCES: AdminResource[] = [
     ],
     searchable: ['mistake_id', 'reporter_id'],
     note: 'Deleting a report only clears the flag. To take an entry down, make it private or delete it under Mistakes.',
+  },
+  {
+    id: 'profile_reports',
+    label: 'Profile reports',
+    singular: 'profile report',
+    orderBy: 'created_at',
+    primaryKey: ['id'],
+    listFunction: 'admin_profile_reports',
+    fields: [],
+    columns: [
+      { key: 'username', label: 'Reported profile', kind: 'profile', filter: 'text' },
+      { key: 'reason', label: 'Reason', filter: 'select', options: reportReasonOptions },
+      { key: 'details', label: 'Note', kind: 'long' },
+      { key: 'created_at', label: 'Reported', kind: 'date', filter: 'date' },
+      { key: 'reporter_id', label: 'Reporter', kind: 'id' },
+    ],
+    searchable: ['username', 'details', 'reporter_id'],
+    note: 'Deleting a report only clears the flag. To deal with a profile, open it on the Profiles tab: set Public to No to hide it, clear the bio, or set Picture to “Initial only”.',
+    noAdd: true,
+    noEdit: true,
+    deleteWords: { button: 'Clear', confirm: 'Clear this report?', yes: 'Yes, clear it', done: 'Cleared the report.' },
   },
   {
     id: 'newsletter_signups',
